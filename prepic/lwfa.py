@@ -38,11 +38,6 @@ compressor and beam transport, we are left with 14 J in the chamber. If 50% of t
 can be focused into the FWHM spot of :math:`21 \mu m`, we get 7 J on target.
 """
 
-
-# todo add betatron estimation from Thomas paper
-# todo add exampl usage
-# todo move docstring above to documentation
-
 # classical electron radius
 r_e = (1 / (4 * π * u.eps_0) * u.qe ** 2 / (u.me * u.clight ** 2)).to("micrometer")
 
