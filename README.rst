@@ -24,7 +24,7 @@ analytically estimate various laser-plasma parameters for experiments and PIC si
 
 
 * Free software: BSD license
-* Documentation: https://prepic.readthedocs.io.
+* Documentation: https://prepic.readthedocs.io
 
 
 Features
