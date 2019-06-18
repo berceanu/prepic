@@ -3,9 +3,6 @@
 language: python
 python:
   - 3.6
-  - 3.5
-  - 3.4
-  - 2.7
 
 # Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: pip install -U tox-travis
@@ -22,7 +19,7 @@ deploy:
   distributions: sdist bdist_wheel
   user: berceanu
   password:
-    secure: PLEASE_REPLACE_ME
+    secure: Ty5TyUTuuJmvxLvTz3xCMlHyK0LjFwHVIovsmaqp58JUpcd7wRJmuTDwVHNqhpZP028MN2vJf/2TZ/ynCDhw113Le1kyxPzgVBNopWHCYoIWAkjmGAJiTqaCILCXZKbfe1130wRQZHNnP+Phub3/aNAr+r1r5qMvklxe3Upe5XqkKkBvh+2E+bsQmLpr0sx3lnM8rFqqsKi5Vu8HhRAprDn+OiF7P2TzCTZKAjIN5lQOvXTdU3TIkEhHT9AWvOiNPxciTAPrAGybw91idydqLJDa5qCLppxR2kdp8AjVuDbuudjnNU1tejEsj60SFm/TYfDO794lnWY/1Xk1m+TeWlFOJri250lqaGPXFRheOBH00wyE1qMDhNn3ppqV90/7Uh/ee4aHeHyxEkLDExo9LtsWLiGoRt0cYKDn+/dP0dksx5sC56qImI5AgrhZbrhL6IpPfZGwVaycNwWRJzm/MOszW+LWYbusliyoZLB/UdfbgFagY5MBS+OBau5OSFoXArQSYBRwIrYUJaKlmjCqJdjcvRbu5mWdbA/KWpDjNWM/xwGntBHu4IHLnefx4yQxkTKDoX8SCnoAOCUbypLmzlgi02JQTT8TWpnABPaskEVmlJkHkAhjpmCRvDuSZ0MpyNBQhw1ShkzSyscUjQkcy2bjTuTr0tOpsUCXSD9IOhc=
   on:
     tags: true
     repo: berceanu/prepic

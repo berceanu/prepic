@@ -11,7 +11,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [ ]
+requirements = ['unyt>=2.2.0', ]
 
 setup_requirements = ['pytest-runner', ]
 
@@ -22,23 +22,18 @@ setup(
     author_email='andreicberceanu@gmail.com',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
-        'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
-        "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
+        'Topic :: Scientific/Engineering :: Physics',
         'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
     ],
     description="analytically estimate various laser-plasma parameters for experiments and PIC simulations",
     install_requires=requirements,
     license="BSD license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    keywords='prepic',
+    keywords='laser plasma physics',
     name='prepic',
     packages=find_packages(include=['prepic']),
     setup_requires=setup_requirements,

@@ -126,3 +126,7 @@ $ git push
 $ git push --tags
 
 Travis will then deploy to PyPI if tests pass.
+
+See also this `release checklist`_.
+
+.. _release checklist: https://gist.github.com/berceanu/0990adc8f81c066f949f61cefb480099
