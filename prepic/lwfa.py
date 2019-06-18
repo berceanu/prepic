@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-
-"""Main module."""
-# -*- coding: utf-8 -*-
 import numpy as np
 import unyt as u
 from numpy import pi as π
 
-"""Main module."""
-"""
+"""Laser WakeField Acceleration module."""
+r"""
 Code that estimates bunch properties (charge, energy, etc.), based on
 Lu, W. et al., Phys. Rev. ST Accel. Beams 10 (6): 061301.
 
@@ -40,7 +37,6 @@ If we assume the laser energy before the compressor is 20 J, and 30% is lost in 
 compressor and beam transport, we are left with 14 J in the chamber. If 50% of this energy
 can be focused into the FWHM spot of :math:`21 \mu m`, we get 7 J on target.
 """
-
 
 
 # todo add betatron estimation from Thomas paper
@@ -672,3 +668,4 @@ if __name__ == "__main__":
     print()
     print("Matching conditions:")
     print(matched_frasc)
+
