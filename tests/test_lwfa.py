@@ -103,9 +103,23 @@ def test_matched_laser_plasma():
     """Check laser-plasma matching function."""
     a0 = 2.343
     match = lwfa.matched_laser_plasma(a0)
-    assert 0
+
+    assert match.ΔE.units.dimensions == dimensions.energy
+    assert_almost_equal(match.ΔE.to_value('megaelectronvolt'), 56.35889, 4)
+
+    assert match.Q.units.dimensions == dimensions.charge_mks
+    assert_almost_equal(match.Q.to_value('picocoulomb'), 58.17636, 4)
+
+    assert_almost_equal(match.η, 0.21384, 4)
 
 
 def test_simulation():
     """Check Simulation class."""
-    assert 0
+    # assert 0
+
+
+# msg = ("simulation with box size ({0.L:.1f})³, Δx={0.Δx:.3f}, Δy={0.Δy:.3f}, "
+#        "Δz={0.Δz:.3f}, nx={0.nx}, ny={0.ny}, nz={0.nz}, {0.npart:e} macro-particles, "
+#        "{0.nstep:e} time steps")
+
+# todo: add proper regression test for CETAL parameters, with parametrized fixtures
