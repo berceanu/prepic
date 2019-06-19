@@ -376,7 +376,6 @@ class Plasma(object):
         η (float, dimensionless): energy transfer efficiency, defined as
                         total bunch energy `N` * `ΔE` / laser energy `ɛL`
             under matching conditions, `η` ~ 1 / (2 * a0)
-
     """
 
     def __init__(self, n_pe, laser=None, bubble_radius=None, propagation_distance=None):
