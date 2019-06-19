@@ -4,21 +4,12 @@ import unyt as u
 from numpy import pi as π
 
 """Laser WakeField Acceleration module."""
-r"""
-Need to resolve the smallest length scale: 20-30 cells/wavelength.
-
-- plasma length scale: skin depth :math:`c/\omega_p`
-- laser length scale: laser wavelength :math:`\lambda_L = 0.8\, \mu m`
-
-
-"""
 
 # classical electron radius
 r_e = (1 / (4 * π * u.eps_0) * u.qe ** 2 / (u.me * u.clight ** 2)).to("micrometer")
 
 
 # Utility functions
-
 
 def w0_to_fwhm(w0):
     """Computes Gaussian laser FWHM from its beam waist.
@@ -315,9 +306,9 @@ class Simulation(object):
         )
 
     def __str__(self):
-        msg = "simulation with box size ({0.L:.1f})³, Δx={0.Δx:.3f}, Δy={0.Δy:.3f}, Δz={0.Δz:.3f}, nx={0.nx}, ny={0.ny}, nz={0.nz}, {0.npart:e} macro-particles, {0.nstep:e} time steps".format(
-            self
-        )
+        msg = ("simulation with box size ({0.L:.1f})³, Δx={0.Δx:.3f}, Δy={0.Δy:.3f}, "
+               "Δz={0.Δz:.3f}, nx={0.nx}, ny={0.ny}, nz={0.nz}, {0.npart:e} macro-particles, "
+               "{0.nstep:e} time steps").format(self)
         return msg
 
 
@@ -417,12 +408,10 @@ class Plasma(object):
         )
         if self.laser:
             n_ratio = (self.npe / self.laser.ncrit).to_value("dimensionless")
-            msg = "Plasma with nₚ={0.npe:.1e} ({1:.2e} nc), ωₚ={0.ωp:.3f}, kₚ={0.kp:.3f}, λₚ={0.λp:.1f}, Ewb={0.Ewb:.1f}".format(
-                self, n_ratio
-            )
-            msg += "\nPc={0.Pc:.1f}, Ldeph={0.dephasing:.2f}, Ldepl={0.depletion:.2f}, ΔE={0.ΔE:.1f} over Lacc={0.Lacc:.2f}".format(
-                self
-            )
+            msg = ("Plasma with nₚ={0.npe:.1e} ({1:.2e} nc), ωₚ={0.ωp:.3f}, kₚ={0.kp:.3f}, "
+                   "λₚ={0.λp:.1f}, Ewb={0.Ewb:.1f}").format(self, n_ratio)
+            msg += ("\nPc={0.Pc:.1f}, Ldeph={0.dephasing:.2f}, Ldepl={0.depletion:.2f}, "
+                    "ΔE={0.ΔE:.1f} over Lacc={0.Lacc:.2f}").format(self)
             msg += "\nfor {0.laser}".format(self)
             if self.R:
                 msg += "\nN={0.N:.1e} electrons, Q={0.Q:.1f}, η={0.η:.3f}".format(self)

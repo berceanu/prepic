@@ -30,3 +30,10 @@ For LWFA, we roughly have :math:`w_0 \approx c \tau_L` and :math:`\tau_L \approx
 If we assume the laser energy before the compressor is 20 J, and 30% is lost in the
 compressor and beam transport, we are left with 14 J in the chamber. If 50% of this energy
 can be focused into the FWHM spot of :math:`21 \mu m`, we get 7 J on target.
+
+
+Need to resolve the smallest length scale: 20-30 cells/wavelength.
+
+- plasma length scale: skin depth :math:`c/\omega_p`
+- laser length scale: laser wavelength :math:`\lambda_L = 0.8\, \mu m`
+
