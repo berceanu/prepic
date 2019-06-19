@@ -30,7 +30,8 @@ analytically estimate various laser-plasma parameters for experiments and PIC si
 Features
 --------
 
-* TODO
+* ``lwfa`` module that estimates bunch properties (charge, energy, etc.), based on
+Lu, W. et al., Phys. Rev. ST Accel. Beams 10 (6): 061301
 
 Quick start
 -----------
