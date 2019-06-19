@@ -314,7 +314,6 @@ class Simulation(object):
 
 # Plasma, without matching
 
-
 class Plasma(object):
     """Class containing plasma parameters.
     Attributes:
@@ -456,31 +455,23 @@ def matched_laser_plasma(a0, beam=GaussianBeam()):
 
 
 if __name__ == "__main__":
-    beam = GaussianBeam()
-    beam = GaussianBeam(w0=7.202530529256849 * u.micrometer)
-    beam = GaussianBeam(fwhm=8.4803316326207 * u.micrometer)
-    beam = GaussianBeam(
-        w0=7.202530529256849 * u.micrometer, fwhm=8.4803316326207 * u.micrometer
-    )
     beam = GaussianBeam.from_f_number(f_number=10.0)
     beam = GaussianBeam.from_focal_distance(
         focal_distance=1 * u.meter, beam_diameter=10 * u.cm
     )
-    print(beam)
+
 
     # CETAL params
     laser = Laser(
         ɛL=7.7 * u.joule, τL=40 * u.femtosecond, beam=GaussianBeam(w0=18 * u.micrometer)
     )
+
     laser = Laser.from_a0(a0=4.076967454355432, ɛL=7.7 * u.joule, τL=40 * u.femtosecond)
+
     laser = Laser.from_a0(
         a0=4.076967454355432, ɛL=7.7 * u.joule, beam=GaussianBeam(w0=18 * u.micrometer)
     )
-    laser = Laser.from_a0(
-        a0=4.076967454355432,
-        τL=40 * u.femtosecond,
-        beam=GaussianBeam(w0=18 * u.micrometer),
-    )
+
     laser = Laser.from_intensity(
         intensity=3.553314404474785e19 * u.watt / u.cm ** 2,
         ɛL=7.7 * u.joule,
@@ -626,4 +617,3 @@ if __name__ == "__main__":
     print()
     print("Matching conditions:")
     print(matched_frasc)
-
