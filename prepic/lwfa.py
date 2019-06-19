@@ -330,17 +330,17 @@ class Plasma(object):
         Pc (float, energy/time): critical power for self-focusing
         dephasing (float, length): electron dephasing length
         depletion (float, length): pump depletion length
-        Ez_avg (float, energy/charge/length): average accelerating field
+        Ez_avg (float, energy/charge/length): average accelerating field \
                                     in the direction of electron propagation
         R (float, length): radius of the plasma bubble
         Lacc (float, length): distance over which laser propagates
         N (float, dimensionless): estimated number of electrons in the bunch
         Q (float, charge): estimated total electron bunch charge
-        ΔE (float, energy): maximum energy gained by one electron
-                        propagating for Lacc
+        ΔE (float, energy): maximum energy gained by one electron \
+                        propagating for Lacc \
                         see Lu et al., 2007 Phys. Rev. ST. Accel. Beams
-        η (float, dimensionless): energy transfer efficiency, defined as
-                        total bunch energy `N` * `ΔE` / laser energy `ɛL`
+        η (float, dimensionless): energy transfer efficiency, defined as \
+                        total bunch energy `N` * `ΔE` / laser energy `ɛL` \
             under matching conditions, `η` ~ 1 / (2 * a0)
     """
 

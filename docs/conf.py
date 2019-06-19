@@ -41,7 +41,7 @@ extensions = [
         #'nbsphinx',
         'sphinx.ext.viewcode'
 ]
-intersphinx_mapping = {'unyt': ('https://unyt.readthedocs.io', None)}
+intersphinx_mapping = {'unyt': ('https://unyt.readthedocs.io/en/latest', None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
