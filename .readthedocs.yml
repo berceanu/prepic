@@ -3,8 +3,6 @@ python:
    install:
       - requirements: docs/requirements_doc.txt
       - requirements: requirements.txt
-      - method: pip
+      - method: setuptools
         path: .
-        extra_requirements:
-            - docs
    system_packages: true
