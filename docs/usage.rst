@@ -20,7 +20,7 @@ To use prepic in a project::
 
 For :math:`a_0 \geq 4-5` we also get self-injection from pure Helium. Helium has the ionization \
 energies 24.59 eV :math:`\text{He}^{+}` and 54.42 :math:`\text{He}^{2+}`, corresponding to laser intensities \
-:math:`1.4 \times 10^{15}`, respectively :math:`8.8 \times 10^{15}\, \text{W/cm}^{2}` [Gibb]_ ,\
+:math:`1.4 \times 10^{15}`, respectively :math:`8.8 \times 10^{15}\, \text{W/cm}^{2}` [Gibb]_ , \
 and will therefore be easily ionized by the laser prepulse.
 
 The atomic Coulomb field is on the order of :math:`10^{14}\, \text{W/cm}^{2}` and relativistic effects \
