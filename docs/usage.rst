@@ -19,26 +19,26 @@ To use prepic in a project::
     import prepic
 
 For :math:`a_0 \geq 4-5` we also get self-injection from pure Helium. Helium has the ionization \
-energies 24.59 eV He:math:`{}^{+}` and 54.42 He:math:`{}^{2+}`, corresponding to laser intensities \
-:math:`1.4 \times 10^{15}`, respectively :math:`8.8 \times 10^{15}` W/cm:math:`{}^{2}` [Gibb]_,\
+energies 24.59 eV :math:`\text{He}^{+}` and 54.42 :math:`\text{He}^{2+}`, corresponding to laser intensities \
+:math:`1.4 \times 10^{15}`, respectively :math:`8.8 \times 10^{15}\, \text{W/cm}^{2}` [Gibb]_ ,\
 and will therefore be easily ionized by the laser prepulse.
 
-The atomic Coulomb field is on the order of :math:`10^{14}` W/cm:math:`{}^{2}` and relativistic effects \
-become important for laser intensities above :math:`10^{17}` W/cm:math:`{}^{2}` (:math:`a_0 \geq 1`), while \
+The atomic Coulomb field is on the order of :math:`10^{14}\, \text{W/cm}^{2}` and relativistic effects \
+become important for laser intensities above :math:`10^{17}\, \text{W/cm}^{2}` (for :math:`a_0 \geq 1`), while \
 QED effects such as radiation reaction only become important for intensities beyond \
-:math:`\sim 2 \times 10^{21}` W/cm:math:`{}^{2}`.
+:math:`\sim 2 \times 10^{21}\, \text{W/cm}^{2}`.
 
 For LWFA, we roughly have :math:`w_0 \approx c \tau_L` and :math:`\tau_L \approx \omega_p^{-1}`.
 
 If we assume the laser energy before the compressor is 20 J, and 30% is lost in the \
 compressor and beam transport, we are left with 14 J in the chamber. If 50% of this energy \
-can be focused into the FWHM spot of :math:`21 \mu`m, we get 7 J on target.
+can be focused into the FWHM spot of :math:`21 \mu m`, we get 7 J on target.
 
 
 Need to resolve the smallest length scale: 20-30 cells/wavelength.
 
 - plasma length scale: skin depth :math:`c/\omega_p`
-- laser length scale: laser wavelength :math:`\lambda_L = 0.8\, \mu`m
+- laser length scale: laser wavelength :math:`\lambda_L = 0.8\, \mu m`
 
 
 .. [Gibb] Gibbon, "Short pulse laser interactions with matter", p. 22.
