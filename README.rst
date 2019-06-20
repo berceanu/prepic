@@ -31,8 +31,12 @@ Features
 --------
 
 * ``lwfa`` module that estimates bunch properties (charge, energy, etc.),
-  based on Lu, W. et al., Phys. Rev. ST Accel. Beams 10 (6): 061301
+  based on [LTJT]_
+
 
 Quick start
 -----------
+
+
+[LTJT] Lu, W. et al., Phys. Rev. ST Accel. Beams 10 (6): 061301
 
