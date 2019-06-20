@@ -1,6 +1,6 @@
-======
-prepic
-======
+=======
+pre-PIC
+=======
 
 
 .. image:: https://img.shields.io/pypi/v/prepic.svg
