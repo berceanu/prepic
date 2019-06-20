@@ -16,7 +16,10 @@ Scalar potential :math:`\Phi` in units of :math:`m_e c^2 / e` and vector potenti
 
 To use prepic in a project::
 
-    import prepic
+  import prepic.lwfa as lwfa
+
+  res = lwfa.w0_to_fwhm(7.202530529256849)
+  print(res)
 
 For :math:`a_0 \geq 4-5` we also get self-injection from pure Helium. Helium has the ionization \
 energies 24.59 eV :math:`\text{He}^{+}` and 54.42 :math:`\text{He}^{2+}`, corresponding to laser intensities \
