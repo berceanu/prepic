@@ -4,5 +4,4 @@ python:
       - requirements: docs/requirements_doc.txt
       - requirements: requirements.txt
       - method: setuptools
-        path: ..
    system_packages: true
