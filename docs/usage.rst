@@ -9,11 +9,6 @@ in units of :math:`m_e c \omega_p / e`, magnetic fields in units of :math:`m_e \
 Scalar potential :math:`\Phi` in units of :math:`m_e c^2 / e` and vector potential \
 :math:`\vec{A}` in units of :math:`m_e c /e`. We will use SI units throughout.
 
-.. jupyter-execute::
-
-  name = 'world'
-  print('hello ' + name + '!')
-
 To use prepic in a project:
 
 .. jupyter-execute::
