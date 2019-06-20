@@ -113,13 +113,33 @@ def test_matched_laser_plasma():
     assert_almost_equal(match.η, 0.21384, 4)
 
 
-def test_simulation():
-    """Check Simulation class."""
-    # assert 0
-
-
-# msg = ("simulation with box size ({0.L:.1f})³, Δx={0.Δx:.3f}, Δy={0.Δy:.3f}, "
-#        "Δz={0.Δz:.3f}, nx={0.nx}, ny={0.ny}, nz={0.nz}, {0.npart:e} macro-particles, "
-#        "{0.nstep:e} time steps")
+# def test_simulation():
+#     """Check Simulation class."""
+    # msg = ("simulation with box size ({0.L:.1f})³, Δx={0.Δx:.3f}, Δy={0.Δy:.3f}, "
+    #        "Δz={0.Δz:.3f}, nx={0.nx}, ny={0.ny}, nz={0.nz}, {0.npart:e} macro-particles, "
+    #        "{0.nstep:e} time steps")
 
 # todo: add proper regression test for CETAL parameters, with parametrized fixtures
+    # https://docs.pytest.org/en/latest/fixture.html#scope-sharing-a-fixture-instance-across-tests-in-a-class-module-or-session
+    # https://docs.pytest.org/en/latest/fixture.html#parametrizing-fixtures
+
+# todo implement an `__eq__` (or "nearly equals") method for your `Laser` class, if you don't already have one,
+    #  to be able to easily compare objects. Then your tests can try constructing the same object via multiple
+    #  constructors and see if they come out equal.
+
+# todo publish in JOSS (see unyt's GH page)
+
+# # CETAL laser
+# npe_cetal = 1.5e18 / u.cm ** 3
+# beam_cetal = GaussianBeam(w0=18 * u.micrometer)
+# laser_cetal = Laser(ɛL=7.7 * u.joule, τL=40 * u.femtosecond, beam=beam_cetal)
+# Plasma(n_pe=npe_cetal)
+# plasma_cetal = Plasma(n_pe=npe_cetal, laser=laser_cetal)
+# bubble_R_cetal = (2 * np.sqrt(plasma_cetal.laser.a0) / plasma_cetal.kp).to(
+#     "micrometer"
+# )
+# plasma_cetal = Plasma(
+#     n_pe=npe_cetal, laser=laser_cetal, bubble_radius=bubble_R_cetal
+# )
+# matched_cetal = matched_laser_plasma(a0=4.1)
+
