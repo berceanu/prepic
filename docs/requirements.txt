@@ -1,2 +1,2 @@
-git+https://github.com/basnijholt/jupyter-sphinx.git
 nbsphinx==0.4.2
+git+https://github.com/basnijholt/jupyter-sphinx.git@0.2.0rc1
