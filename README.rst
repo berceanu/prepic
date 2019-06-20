@@ -30,8 +30,7 @@ analytically estimate various laser-plasma parameters for experiments and PIC si
 Features
 --------
 
-* ``lwfa`` module that estimates bunch properties (charge, energy, etc.),
-  based on [LTJT]_
+* ``lwfa`` module for estimating bunch properties (charge, energy, etc.), based on [LTJT]_
 
 
 Quick start
