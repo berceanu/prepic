@@ -38,7 +38,7 @@ extensions = [
         'sphinx.ext.intersphinx',
         'sphinx.ext.autosummary',
         'sphinx.ext.mathjax',
-        'sphinx.ext.viewcode'
+        'sphinx.ext.viewcode',
         'sphinx.ext.autosectionlabel',
         'jupyter_sphinx.execute',
         'nbsphinx',
