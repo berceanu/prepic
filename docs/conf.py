@@ -38,10 +38,15 @@ extensions = [
         'sphinx.ext.intersphinx',
         'sphinx.ext.autosummary',
         'sphinx.ext.mathjax',
-        #'nbsphinx',
         'sphinx.ext.viewcode'
+        'sphinx.ext.autosectionlabel',
+        'jupyter_sphinx.execute',
+        'nbsphinx',
 ]
-intersphinx_mapping = {'unyt': ('https://unyt.readthedocs.io/en/latest', None)}
+intersphinx_mapping = {
+        'unyt': ('https://unyt.readthedocs.io/en/latest', None),
+        'python': ('https://docs.python.org/3', None),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
