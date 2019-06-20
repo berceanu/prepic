@@ -14,7 +14,9 @@ Scalar potential :math:`\Phi` in units of :math:`m_e c^2 / e` and vector potenti
   name = 'world'
   print('hello ' + name + '!')
 
-To use prepic in a project::
+To use prepic in a project:
+
+.. jupyter-execute::
 
   import prepic.lwfa as lwfa
 
