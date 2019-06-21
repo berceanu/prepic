@@ -6,9 +6,6 @@ from prepic.lwfa import GaussianBeam, Laser, Plasma, matched_laser_plasma, Simul
 
 
 def main():
-
-    print(w0_to_fwhm(7.202530529256849* u.meter))
-
     GaussianBeam.from_f_number(f_number=10.0)
     GaussianBeam.from_focal_distance(
         focal_distance=1 * u.meter, beam_diameter=10 * u.cm

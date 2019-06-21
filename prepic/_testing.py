@@ -1,31 +1,27 @@
 from itertools import chain
-from numpy import pi as π
-
-import unyt as u
-
-r_e = (1 / (4 * π * u.eps_0) * u.qe ** 2 / (u.me * u.clight ** 2)).to("micrometer")
+from unyt import dimensions
 
 
 class UnitsError(ValueError):
     pass
 
 
-def right_units(arg, dimension):
+def _right_units(arg, dim):
     """Checks the argument has the right dimensionality.
 
     :param arg: variable to check
     :type arg: :py:class:`unyt.array.unyt_quantity`
-    :param dimension: SI base quantity, eg. 'time', 'length', etc.
-    :type dimension: str
+    :param dim: SI base quantity, eg. 'time', 'length', etc.
+    :type dim: str
     :return: True if check successful
     :rtype: bool
     :raises AttributeError: if `arg` doesn't have `.units` attribute
     """
     try:
-        arg_dimension = arg.units.dimensions
+        arg_dim = arg.units.dimensions
     except AttributeError:
-        arg_dimension = None
-    return arg_dimension == getattr(u.dimensions, dimension)
+        arg_dim = None
+    return arg_dim == getattr(dimensions, dim)
 
 
 def check_dimensions(**arg_units):
@@ -61,7 +57,7 @@ def check_dimensions(**arg_units):
             """
             for arg_name, arg_value in chain(zip(names_of_args, args), kwargs.items()):
                 dimension = arg_units[arg_name]
-                if arg_name in arg_units and not right_units(arg_value, dimension):
+                if arg_name in arg_units and not _right_units(arg_value, dimension):
                     raise UnitsError(
                         f"arg '{arg_name}'={repr(arg_value)} does not match {dimension}"
                     )
@@ -71,22 +67,3 @@ def check_dimensions(**arg_units):
         return new_f
 
     return check_nr_args
-
-
-@check_dimensions(a0="dimensionless", λL="length")
-def intensity_from_a0(a0, λL=0.8 * u.micrometer):
-    """Compute peak laser intensity in the focal plane.
-
-    Args:
-        a0 (float, dimensionless): normalized laser vector potential
-        λL (float, length): laser wavelength
-
-    Returns:
-        I0 (float, energy/time/area): peak laser intensity in the focal plane
-    """
-    return π / 2 * u.clight / r_e * u.me * u.clight ** 2 / λL ** 2 * a0 ** 2
-
-
-if __name__ == "__main__":
-    res = intensity_from_a0(a0=7.202530529256849*u.dimensionless, λL=0.8*u.second) # raises
-    print(res)

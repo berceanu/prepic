@@ -17,14 +17,14 @@ def test_w0_to_fwhm():
 
 def test_waist_fwhm():
     """Round-trip checking of w0 to fwhm to w0 conversion."""
-    w0 = 10.0
+    w0 = 10.0*u.micrometer
     assert_allclose_units(lwfa.fwhm_to_w0(lwfa.w0_to_fwhm(w0)), w0)
 
 
 def test_a0_intensity():
     """Round-trip checking of a0 to io to a0 conversion."""
-    a0 = 2.0
-    assert_allclose_units(lwfa.a0_from_intensity(lwfa.intensity_from_a0(a0)), a0, 4)
+    a0 = 2.0*u.dimensionless
+    assert_allclose_units(lwfa.a0_from_intensity(lwfa.intensity_from_a0(a0)), a0)
 
 
 def test_gaussianbeam():
