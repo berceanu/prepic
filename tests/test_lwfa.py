@@ -5,6 +5,7 @@ from collections import namedtuple
 
 import pytest
 import unyt as u
+import numpy as np
 from unyt._testing import assert_allclose_units
 
 from prepic import lwfa
@@ -16,11 +17,14 @@ def cet_param():
     Params = namedtuple(
         "Cetal",
         [
+            "npe",
+            "kp",
             "f_number",
             "focal_distance",
             "beam_diameter",
             "w0",
             "fwhm",
+            "zR",
             "a0",
             "ɛL",
             "τL",
@@ -29,11 +33,14 @@ def cet_param():
         ],
     )
     cetal = Params(
+        npe=1.5e18 / u.cm ** 3,
+        kp=0.102 * 1 / u.micrometer,  # todo update
         f_number=24.9912 * u.dimensionless,
         focal_distance=3.2 * u.meter,
         beam_diameter=128.045071 * u.mm,
         w0=18 * u.micrometer,
         fwhm=21.193380405278543 * u.micrometer,
+        zR = 3534.29173 * u.micrometer,  # todo update
         a0=4.076967454355432 * u.dimensionless,
         ɛL=7.7 * u.joule,
         τL=40 * u.femtosecond,
@@ -45,11 +52,14 @@ def cet_param():
 
 @pytest.fixture(scope="module")
 def cet_plasma(cet_param):
+    bubble_r = (2 * np.sqrt(cet_param.a0) / cet_param.kp)
+
     return Plasma(
-        n_pe=0.294e18 / u.cm ** 3,
+        n_pe=cet_param.npe,
         laser=Laser.from_a0(
             a0=cet_param.a0, ɛL=cet_param.ɛL, beam=GaussianBeam(w0=cet_param.w0)
         ),
+        bubble_radius=bubble_r
     )
 
 
@@ -105,63 +115,46 @@ def test_waist_fwhm(cet_param):
     assert_allclose_units(lwfa.fwhm_to_w0(lwfa.w0_to_fwhm(cet_param.w0)), cet_param.w0)
 
 
-def test_a0_intensity():
+def test_a0_intensity(cet_param):
     """Round-trip checking of a0 to io to a0 conversion."""
     assert_allclose_units(
         lwfa.a0_from_intensity(lwfa.intensity_from_a0(cet_param.a0)), cet_param.a0
     )
 
 
-def test_rayleigh():
+def test_rayleigh(cet_plasma, cet_param):
     """Check Rayleigh length."""
-    zR = lwfa.GaussianBeam(w0=30.0 * u.micrometer).zR
-    assert zR.units.dimensions == dimensions.length
-    assert_allclose_units(zR.to_value("micrometer"), 3534.29173, 4)
+    assert_allclose_units(cet_plasma.laser.beam.zR, cet_param.zR)
 
 
-def test_laser():
+def test_laser(cet_plasma, cet_param):
     """Check Laser class."""
-    laser = lwfa.Laser.from_a0(
-        a0=2.343,
-        τL=40.0 * u.femtosecond,
-        beam=lwfa.GaussianBeam(w0=30.0 * u.micrometer),
-    )
-    assert_allclose_units(laser.ɛL.to_value("joule"), 7.06412, 4)
+    laser = cet_plasma.laser
 
+    assert_allclose_units(laser.ɛL, cet_param.ɛL)
+    assert_allclose_units(laser.ncrit, 1741.95959e18 / u.cm ** 3)
+
+    # todo
     assert_allclose_units(laser.kL.to_value("1/micrometer"), 7.85398, 4)
-
     assert_allclose_units(laser.ωL.to_value("1/femtosecond"), 2.3546, 4)
-
     assert_allclose_units(laser.P0.to_value("terawatt"), 165.90753, 4)
-
     assert_allclose_units(laser.I0.to_value("exawatt/cm**2"), 11.73555, 4)
-
     assert_allclose_units(laser.E0.to_value("megavolt/mm"), 9403.34009, 4)
 
-    assert_allclose_units(laser.ncrit.to_value("1e18/cm**3"), 1741.95959, 4)
 
-
-def test_plasma():
+def test_plasma(cet_plasma, cet_param):
     """Check Plasma class."""
-    electron_density = 0.294e18 / u.cm ** 3
-    plasma = lwfa.Plasma(n_pe=electron_density)
-
-    assert_allclose_units(plasma.λp.to_value("micrometer"), 61.57938, 4)
-
-    assert_allclose_units(plasma.kp.to_value("1/micrometer"), 0.102, 4)
-
-    assert_allclose_units(plasma.ωp.to_value("1/femtosecond"), 0.0305, 4)
+    assert_allclose_units(cet_plasma.λp, 61.57938 * u.micrometer)
+    assert_allclose_units(cet_plasma.kp, cet_param.kp)
+    assert_allclose_units(cet_plasma.ωp, 0.0305 * 1 / u.femtosecond)
 
 
-def test_matched_laser_plasma():
+def test_matched_laser_plasma(cet_param):
     """Check laser-plasma matching function."""
-    a0 = 2.343
-    match = lwfa.matched_laser_plasma(a0)
+    match = lwfa.matched_laser_plasma(cet_param.a0)
 
     assert_allclose_units(match.ΔE.to_value("megaelectronvolt"), 56.35889, 4)
-
     assert_allclose_units(match.Q.to_value("picocoulomb"), 58.17636, 4)
-
     assert_allclose_units(match.η, 0.21384, 4)
 
 # def test_simulation():
@@ -171,25 +164,4 @@ def test_matched_laser_plasma():
 #        "{0.nstep:e} time steps")
 
 # todo: add proper regression test for CETAL parameters, with parametrized fixtures
-# https://docs.pytest.org/en/latest/fixture.html#scope-sharing-a-fixture-instance-across-tests-in-a-class-module-or-session
 # https://docs.pytest.org/en/latest/fixture.html#parametrizing-fixtures
-
-# todo implement an `__eq__` (or "nearly equals") method for your `Laser` class, if you don't already have one,
-#  to be able to easily compare objects. Then your tests can try constructing the same object via multiple
-#  constructors and see if they come out equal.
-
-# todo publish in JOSS (see unyt's GH page)
-
-# # CETAL laser
-# npe_cetal = 1.5e18 / u.cm ** 3
-# beam_cetal = GaussianBeam(w0=18 * u.micrometer)
-# laser_cetal = Laser(ɛL=7.7 * u.joule, τL=40 * u.femtosecond, beam=beam_cetal)
-# Plasma(n_pe=npe_cetal)
-# plasma_cetal = Plasma(n_pe=npe_cetal, laser=laser_cetal)
-# bubble_R_cetal = (2 * np.sqrt(plasma_cetal.laser.a0) / plasma_cetal.kp).to(
-#     "micrometer"
-# )
-# plasma_cetal = Plasma(
-#     n_pe=npe_cetal, laser=laser_cetal, bubble_radius=bubble_R_cetal
-# )
-# matched_cetal = matched_laser_plasma(a0=4.1)
