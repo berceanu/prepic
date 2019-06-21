@@ -2,15 +2,29 @@
 import numpy as np
 import unyt as u
 from numpy import pi as π
-
 """Laser WakeField Acceleration module."""
 
 # classical electron radius
 r_e = (1 / (4 * π * u.eps_0) * u.qe ** 2 / (u.me * u.clight ** 2)).to("micrometer")
 
-
 # Utility functions
 
+def check_arg(arg, dimension):
+    """Checks the argument has the right dimensionality.
+
+    :param arg: variable to check
+    :type arg: :py:class:`unyt.array.unyt_quantity`
+    :param dimension: SI base quantity, eg. 'time', 'length', etc.
+    :type dimension: str
+    """
+    msg = f"arg must have units of {dimension}"
+    try:
+        arg_dimension = arg.units.dimensions
+    except AttributeError:
+        arg_dimension = None
+    assert arg_dimension == getattr(u.dimensions, dimension), msg
+
+@dimensions('length')
 def w0_to_fwhm(w0):
     """Computes Gaussian laser FWHM from its beam waist.
 
@@ -20,9 +34,10 @@ def w0_to_fwhm(w0):
     Returns:
         fwhm (float, length): beam FWHM @ 1/2 intensity
     """
+    check_arg(w0, 'length')
     return 2 * w0 / np.sqrt(2 / np.log(2))
 
-
+@dimensions('length')
 def fwhm_to_w0(fwhm):
     """Computes Gaussian laser beam waist from its FWHM.
 
@@ -34,7 +49,7 @@ def fwhm_to_w0(fwhm):
     """
     return 1 / 2 * np.sqrt(2 / np.log(2)) * fwhm
 
-
+@dimensions('length', 'length')
 def intensity_from_a0(a0, λL=0.8 * u.micrometer):
     """Compute peak laser intensity in the focal plane.
 
@@ -47,7 +62,7 @@ def intensity_from_a0(a0, λL=0.8 * u.micrometer):
     """
     return π / 2 * u.clight / r_e * u.me * u.clight ** 2 / λL ** 2 * a0 ** 2
 
-
+@dimensions('length', 'length')
 def a0_from_intensity(i0, λL=0.8 * u.micrometer):
     """Compute laser normalized vector potential.
 
