@@ -3,11 +3,13 @@ import numpy as np
 import unyt as u
 from numpy import pi as π
 
-from ._testing import check_dimensions
+from ._testing import check_dimensions, BaseClass, right_units
+
 """Laser WakeField Acceleration module."""
 
 # classical electron radius
 r_e = (1 / (4 * π * u.eps_0) * u.qe ** 2 / (u.me * u.clight ** 2)).to("micrometer")
+
 
 # Utility functions
 
@@ -24,6 +26,7 @@ def w0_to_fwhm(w0):
     """
     return 2 * w0 / np.sqrt(2 / np.log(2))
 
+
 @check_dimensions(fwhm='length')
 def fwhm_to_w0(fwhm):
     """Computes Gaussian laser beam waist from its FWHM.
@@ -35,6 +38,7 @@ def fwhm_to_w0(fwhm):
         w0 (float, length): beam waist @ 1/e^2 intensity
     """
     return 1 / 2 * np.sqrt(2 / np.log(2)) * fwhm
+
 
 @check_dimensions(a0='dimensionless', λL='length')
 def intensity_from_a0(a0, λL=0.8 * u.micrometer):
@@ -48,6 +52,7 @@ def intensity_from_a0(a0, λL=0.8 * u.micrometer):
         I0 (float, energy/time/area): peak laser intensity in the focal plane
     """
     return π / 2 * u.clight / r_e * u.me * u.clight ** 2 / λL ** 2 * a0 ** 2
+
 
 @check_dimensions(i0='flux', λL='length')
 def a0_from_intensity(i0, λL=0.8 * u.micrometer):
@@ -63,11 +68,7 @@ def a0_from_intensity(i0, λL=0.8 * u.micrometer):
     return np.sqrt(i0 / (π / 2 * u.clight / r_e * u.me * u.clight ** 2 / λL ** 2))
 
 
-# Class abstractions
-# Gaussian Beam
-
-
-class GaussianBeam(object):
+class GaussianBeam(BaseClass):
     """Contains the (geometric) parameters for a Gaussian laser beam.
 
     Attributes:
@@ -90,11 +91,7 @@ class GaussianBeam(object):
             self.fwhm = fwhm.to("micrometer")
             self.w0 = fwhm_to_w0(self.fwhm).to("micrometer")
         elif w0 and fwhm:
-            assert np.isclose(
-                w0.to_value("micrometer"), fwhm_to_w0(fwhm).to_value("micrometer")
-            )
-            self.w0 = w0.to("micrometer")
-            self.fwhm = fwhm.to("micrometer")
+            raise ValueError("both w0 and fwhm given, only give one")
         else:  # both None
             self.w0 = None
             self.fwhm = None
@@ -112,6 +109,8 @@ class GaussianBeam(object):
             :param f_number: f/# of the off-axis parabolic mirror (float, dimensionless)
             :param λL: laser wavelength (float, length, optional)
         """
+        assert right_units(f_number, 'dimensionless'), "f_number should be dimensionless"
+
         w0 = 2 * np.sqrt(2) / π * λL * f_number
         return cls(w0=w0, λL=λL)
 
@@ -124,6 +123,9 @@ class GaussianBeam(object):
             :param beam_diameter: beam diameter after compressor (float, units of length)
             :param λL: laser wavelength (float, length, optional)
         """
+        assert right_units(focal_distance, 'length'), "focal_distance should be a length"
+        assert right_units(beam_diameter, 'length'), "beam_diameter should be a length"
+
         return cls.from_f_number(f_number=focal_distance / beam_diameter, λL=λL)
 
     def __repr__(self):
@@ -141,7 +143,7 @@ class GaussianBeam(object):
 # Laser, without matching
 
 
-class Laser(object):
+class Laser(BaseClass):
     """Class containing laser parameters.
 
     Attributes:
@@ -243,7 +245,7 @@ class Laser(object):
         return msg
 
 
-class Simulation(object):
+class Simulation(BaseClass):
     """Class for estimating the recommended simulation parameters.
     Attributes:
         Δx (float, length): transverse spatial resolution
@@ -316,7 +318,7 @@ class Simulation(object):
 
 # Plasma, without matching
 
-class Plasma(object):
+class Plasma(BaseClass):
     """Class containing plasma parameters.
     Attributes:
         npe (float, 1/volume): plasma electron (number) density
@@ -454,5 +456,3 @@ def matched_laser_plasma(a0, beam=GaussianBeam()):
     print("Scaling laws valid up to a0c={0:.1f}".format(a0c))
 
     return Plasma(n_pe=n_pe, laser=laser, bubble_radius=w0)
-
-

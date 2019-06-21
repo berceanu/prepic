@@ -4,46 +4,8 @@ import unyt as u
 from prepic.lwfa import GaussianBeam, Laser, Plasma, matched_laser_plasma, Simulation, w0_to_fwhm
 
 
-
 def main():
-    GaussianBeam.from_f_number(f_number=10.0)
-    GaussianBeam.from_focal_distance(
-        focal_distance=1 * u.meter, beam_diameter=10 * u.cm
-    )
-
-    # CETAL params >>>>>>>>>>>>>>>>>>>>>
-    Laser.from_a0(a0=4.076967454355432, ɛL=7.7 * u.joule, τL=40 * u.femtosecond)
-
-    Laser.from_a0(
-        a0=4.076967454355432, ɛL=7.7 * u.joule, beam=GaussianBeam(w0=18 * u.micrometer)
-    )
-
-    Laser.from_intensity(
-        intensity=3.553314404474785e19 * u.watt / u.cm ** 2,
-        ɛL=7.7 * u.joule,
-        τL=40 * u.femtosecond,
-    )
-    Laser.from_intensity(
-        intensity=3.553314404474785e19 * u.watt / u.cm ** 2,
-        ɛL=7.7 * u.joule,
-        beam=GaussianBeam(w0=18 * u.micrometer),
-    )
-    Laser.from_intensity(
-        intensity=3.553314404474785e19 * u.watt / u.cm ** 2,
-        τL=40 * u.femtosecond,
-        beam=GaussianBeam(w0=18 * u.micrometer),
-    )
-    Laser.from_power(
-        power=180.84167614968285 * u.terawatt,
-        beam=GaussianBeam(w0=18 * u.micrometer),
-        τL=40 * u.femtosecond,
-    )
-    laser = Laser.from_power(
-        power=180.84167614968285 * u.terawatt,
-        beam=GaussianBeam(w0=18 * u.micrometer),
-        ɛL=7.7 * u.joule,
-    )
-
+    print(w0_to_fwhm(18 * u.micrometer))
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # 1. gas-jet with $L_{\text{acc}} = 3$ mm, $n_{\text{pe}} = (1-3) \times 10^{18}$ cm${}^{-3}$
     # 2. capillary with $L_{\text{acc}} = (3-10)$ cm, $n_{\text{pe}} = (3-7) \times 10^{17}$ cm${}^{-3}$

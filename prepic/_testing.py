@@ -1,12 +1,49 @@
+# -*- coding: utf-8 -*-
 from itertools import chain
-from unyt import dimensions
+
+import unyt as u
+from unyt._testing import assert_allclose_units
+from prepic._util import todict, flatten_dict
+
+"""Module containing utilities for testing dimensional analysis."""
+
+
+def allclose_units(actual, desired, rtol=1e-7, atol=0, **kwargs):
+    try:
+        assert_allclose_units(actual, desired, rtol, atol, **kwargs)
+    except AssertionError:
+        return False
+    return True
+
+
+def __round__(self):
+    return type(self)(round(float(self)), self.units)
+
+
+class BaseClass:
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(other, type(self)):
+            self_vars = flatten_dict(todict(self))
+            other_vars = flatten_dict(todict(other))
+            common_vars = self_vars.keys() & other_vars.keys()
+
+            for key in common_vars:
+                self_val = self_vars[key]
+                other_val = other_vars[key]
+                # print(f"{key}: {self_val} vs {other_val}")
+                if not allclose_units(self_val, other_val, 1e-5):
+                    print(f"Error in {key}: {self_val} vs {other_val}")
+                    return False
+            return True
+        return False
 
 
 class UnitsError(ValueError):
     pass
 
 
-def _right_units(arg, dim):
+def right_units(arg, dim):
     """Checks the argument has the right dimensionality.
 
     :param arg: variable to check
@@ -21,7 +58,7 @@ def _right_units(arg, dim):
         arg_dim = arg.units.dimensions
     except AttributeError:
         arg_dim = None
-    return arg_dim == getattr(dimensions, dim)
+    return arg_dim == getattr(u.dimensions, dim)
 
 
 def check_dimensions(**arg_units):
@@ -57,7 +94,7 @@ def check_dimensions(**arg_units):
             """
             for arg_name, arg_value in chain(zip(names_of_args, args), kwargs.items()):
                 dimension = arg_units[arg_name]
-                if arg_name in arg_units and not _right_units(arg_value, dimension):
+                if arg_name in arg_units and not right_units(arg_value, dimension):
                     raise UnitsError(
                         f"arg '{arg_name}'={repr(arg_value)} does not match {dimension}"
                     )
