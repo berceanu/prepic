@@ -173,7 +173,7 @@ class Laser(object):
             self.I0 = (
                 2 / π * np.sqrt(4 * np.log(2) / π) * self.ɛL / (self.τL * self.beam.w0 ** 2)
             ).to("watt/cm**2")
-            self.a0 = a0_from_intensity(i0=self.I0, λL=self.beam.λL).to_value(
+            self.a0 = a0_from_intensity(i0=self.I0, λL=self.beam.λL).to(
                 "dimensionless"
             )
             self.E0 = (u.clight * u.me * self.ωL / np.abs(u.qe) * self.a0).to(
@@ -291,16 +291,16 @@ class Simulation(object):
         self.Δy = self.Δx
         self.Δz = self.plasma.laser.beam.λL / 20
 
-        self.nx = int((self.L / self.Δx).to_value("dimensionless"))
+        self.nx = int((self.L / self.Δx).to("dimensionless"))
         self.ny = self.nx
-        self.nz = int((self.L / self.Δz).to_value("dimensionless"))
+        self.nz = int((self.L / self.Δz).to("dimensionless"))
 
         self.npart = self.nx * self.ny * self.nz * self.ppc
 
         self.dt = (self.Δz / u.clight).to("femtosecond")
         self.t_interact = ((self.plasma.Lacc + self.L) / u.clight).to("femtosecond")
 
-        self.nstep = int((self.t_interact / self.dt).to_value("dimensionless"))
+        self.nstep = int((self.t_interact / self.dt).to("dimensionless"))
 
     def __repr__(self):
         return "<{0.__class__.__name__}({0}, {1.L}, {1.ppc})>".format(
@@ -367,7 +367,7 @@ class Plasma(object):
         if laser:
             self.laser = laser
 
-            self.γp = (self.laser.ωL / self.ωp).to_value("dimensionless")
+            self.γp = (self.laser.ωL / self.ωp).to("dimensionless")
             self.Pc = (17 * self.γp ** 2 * u.gigawatt).to("terawatt")
 
             self.dephasing = (
@@ -387,12 +387,12 @@ class Plasma(object):
             if bubble_radius:
                 self.R = bubble_radius
 
-                self.N = (1 / 30 * (self.kp * self.R) ** 3 / (self.kp * r_e)).to_value(
+                self.N = (1 / 30 * (self.kp * self.R) ** 3 / (self.kp * r_e)).to(
                     "dimensionless"
                 )
                 self.Q = (self.N * np.abs(u.qe)).to("picocoulomb")
 
-                self.η = (self.N * self.ΔE / self.laser.ɛL).to_value("dimensionless")
+                self.η = (self.N * self.ΔE / self.laser.ɛL).to("dimensionless")
             else:
                 self.R = None
         else:
@@ -408,7 +408,7 @@ class Plasma(object):
             self
         )
         if self.laser:
-            n_ratio = (self.npe / self.laser.ncrit).to_value("dimensionless")
+            n_ratio = (self.npe / self.laser.ncrit).to("dimensionless")
             msg = ("Plasma with nₚ={0.npe:.1e} ({1:.2e} nc), ωₚ={0.ωp:.3f}, kₚ={0.kp:.3f}, "
                    "λₚ={0.λp:.1f}, Ewb={0.Ewb:.1f}").format(self, n_ratio)
             msg += ("\nPc={0.Pc:.1f}, Ldeph={0.dephasing:.2f}, Ldepl={0.depletion:.2f}, "
@@ -450,7 +450,7 @@ def matched_laser_plasma(a0, beam=GaussianBeam()):
     laser = Laser.from_a0(a0=a0, τL=τL, beam=gbeam)
 
     # critical normalized vector potential
-    a0c = (2 * np.sqrt(laser.ncrit / n_pe)).to_value("dimensionless")
+    a0c = (2 * np.sqrt(laser.ncrit / n_pe)).to("dimensionless")
     print("Scaling laws valid up to a0c={0:.1f}".format(a0c))
 
     return Plasma(n_pe=n_pe, laser=laser, bubble_radius=w0)
