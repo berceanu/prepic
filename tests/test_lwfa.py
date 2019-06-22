@@ -96,13 +96,6 @@ def test_laser_constructors(cet_plasma, cet_param):
     assert l6 == l7
 
 
-def test_plasma_with_laser(cet_plasma):
-    """Check Plasma class when given a Laser."""
-    assert_allclose_units(cet_plasma.Pc, 19.7422087 * u.terawatt)
-    assert_allclose_units(cet_plasma.depletion, 13.92603593 * u.mm)
-    assert_allclose_units(cet_plasma.dephasing, 13.56555928 * u.mm)
-
-
 def test_w0_to_fwhm(cet_param):
     """The the beam-waist to full-width half-maximum conversion."""
     fwhm = lwfa.w0_to_fwhm(cet_param.w0)
@@ -147,6 +140,11 @@ def test_plasma(cet_plasma, cet_param):
     assert_allclose_units(cet_plasma.kp, cet_param.kp)
     assert_allclose_units(cet_plasma.ωp, 0.0690935 * 1 / u.femtosecond)
 
+def test_plasma_with_laser(cet_plasma):
+    """Check Plasma class when given a Laser."""
+    assert_allclose_units(cet_plasma.Pc, 19.7422087 * u.terawatt)
+    assert_allclose_units(cet_plasma.depletion, 13.92603593 * u.mm)
+    assert_allclose_units(cet_plasma.dephasing, 13.56555928 * u.mm)
 
 def test_matched_laser_plasma(cet_param):
     """Check laser-plasma matching function."""
@@ -155,6 +153,7 @@ def test_matched_laser_plasma(cet_param):
     assert_allclose_units(match.ΔE, 1564.41581593 * u.megaelectronvolt)
     assert_allclose_units(match.Q, 533.34275131 * u.picocoulomb)
     assert_allclose_units(match.η, 0.1228936 * u.dimensionless)
+
 
 def test_simulation(cet_plasma):
     """Check Simulation class."""
@@ -168,7 +167,6 @@ def test_simulation(cet_plasma):
     assert_allclose_units(sim.nz, 2726 * u.dimensionless)
     assert_allclose_units(sim.npart, 1373925808 * u.dimensionless)
     assert_allclose_units(sim.nstep, 341865 * u.dimensionless)
-
 
 # todo: parametrized the fixtures
 # https://docs.pytest.org/en/latest/fixture.html#parametrizing-fixtures
