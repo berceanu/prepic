@@ -18,11 +18,11 @@ pre-PIC
      :target: https://pyup.io/repos/github/berceanu/prepic/
      :alt: Updates
 
-.. image:: https://codecov.io/gh/berceanu/sliceplots/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/berceanu/sliceplots
+.. image:: https://codecov.io/gh/berceanu/prepic/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/berceanu/prepic
 
 .. image:: https://mybinder.org/badge_logo.svg
- :target: https://mybinder.org/v2/gh/berceanu/sliceplots/bda060663a197d31caa2deacfac68adb7c687690?filepath=examples%2Fsliceplots.ipynb
+ :target: https://mybinder.org/v2/gh/berceanu/prepic/b8ee3d26968f4692b4da2880ef139d498bd6f775?filepath=examples%2Fexample_notebook.ipynb
 
 analytically estimate various laser-plasma parameters for experiments and PIC simulations
 
