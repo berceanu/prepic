@@ -12,8 +12,6 @@ To use ``prepic`` in a project, we first import the necessary modules
     from collections import namedtuple
     import unyt as u
     import numpy as np
-    from matplotlib import pyplot
-    %matplotlib inline
 
     from prepic import lwfa
 
@@ -71,6 +69,11 @@ We now build the :py:class:`prepic.lwfa.Plasma` class for our parameters
         )
     cetal_plasma = get_plasma(param)
     cetal_plasma
+
+
+You can download all the code from this document as a Python script :jupyter-download:script:`prepic` \
+or as a Jupyter notebook :jupyter-download:notebook:`prepic`.
+
 
 We measure charges in units of :math:`e`, masses in units of :math:`m_e`, lengths in \
 units of :math:`l_p = c/\omega_p`, times in units of :math:`t_p = 1 /\omega_p`. Momenta \
