@@ -8,6 +8,7 @@ Welcome to prepic's documentation!
    readme
    installation
    usage
+   physics
    modules
    contributing
    authors
