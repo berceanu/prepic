@@ -126,7 +126,6 @@ def test_laser(cet_plasma, cet_param):
     assert_allclose_units(laser.ɛL, cet_param.ɛL)
     assert_allclose_units(laser.ncrit, 1741.95959e18 / u.cm ** 3)
 
-    # todo
     assert_allclose_units(laser.kL, 7.85398163 * 1 / u.micrometer)
     assert_allclose_units(laser.ωL, 2.35456446 * 1 / u.femtosecond)
     assert_allclose_units(laser.P0, 180.84167615 * u.terawatt)
