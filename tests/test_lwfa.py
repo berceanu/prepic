@@ -156,11 +156,19 @@ def test_matched_laser_plasma(cet_param):
     assert_allclose_units(match.Q, 533.34275131 * u.picocoulomb)
     assert_allclose_units(match.η, 0.1228936 * u.dimensionless)
 
-# def test_simulation():
-#     """Check Simulation class."""
-#     box size ({0.L:.1f})³, Δx={0.Δx:.3f}, Δy={0.Δy:.3f}
-#     Δz={0.Δz:.3f}, nx={0.nx}, ny={0.ny}, nz={0.nz}, {0.npart:e} macro-particles
-#     {0.nstep:e} time steps
+def test_simulation(cet_plasma):
+    """Check Simulation class."""
+    sim = lwfa.Simulation(cet_plasma)
 
-# todo: add proper regression test for CETAL parameters, with parametrized fixtures
+    assert_allclose_units(sim.L, 109.04942675 * u.micrometer)
+    assert_allclose_units(sim.Δx, 0.43389388 * u.micrometer)
+    assert_allclose_units(sim.Δz, 0.04 * u.micrometer)
+
+    assert_allclose_units(sim.nx, 251 * u.dimensionless)
+    assert_allclose_units(sim.nz, 2726 * u.dimensionless)
+    assert_allclose_units(sim.npart, 1373925808 * u.dimensionless)
+    assert_allclose_units(sim.nstep, 341865 * u.dimensionless)
+
+
+# todo: parametrized the fixtures
 # https://docs.pytest.org/en/latest/fixture.html#parametrizing-fixtures

@@ -285,7 +285,7 @@ class Simulation(BaseClass):
         else:
             self.L = box_length.to("micrometer")
         if not ppc:
-            self.ppc = 8
+            self.ppc = 8 * u.dimensionless
         else:
             self.ppc = ppc
 
