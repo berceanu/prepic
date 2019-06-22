@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Tests for `lwfa` module."""
+
 from collections import namedtuple
 
+import numpy as np
 import pytest
 import unyt as u
-import numpy as np
 from unyt._testing import assert_allclose_units
 
 from prepic import lwfa
-from prepic.lwfa import GaussianBeam, Laser, Plasma
 
 
 @pytest.fixture(scope="module")
@@ -34,13 +34,13 @@ def cet_param():
     )
     cetal = Params(
         npe=1.5e18 / u.cm ** 3,
-        kp=0.102 * 1 / u.micrometer,  # todo update
+        kp=0.2304711 * 1 / u.micrometer,
         f_number=24.9912 * u.dimensionless,
         focal_distance=3.2 * u.meter,
         beam_diameter=128.045071 * u.mm,
         w0=18 * u.micrometer,
         fwhm=21.193380405278543 * u.micrometer,
-        zR = 3534.29173 * u.micrometer,  # todo update
+        zR=1.27234502 * u.mm,
         a0=4.076967454355432 * u.dimensionless,
         ɛL=7.7 * u.joule,
         τL=40 * u.femtosecond,
@@ -54,54 +54,53 @@ def cet_param():
 def cet_plasma(cet_param):
     bubble_r = (2 * np.sqrt(cet_param.a0) / cet_param.kp)
 
-    return Plasma(
+    return lwfa.Plasma(
         n_pe=cet_param.npe,
-        laser=Laser.from_a0(
-            a0=cet_param.a0, ɛL=cet_param.ɛL, beam=GaussianBeam(w0=cet_param.w0)
+        laser=lwfa.Laser.from_a0(
+            a0=cet_param.a0, ɛL=cet_param.ɛL, beam=lwfa.GaussianBeam(w0=cet_param.w0)
         ),
         bubble_radius=bubble_r
     )
 
 
-def test_plasma_with_laser(cet_plasma):
-    """Check Plasma class when given a Laser."""
-    assert_allclose_units(cet_plasma.Pc, 100.72555 * u.terawatt)
-    assert_allclose_units(cet_plasma.depletion, 71051.20374 * u.micrometer)
-    assert_allclose_units(cet_plasma.dephasing, 118514.39895 * u.micrometer)
-
-
-def test_beam_constructors(cet_param):
-    g1 = GaussianBeam.from_f_number(f_number=cet_param.f_number)
-    g2 = GaussianBeam.from_focal_distance(
+def test_beam_constructors(cet_plasma, cet_param):
+    g1 = lwfa.GaussianBeam.from_f_number(f_number=cet_param.f_number)
+    g2 = lwfa.GaussianBeam.from_focal_distance(
         focal_distance=cet_param.focal_distance, beam_diameter=cet_param.beam_diameter
     )
-    g3 = GaussianBeam(w0=cet_param.w0)
-    assert (g1 == g2) and (g2 == g3)
+    g3 = cet_plasma.laser.beam
+    assert g1 == g2
+    assert g2 == g3
 
 
-def test_laser_constructors(cet_param):
-    cetbeam = GaussianBeam(w0=cet_param.w0)
-    l1 = Laser.from_a0(a0=cet_param.a0, ɛL=cet_param.ɛL, τL=cet_param.τL)
-    l2 = Laser.from_a0(a0=cet_param.a0, ɛL=cet_param.ɛL, beam=cetbeam)
-    l3 = Laser.from_intensity(
+def test_laser_constructors(cet_plasma, cet_param):
+    cetbeam = lwfa.GaussianBeam(w0=cet_param.w0)
+    l1 = lwfa.Laser.from_a0(a0=cet_param.a0, ɛL=cet_param.ɛL, τL=cet_param.τL)
+    l2 = cet_plasma.laser
+    l3 = lwfa.Laser.from_intensity(
         intensity=cet_param.intensity, ɛL=cet_param.ɛL, τL=cet_param.τL
     )
-    l4 = Laser.from_intensity(
+    l4 = lwfa.Laser.from_intensity(
         intensity=cet_param.intensity, ɛL=cet_param.ɛL, beam=cetbeam
     )
-    l5 = Laser.from_intensity(
+    l5 = lwfa.Laser.from_intensity(
         intensity=cet_param.intensity, τL=cet_param.τL, beam=cetbeam
     )
-    l6 = Laser.from_power(power=cet_param.power, τL=cet_param.τL, beam=cetbeam)
-    l7 = Laser.from_power(power=cet_param.power, ɛL=cet_param.ɛL, beam=cetbeam)
-    assert (
-        (l1 == l2)
-        and (l2 == l3)
-        and (l3 == l4)
-        and (l4 == l5)
-        and (l5 == l6)
-        and (l6 == l7)
-    )
+    l6 = lwfa.Laser.from_power(power=cet_param.power, τL=cet_param.τL, beam=cetbeam)
+    l7 = lwfa.Laser.from_power(power=cet_param.power, ɛL=cet_param.ɛL, beam=cetbeam)
+    assert l1 == l2
+    assert l2 == l3
+    assert l3 == l4
+    assert l4 == l5
+    assert l5 == l6
+    assert l6 == l7
+
+
+def test_plasma_with_laser(cet_plasma):
+    """Check Plasma class when given a Laser."""
+    assert_allclose_units(cet_plasma.Pc, 19.7422087 * u.terawatt)
+    assert_allclose_units(cet_plasma.depletion, 13.92603593 * u.mm)
+    assert_allclose_units(cet_plasma.dephasing, 13.56555928 * u.mm)
 
 
 def test_w0_to_fwhm(cet_param):
@@ -135,33 +134,33 @@ def test_laser(cet_plasma, cet_param):
     assert_allclose_units(laser.ncrit, 1741.95959e18 / u.cm ** 3)
 
     # todo
-    assert_allclose_units(laser.kL.to_value("1/micrometer"), 7.85398, 4)
-    assert_allclose_units(laser.ωL.to_value("1/femtosecond"), 2.3546, 4)
-    assert_allclose_units(laser.P0.to_value("terawatt"), 165.90753, 4)
-    assert_allclose_units(laser.I0.to_value("exawatt/cm**2"), 11.73555, 4)
-    assert_allclose_units(laser.E0.to_value("megavolt/mm"), 9403.34009, 4)
+    assert_allclose_units(laser.kL, 7.85398163 * 1 / u.micrometer)
+    assert_allclose_units(laser.ωL, 2.35456446 * 1 / u.femtosecond)
+    assert_allclose_units(laser.P0, 180.84167615 * u.terawatt)
+    assert_allclose_units(laser.I0, 3.5533144e+19 * u.watt / u.cm ** 2)
+    assert_allclose_units(laser.E0, 16362.40354854 * u.megavolt / u.mm)
 
 
 def test_plasma(cet_plasma, cet_param):
     """Check Plasma class."""
-    assert_allclose_units(cet_plasma.λp, 61.57938 * u.micrometer)
+    assert_allclose_units(cet_plasma.λp, 27.26235669 * u.micrometer)
     assert_allclose_units(cet_plasma.kp, cet_param.kp)
-    assert_allclose_units(cet_plasma.ωp, 0.0305 * 1 / u.femtosecond)
+    assert_allclose_units(cet_plasma.ωp, 0.0690935 * 1 / u.femtosecond)
 
 
 def test_matched_laser_plasma(cet_param):
     """Check laser-plasma matching function."""
     match = lwfa.matched_laser_plasma(cet_param.a0)
 
-    assert_allclose_units(match.ΔE.to_value("megaelectronvolt"), 56.35889, 4)
-    assert_allclose_units(match.Q.to_value("picocoulomb"), 58.17636, 4)
-    assert_allclose_units(match.η, 0.21384, 4)
+    assert_allclose_units(match.ΔE, 1564.41581593 * u.megaelectronvolt)
+    assert_allclose_units(match.Q, 533.34275131 * u.picocoulomb)
+    assert_allclose_units(match.η, 0.1228936 * u.dimensionless)
 
 # def test_simulation():
 #     """Check Simulation class."""
-# msg = ("simulation with box size ({0.L:.1f})³, Δx={0.Δx:.3f}, Δy={0.Δy:.3f}, "
-#        "Δz={0.Δz:.3f}, nx={0.nx}, ny={0.ny}, nz={0.nz}, {0.npart:e} macro-particles, "
-#        "{0.nstep:e} time steps")
+#     box size ({0.L:.1f})³, Δx={0.Δx:.3f}, Δy={0.Δy:.3f}
+#     Δz={0.Δz:.3f}, nx={0.nx}, ny={0.ny}, nz={0.nz}, {0.npart:e} macro-particles
+#     {0.nstep:e} time steps
 
 # todo: add proper regression test for CETAL parameters, with parametrized fixtures
 # https://docs.pytest.org/en/latest/fixture.html#parametrizing-fixtures
