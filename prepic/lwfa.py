@@ -453,6 +453,7 @@ def matched_laser_plasma(a0, beam=GaussianBeam()):
 
     # critical normalized vector potential
     a0c = (2 * np.sqrt(laser.ncrit / n_pe)).to("dimensionless")
-    print("Scaling laws valid up to a0c={0:.1f}".format(a0c))
+    if a0 > a0c:
+        raise ValueError("Scaling laws valid up to a0c={0:.1f}".format(a0c))
 
     return Plasma(n_pe=n_pe, laser=laser, bubble_radius=w0)

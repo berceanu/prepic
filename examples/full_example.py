@@ -32,7 +32,6 @@ def main():
 
     matched_frasc = matched_laser_plasma(a0=3.4)
 
-    # todo remove msg "Scaling laws valid up to" and replace with catch/raise
 
     # We will be using this as a worked-out example for the documentation: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

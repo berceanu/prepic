@@ -31,9 +31,8 @@ class BaseClass:
             for key in common_vars:
                 self_val = self_vars[key]
                 other_val = other_vars[key]
-                # print(f"{key}: {self_val} vs {other_val}")
                 if not allclose_units(self_val, other_val, 1e-5):
-                    print(f"Error in {key}: {self_val} vs {other_val}")
+                    # print(f"Difference in {key}: {self_val} vs {other_val}")
                     return False
             return True
         return False
