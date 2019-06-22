@@ -30,6 +30,7 @@ setup(
     ],
     description="analytically estimate various laser-plasma parameters for experiments and PIC simulations",
     install_requires=requirements,
+    python_requires = '>= 3.6',
     license="BSD license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
