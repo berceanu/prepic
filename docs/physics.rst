@@ -33,3 +33,6 @@ Need to resolve the smallest length scale: 20-30 cells/wavelength.
 
 - plasma length scale: skin depth :math:`c/\omega_p`
 - laser length scale: laser wavelength :math:`\lambda_L = 0.8\, \mu m`
+
+
+.. [Gibb] Gibbon, "Short pulse laser interactions with matter", p. 22.

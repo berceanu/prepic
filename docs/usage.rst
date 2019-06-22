@@ -111,6 +111,5 @@ You can download all the code from this document as a Python script :jupyter-dow
 or as a Jupyter notebook :jupyter-download:notebook:`prepic`.
 
 
-.. [Gibb] Gibbon, "Short pulse laser interactions with matter", p. 22.
 .. [CABC] Curcio, A., et al. Physical Review Accelerators and Beams 20.1 (2017): 012801.
 
