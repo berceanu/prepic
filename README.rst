@@ -41,4 +41,5 @@ Quick start
 -----------
 
 
-.. [LTJT] Lu, W. et al., Phys. Rev. ST Accel. Beams 10 (6): 061301
+.. [LTJT] Lu, Wei, et al. Physical Review Special Topics-Accelerators and Beams 10.6 (2007): 061301.
+
