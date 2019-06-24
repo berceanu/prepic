@@ -31,8 +31,7 @@ pre-PIC
 
 
 .. image:: https://mybinder.org/badge_logo.svg
-   :target:
-   https://mybinder.org/v2/gh/berceanu/prepic/4178013e8ba5a58a47eb616eea177348a204ef10?filepath=examples%2Fprepic_usage.ipynb
+   :target: https://mybinder.org/v2/gh/berceanu/prepic/4178013e8ba5a58a47eb616eea177348a204ef10?filepath=examples%2Fprepic_usage.ipynb
 
 
 analytically estimate various laser-plasma parameters for experiments and PIC simulations
