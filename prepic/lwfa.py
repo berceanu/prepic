@@ -387,7 +387,7 @@ class Plasma(BaseClass):
             self.ΔE = (np.abs(u.qe) * self.Ez_avg * self.Lacc).to("megaelectronvolt")
 
             if bubble_radius:
-                self.R = bubble_radius
+                self.R = bubble_radius.to('micrometer')
 
                 self.N = (1 / 30 * (self.kp * self.R) ** 3 / (self.kp * r_e)).to(
                     "dimensionless"
