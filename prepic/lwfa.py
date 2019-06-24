@@ -302,7 +302,7 @@ class Simulation(BaseClass):
         return f"<{repr(self.plasma).__class__.__name__}({repr(self.plasma)}, {self.L}, {self.ppc})>"
 
     def __str__(self):
-        msg = (f"simulation with box size ({self.L:.1f})³, Δx={self.Δx:.3f}, Δy={self.Δy:.3f}, "
+        msg = (f"3D simulation with box size ({self.L:.1f})³, Δx={self.Δx:.3f}, Δy={self.Δy:.3f}, "
                f"Δz={self.Δz:.3f}, nx={int(self.nx.to_value('dimensionless'))}, ny={int(self.ny.to_value('dimensionless'))}, "
                f"nz={int(self.nz.to_value('dimensionless'))}, {int(self.npart.to_value('dimensionless')):e} macro-particles, "
                f"{int(self.nstep.to_value('dimensionless')):e} time steps")
@@ -400,7 +400,7 @@ class Plasma(BaseClass):
         msg = f"Plasma with nₚ={self.npe:.1e}, ωₚ={self.ωp:.3f}, kₚ={self.kp:.3f}, λₚ={self.λp:.1f}, Ewb={self.Ewb:.1f}"
         if self.laser:
             n_ratio = (self.npe / self.laser.ncrit).to("dimensionless")
-            msg = (f"Plasma with nₚ={self.npe:.1e} ({n_ratio.to_value('dimensionless'):.2e} nc), ωₚ={self.ωp:.3f}, kₚ={self.kp:.3f}, "
+            msg = (f"Plasma with nₚ={self.npe:.1e} ({n_ratio.to_value('dimensionless'):.2e} × nc), ωₚ={self.ωp:.3f}, kₚ={self.kp:.3f}, "
                    f"λₚ={self.λp:.1f}, Ewb={self.Ewb:.1f}")
             msg += (f"\nPc={self.Pc:.1f}, Ldeph={self.dephasing:.2f}, Ldepl={self.depletion:.2f}, "
                     f"ΔE={self.ΔE:.1f} over Lacc={self.Lacc:.2f}")
