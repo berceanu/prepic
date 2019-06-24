@@ -1,6 +1,7 @@
 from collections import namedtuple
-import unyt as u
+
 import numpy as np
+import unyt as u
 
 from prepic import lwfa
 
@@ -14,42 +15,33 @@ Flame = namedtuple(
         "prop_dist",  # laser propagation distance (acceleration length)
     ],
 )
-param = Flame(
-    npe=6.14e18 / u.cm ** 3,
-    w0=6.94 * u.micrometer,
-    ɛL=1.0 * u.joule,
-    τL=30 * u.femtosecond,
-    prop_dist=1.18 * u.mm,
-)
 
-flame_beam = lwfa.GaussianBeam(w0=param.w0)
-print(flame_beam)
+if __name__ == "__main__":
+    param = Flame(
+        npe=6.14e18 / u.cm ** 3,
+        w0=6.94 * u.micrometer,
+        ɛL=1.0 * u.joule,
+        τL=30 * u.femtosecond,
+        prop_dist=1.18 * u.mm,
+    )
 
-flame_laser = lwfa.Laser(
-    ɛL=param.ɛL, τL=param.τL, beam=flame_beam
-)
-print(flame_laser)
+    flame_beam = lwfa.GaussianBeam(w0=param.w0)
 
-flame_plasma = lwfa.Plasma(
-    n_pe=param.npe, laser=flame_laser, propagation_distance=param.prop_dist
-)
-print(flame_plasma)
+    flame_laser = lwfa.Laser(ɛL=param.ɛL, τL=param.τL, beam=flame_beam)
 
-bubble_r = (
-    2 * np.sqrt(flame_plasma.laser.a0) / flame_plasma.kp
-).to("micrometer")
-print(f"bubble radius is {bubble_r:.1f}")
+    flame_plasma = lwfa.Plasma(
+        n_pe=param.npe, laser=flame_laser, propagation_distance=param.prop_dist
+    )
 
-new_plasma = lwfa.Plasma(
-    n_pe=param.npe,
-    laser=flame_laser,
-    bubble_radius=bubble_r,
-    propagation_distance=param.prop_dist,
-)
-print(new_plasma)
+    bubble_r = (2 * np.sqrt(flame_plasma.laser.a0) / flame_plasma.kp).to("micrometer")
 
-matched_flame = lwfa.matched_laser_plasma(a0=flame_plasma.laser.a0)
-print(matched_flame)
+    new_plasma = lwfa.Plasma(
+        n_pe=param.npe,
+        laser=flame_laser,
+        bubble_radius=bubble_r,
+        propagation_distance=param.prop_dist,
+    )
 
-sim_flame = lwfa.Simulation(flame_plasma)
-print(sim_flame)
+    matched_flame = lwfa.matched_laser_plasma(a0=flame_plasma.laser.a0)
+
+    sim_flame = lwfa.Simulation(flame_plasma)
