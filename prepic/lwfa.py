@@ -129,14 +129,12 @@ class GaussianBeam(BaseClass):
         return cls.from_f_number(f_number=focal_distance / beam_diameter, λL=λL)
 
     def __repr__(self):
-        return "<{0.__class__.__name__}({0.w0}, {0.λL})>".format(self)
+        return f"<{self.__class__.__name__}({self.w0}, {self.λL})>"
 
     def __str__(self):
-        msg = "beam with λL={0.λL:.2f}".format(self)
+        msg = f"beam with λL={self.λL:.2f}"
         if self.w0 and self.fwhm:
-            msg = "beam with w0={0.w0:.1f} (FWHM={0.fwhm:.1f}), zᵣ={0.zR:.2f}, λL={0.λL:.2f}".format(
-                self
-            )
+            msg = f"beam with w0={self.w0:.1f} (FWHM={self.fwhm:.1f}), zᵣ={self.zR:.2f}, λL={self.λL:.2f}"
         return msg
 
 
@@ -232,16 +230,12 @@ class Laser(BaseClass):
         return cls(ɛL=ɛL, τL=τL, beam=beam)
 
     def __repr__(self):
-        return "<{0.__class__.__name__}({0.ɛL}, {0.τL}, {1})>".format(
-            self, repr(self.beam)
-        )
+        return f"<{self.__class__.__name__}({self.ɛL}, {self.τL}, {repr(self.beam)})>"
 
     def __str__(self):
-        msg = "laser {0.beam}, kL={0.kL:.3f}, ωL={0.ωL:.3f}, ɛL={0.ɛL:.1f}, τL={0.τL:.1f}, P₀={0.P0:.1f}".format(
-            self
-        )
+        msg = f"laser {self.beam}, kL={self.kL:.3f}, ωL={self.ωL:.3f}, ɛL={self.ɛL:.1f}, τL={self.τL:.1f}, P₀={self.P0:.1f}"
         if self.beam.w0:
-            msg += "\nI₀={0.I0:.1e}, a₀={0.a0:.1f}, E₀={0.E0:.1e}".format(self)
+            msg += f"\nI₀={self.I0:.1e}, a₀={self.a0.to_value('dimensionless'):.1f}, E₀={self.E0:.1e}"
         return msg
 
 
@@ -285,7 +279,7 @@ class Simulation(BaseClass):
         else:
             self.L = box_length.to("micrometer")
         if not ppc:
-            self.ppc = 8 * u.dimensionless
+            self.ppc = u.unyt_quantity(8, "dimensionless", dtype="int")
         else:
             self.ppc = ppc
 
@@ -293,26 +287,25 @@ class Simulation(BaseClass):
         self.Δy = self.Δx
         self.Δz = self.plasma.laser.beam.λL / 20
 
-        self.nx = int((self.L / self.Δx).to("dimensionless"))
+        self.nx = u.unyt_quantity((self.L / self.Δx).to_value("dimensionless"), "dimensionless", dtype="int")
         self.ny = self.nx
-        self.nz = int((self.L / self.Δz).to("dimensionless"))
+        self.nz = u.unyt_quantity((self.L / self.Δz).to_value("dimensionless"), "dimensionless", dtype="int")
 
         self.npart = self.nx * self.ny * self.nz * self.ppc
 
         self.dt = (self.Δz / u.clight).to("femtosecond")
         self.t_interact = ((self.plasma.Lacc + self.L) / u.clight).to("femtosecond")
 
-        self.nstep = int((self.t_interact / self.dt).to("dimensionless"))
+        self.nstep = u.unyt_quantity((self.t_interact / self.dt).to_value("dimensionless"), "dimensionless", dtype="int")
 
     def __repr__(self):
-        return "<{0.__class__.__name__}({0}, {1.L}, {1.ppc})>".format(
-            repr(self.plasma), self
-        )
+        return f"<{repr(self.plasma).__class__.__name__}({repr(self.plasma)}, {self.L}, {self.ppc})>"
 
     def __str__(self):
-        msg = ("simulation with box size ({0.L:.1f})³, Δx={0.Δx:.3f}, Δy={0.Δy:.3f}, "
-               "Δz={0.Δz:.3f}, nx={0.nx}, ny={0.ny}, nz={0.nz}, {0.npart:e} macro-particles, "
-               "{0.nstep:e} time steps").format(self)
+        msg = (f"simulation with box size ({self.L:.1f})³, Δx={self.Δx:.3f}, Δy={self.Δy:.3f}, "
+               f"Δz={self.Δz:.3f}, nx={int(self.nx.to_value('dimensionless'))}, ny={int(self.ny.to_value('dimensionless'))}, "
+               f"nz={int(self.nz.to_value('dimensionless'))}, {int(self.npart.to_value('dimensionless')):e} macro-particles, "
+               f"{int(self.nstep.to_value('dimensionless')):e} time steps")
         return msg
 
 
@@ -377,7 +370,7 @@ class Plasma(BaseClass):
             ).to("mm")
             self.depletion = (self.γp ** 2 * u.clight * self.laser.τL).to("mm")
 
-            self.Ez_avg = self.Ewb * np.sqrt(self.laser.a0) / 2
+            self.Ez_avg = (self.Ewb * np.sqrt(self.laser.a0) / 2).to("megavolt/mm")
 
             if propagation_distance:
                 self.Lacc = propagation_distance.to("mm")
@@ -401,23 +394,19 @@ class Plasma(BaseClass):
             self.laser = None
 
     def __repr__(self):
-        return "<{0.__class__.__name__}({0.npe}, {1}, {0.R})>".format(
-            self, repr(self.laser)
-        )
+        return f"<{self.__class__.__name__}({self.npe}, {repr(self.laser)}, {self.R})>"
 
     def __str__(self):
-        msg = "Plasma with nₚ={0.npe:.1e}, ωₚ={0.ωp:.3f}, kₚ={0.kp:.3f}, λₚ={0.λp:.1f}, Ewb={0.Ewb:.1f}".format(
-            self
-        )
+        msg = f"Plasma with nₚ={self.npe:.1e}, ωₚ={self.ωp:.3f}, kₚ={self.kp:.3f}, λₚ={self.λp:.1f}, Ewb={self.Ewb:.1f}"
         if self.laser:
             n_ratio = (self.npe / self.laser.ncrit).to("dimensionless")
-            msg = ("Plasma with nₚ={0.npe:.1e} ({1:.2e} nc), ωₚ={0.ωp:.3f}, kₚ={0.kp:.3f}, "
-                   "λₚ={0.λp:.1f}, Ewb={0.Ewb:.1f}").format(self, n_ratio)
-            msg += ("\nPc={0.Pc:.1f}, Ldeph={0.dephasing:.2f}, Ldepl={0.depletion:.2f}, "
-                    "ΔE={0.ΔE:.1f} over Lacc={0.Lacc:.2f}").format(self)
-            msg += "\nfor {0.laser}".format(self)
+            msg = (f"Plasma with nₚ={self.npe:.1e} ({n_ratio.to_value('dimensionless'):.2e} nc), ωₚ={self.ωp:.3f}, kₚ={self.kp:.3f}, "
+                   f"λₚ={self.λp:.1f}, Ewb={self.Ewb:.1f}")
+            msg += (f"\nPc={self.Pc:.1f}, Ldeph={self.dephasing:.2f}, Ldepl={self.depletion:.2f}, "
+                    f"ΔE={self.ΔE:.1f} over Lacc={self.Lacc:.2f}")
+            msg += f"\nfor {self.laser}"
             if self.R:
-                msg += "\nN={0.N:.1e} electrons, Q={0.Q:.1f}, η={0.η:.3f}".format(self)
+                msg += f"\nN={self.N.to_value('dimensionless'):.1e} electrons, Q={self.Q:.1f}, η={self.η.to_value('dimensionless'):.3f}"
         return msg
 
 
@@ -454,6 +443,6 @@ def matched_laser_plasma(a0, beam=GaussianBeam()):
     # critical normalized vector potential
     a0c = (2 * np.sqrt(laser.ncrit / n_pe)).to("dimensionless")
     if a0 > a0c:
-        raise ValueError("Scaling laws valid up to a0c={0:.1f}".format(a0c))
+        raise ValueError(f"Scaling laws valid up to a0c={a0c:.1f}")
 
     return Plasma(n_pe=n_pe, laser=laser, bubble_radius=w0)
