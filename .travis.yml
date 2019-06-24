@@ -12,17 +12,3 @@ script: tox
 
 after_success: codecov
 
-# Assuming you have installed the travis-ci CLI tool, after you
-# create the Github repo and add it to Travis, run the
-# following command to finish PyPI deployment setup:
-# $ travis encrypt --add deploy.password
-deploy:
-  provider: pypi
-  distributions: sdist bdist_wheel
-  user: berceanu
-  password:
-    secure: Ty5TyUTuuJmvxLvTz3xCMlHyK0LjFwHVIovsmaqp58JUpcd7wRJmuTDwVHNqhpZP028MN2vJf/2TZ/ynCDhw113Le1kyxPzgVBNopWHCYoIWAkjmGAJiTqaCILCXZKbfe1130wRQZHNnP+Phub3/aNAr+r1r5qMvklxe3Upe5XqkKkBvh+2E+bsQmLpr0sx3lnM8rFqqsKi5Vu8HhRAprDn+OiF7P2TzCTZKAjIN5lQOvXTdU3TIkEhHT9AWvOiNPxciTAPrAGybw91idydqLJDa5qCLppxR2kdp8AjVuDbuudjnNU1tejEsj60SFm/TYfDO794lnWY/1Xk1m+TeWlFOJri250lqaGPXFRheOBH00wyE1qMDhNn3ppqV90/7Uh/ee4aHeHyxEkLDExo9LtsWLiGoRt0cYKDn+/dP0dksx5sC56qImI5AgrhZbrhL6IpPfZGwVaycNwWRJzm/MOszW+LWYbusliyoZLB/UdfbgFagY5MBS+OBau5OSFoXArQSYBRwIrYUJaKlmjCqJdjcvRbu5mWdbA/KWpDjNWM/xwGntBHu4IHLnefx4yQxkTKDoX8SCnoAOCUbypLmzlgi02JQTT8TWpnABPaskEVmlJkHkAhjpmCRvDuSZ0MpyNBQhw1ShkzSyscUjQkcy2bjTuTr0tOpsUCXSD9IOhc=
-  on:
-    tags: true
-    repo: berceanu/prepic
-    python: 3.6
