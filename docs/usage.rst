@@ -3,7 +3,7 @@ Usage
 =====
 
 .. jupyter-kernel::
-  :id: prepic
+  :id: prepic_usage
 
 To use ``prepic`` in a project, we first import the necessary modules
 
@@ -107,8 +107,8 @@ based on the laser-plasma characteristics:
     print(sim_flame)
 
 
-You can download all the code from this document as a Python script :jupyter-download:script:`prepic` \
-or as a Jupyter notebook :jupyter-download:notebook:`prepic`.
+You can download all the code from this document as a Python script :jupyter-download:script:`prepic_usage` \
+or as a Jupyter notebook :jupyter-download:notebook:`prepic_usage`.
 
 
 .. [CABC] Curcio, A., et al. Physical Review Accelerators and Beams 20.1 (2017): 012801.
