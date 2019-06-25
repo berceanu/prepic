@@ -77,7 +77,7 @@ Estimate ideal laser-plasma matching parameters based on scaling laws from [LTJT
     I₀=4.1e+19 W/cm**2, a₀=4.4, E₀=1.8e+04 MV/mm
     N=4.5e+09 electrons, Q=723.5 pC, η=0.114
 
-For more info and a fully documented example, see `the usage docs <https://prepic.readthedocs.io/en/latest/usage.html>`_.
+For more info and a fully documented example, see `the usage docs <https://prepic.readthedocs.io/en/latest/usage.html>`_, and/or try our binder interactive notebooks.
 
 
 .. [LTJT] Lu, Wei, et al. Physical Review Special Topics-Accelerators and Beams 10.6 (2007): 061301.
