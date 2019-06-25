@@ -11,7 +11,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['unyt>=2.2.0', ]
+requirements = ['unyt>=2.2.0', 'numpy>=1.16.4']
 
 setup_requirements = ['pytest-runner', ]
 
