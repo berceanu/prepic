@@ -45,8 +45,8 @@ Features
 --------
 
 * ``lwfa`` module for estimating bunch properties (charge, energy, etc.)
-* small codebase
-* only depends on `unyt <https://github.com/yt-project/unyt>`_
+* small codebase, ~ 2k LOC
+* only depends on `unyt <https://github.com/yt-project/unyt>`_, for physical units support
 
 
 Quick start
