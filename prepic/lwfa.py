@@ -14,7 +14,7 @@ r_e = (1 / (4 * π * u.eps_0) * u.qe ** 2 / (u.me * u.clight ** 2)).to("micromet
 # Utility functions
 
 
-@check_dimensions(w0='length')
+@check_dimensions(w0="length")
 def w0_to_fwhm(w0):
     """Computes Gaussian laser FWHM from its beam waist.
 
@@ -27,7 +27,7 @@ def w0_to_fwhm(w0):
     return 2 * w0 / np.sqrt(2 / np.log(2))
 
 
-@check_dimensions(fwhm='length')
+@check_dimensions(fwhm="length")
 def fwhm_to_w0(fwhm):
     """Computes Gaussian laser beam waist from its FWHM.
 
@@ -40,7 +40,7 @@ def fwhm_to_w0(fwhm):
     return 1 / 2 * np.sqrt(2 / np.log(2)) * fwhm
 
 
-@check_dimensions(a0='dimensionless', λL='length')
+@check_dimensions(a0="dimensionless", λL="length")
 def intensity_from_a0(a0, λL=0.8 * u.micrometer):
     """Compute peak laser intensity in the focal plane.
 
@@ -54,7 +54,7 @@ def intensity_from_a0(a0, λL=0.8 * u.micrometer):
     return π / 2 * u.clight / r_e * u.me * u.clight ** 2 / λL ** 2 * a0 ** 2
 
 
-@check_dimensions(i0='flux', λL='length')
+@check_dimensions(i0="flux", λL="length")
 def a0_from_intensity(i0, λL=0.8 * u.micrometer):
     """Compute laser normalized vector potential.
 
@@ -109,7 +109,9 @@ class GaussianBeam(BaseClass):
             :param f_number: f/# of the off-axis parabolic mirror (float, dimensionless)
             :param λL: laser wavelength (float, length, optional)
         """
-        assert right_units(f_number, 'dimensionless'), "f_number should be dimensionless"
+        assert right_units(
+            f_number, "dimensionless"
+        ), "f_number should be dimensionless"
 
         w0 = 2 * np.sqrt(2) / π * λL * f_number
         return cls(w0=w0, λL=λL)
@@ -123,8 +125,10 @@ class GaussianBeam(BaseClass):
             :param beam_diameter: beam diameter after compressor (float, units of length)
             :param λL: laser wavelength (float, length, optional)
         """
-        assert right_units(focal_distance, 'length'), "focal_distance should be a length"
-        assert right_units(beam_diameter, 'length'), "beam_diameter should be a length"
+        assert right_units(
+            focal_distance, "length"
+        ), "focal_distance should be a length"
+        assert right_units(beam_diameter, "length"), "beam_diameter should be a length"
 
         return cls.from_f_number(f_number=focal_distance / beam_diameter, λL=λL)
 
@@ -171,11 +175,13 @@ class Laser(BaseClass):
 
         if self.beam.w0:
             self.I0 = (
-                2 / π * np.sqrt(4 * np.log(2) / π) * self.ɛL / (self.τL * self.beam.w0 ** 2)
+                2
+                / π
+                * np.sqrt(4 * np.log(2) / π)
+                * self.ɛL
+                / (self.τL * self.beam.w0 ** 2)
             ).to("watt/cm**2")
-            self.a0 = a0_from_intensity(i0=self.I0, λL=self.beam.λL).to(
-                "dimensionless"
-            )
+            self.a0 = a0_from_intensity(i0=self.I0, λL=self.beam.λL).to("dimensionless")
             self.E0 = (u.clight * u.me * self.ωL / np.abs(u.qe) * self.a0).to(
                 "megavolt/mm"
             )
@@ -233,7 +239,10 @@ class Laser(BaseClass):
         return f"<{self.__class__.__name__}({self.ɛL}, {self.τL}, {repr(self.beam)})>"
 
     def __str__(self):
-        msg = f"laser {self.beam}, kL={self.kL:.3f}, ωL={self.ωL:.3f}, ɛL={self.ɛL:.1f}, τL={self.τL:.1f}, P₀={self.P0:.1f}"
+        msg = (
+            f"laser {self.beam}, kL={self.kL:.3f}, ωL={self.ωL:.3f}, ɛL={self.ɛL:.1f}, "
+            f"τL={self.τL:.1f}, P₀={self.P0:.1f}"
+        )
         if self.beam.w0:
             msg += f"\nI₀={self.I0:.1e}, a₀={self.a0.to_value('dimensionless'):.1f}, E₀={self.E0:.1e}"
         return msg
@@ -287,29 +296,41 @@ class Simulation(BaseClass):
         self.Δy = self.Δx
         self.Δz = self.plasma.laser.beam.λL / 20
 
-        self.nx = u.unyt_quantity((self.L / self.Δx).to_value("dimensionless"), "dimensionless", dtype="int")
+        self.nx = u.unyt_quantity(
+            (self.L / self.Δx).to_value("dimensionless"), "dimensionless", dtype="int"
+        )
         self.ny = self.nx
-        self.nz = u.unyt_quantity((self.L / self.Δz).to_value("dimensionless"), "dimensionless", dtype="int")
+        self.nz = u.unyt_quantity(
+            (self.L / self.Δz).to_value("dimensionless"), "dimensionless", dtype="int"
+        )
 
         self.npart = self.nx * self.ny * self.nz * self.ppc
 
         self.dt = (self.Δz / u.clight).to("femtosecond")
         self.t_interact = ((self.plasma.Lacc + self.L) / u.clight).to("femtosecond")
 
-        self.nstep = u.unyt_quantity((self.t_interact / self.dt).to_value("dimensionless"), "dimensionless", dtype="int")
+        self.nstep = u.unyt_quantity(
+            (self.t_interact / self.dt).to_value("dimensionless"),
+            "dimensionless",
+            dtype="int",
+        )
 
     def __repr__(self):
         return f"<{repr(self.plasma).__class__.__name__}({repr(self.plasma)}, {self.L}, {self.ppc})>"
 
     def __str__(self):
-        msg = (f"3D simulation with box size ({self.L:.1f})³, Δx={self.Δx:.3f}, Δy={self.Δy:.3f}, "
-               f"Δz={self.Δz:.3f}, nx={int(self.nx.to_value('dimensionless'))}, ny={int(self.ny.to_value('dimensionless'))}, "
-               f"nz={int(self.nz.to_value('dimensionless'))}, {int(self.npart.to_value('dimensionless')):e} macro-particles, "
-               f"{int(self.nstep.to_value('dimensionless')):e} time steps")
+        msg = (
+            f"3D simulation with box size ({self.L:.1f})³, Δx={self.Δx:.3f}, Δy={self.Δy:.3f}, "
+            f"Δz={self.Δz:.3f}, nx={int(self.nx.to_value('dimensionless'))}, "
+            f"ny={int(self.ny.to_value('dimensionless'))}, nz={int(self.nz.to_value('dimensionless'))}, "
+            f"{int(self.npart.to_value('dimensionless')):e} macro-particles, "
+            f"{int(self.nstep.to_value('dimensionless')):e} time steps"
+        )
         return msg
 
 
 # Plasma, without matching
+
 
 class Plasma(BaseClass):
     """Class containing plasma parameters.
@@ -380,7 +401,7 @@ class Plasma(BaseClass):
             self.ΔE = (np.abs(u.qe) * self.Ez_avg * self.Lacc).to("megaelectronvolt")
 
             if bubble_radius:
-                self.R = bubble_radius.to('micrometer')
+                self.R = bubble_radius.to("micrometer")
 
                 self.N = (1 / 30 * (self.kp * self.R) ** 3 / (self.kp * r_e)).to(
                     "dimensionless"
@@ -400,13 +421,20 @@ class Plasma(BaseClass):
         msg = f"Plasma with nₚ={self.npe:.1e}, ωₚ={self.ωp:.3f}, kₚ={self.kp:.3f}, λₚ={self.λp:.1f}, Ewb={self.Ewb:.1f}"
         if self.laser:
             n_ratio = (self.npe / self.laser.ncrit).to("dimensionless")
-            msg = (f"Plasma with nₚ={self.npe:.1e} ({n_ratio.to_value('dimensionless'):.2e} × nc), ωₚ={self.ωp:.3f}, kₚ={self.kp:.3f}, "
-                   f"λₚ={self.λp:.1f}, Ewb={self.Ewb:.1f}")
-            msg += (f"\nPc={self.Pc:.1f}, Ldeph={self.dephasing:.2f}, Ldepl={self.depletion:.2f}, "
-                    f"ΔE={self.ΔE:.1f} over Lacc={self.Lacc:.2f}")
+            msg = (
+                f"Plasma with nₚ={self.npe:.1e} ({n_ratio.to_value('dimensionless'):.2e} × nc), ωₚ={self.ωp:.3f}, "
+                f"kₚ={self.kp:.3f}, λₚ={self.λp:.1f}, Ewb={self.Ewb:.1f}"
+            )
+            msg += (
+                f"\nPc={self.Pc:.1f}, Ldeph={self.dephasing:.2f}, Ldepl={self.depletion:.2f}, "
+                f"ΔE={self.ΔE:.1f} over Lacc={self.Lacc:.2f}"
+            )
             msg += f"\nfor {self.laser}"
             if self.R:
-                msg += f"\nN={self.N.to_value('dimensionless'):.1e} electrons, Q={self.Q:.1f}, η={self.η.to_value('dimensionless'):.3f}"
+                msg += (
+                    f"\nN={self.N.to_value('dimensionless'):.1e} electrons, Q={self.Q:.1f}, "
+                    f"η={self.η.to_value('dimensionless'):.3f}"
+                )
         return msg
 
 
