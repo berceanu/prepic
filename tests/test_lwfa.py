@@ -174,7 +174,7 @@ def test_matched_laser_plasma(cet_param):
     assert_allclose_units(match.η, 0.1228936 * u.dimensionless)
 
     with pytest.raises(ValueError):
-        _ = lwfa.matched_laser_plasma(a0=100)
+        _ = lwfa.matched_laser_plasma(a0=0.5 * u.dimensionless)
 
 
 def test_simulation(cet_plasma, cet_param):
