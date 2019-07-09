@@ -151,8 +151,15 @@ def test_plasma(cet_plasma, cet_param):
     assert_allclose_units(cet_plasma.ωp, 0.0690935 * 1 / u.femtosecond)
 
 
-def test_plasma_with_laser(cet_plasma):
+def test_plasma_with_laser(cet_plasma, cet_param):
     """Check Plasma class when given a Laser."""
+    # test constructor with no bubble_radius and given propagation_distance
+    _ = lwfa.Plasma(
+        n_pe=cet_param.npe,
+        laser=cet_plasma.laser,
+        propagation_distance=13.56555928 * u.mm,
+    )
+
     assert_allclose_units(cet_plasma.Pc, 19.7422087 * u.terawatt)
     assert_allclose_units(cet_plasma.depletion, 13.92603593 * u.mm)
     assert_allclose_units(cet_plasma.dephasing, 13.56555928 * u.mm)
@@ -167,7 +174,7 @@ def test_matched_laser_plasma(cet_param):
     assert_allclose_units(match.η, 0.1228936 * u.dimensionless)
 
     with pytest.raises(ValueError):
-        lwfa.matched_laser_plasma(a0=100)
+        _ = lwfa.matched_laser_plasma(a0=100)
 
 
 def test_simulation(cet_plasma, cet_param):
