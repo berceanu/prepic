@@ -70,23 +70,21 @@ def test_beam_constructors(cet_plasma, cet_param):
         focal_distance=cet_param.focal_distance, beam_diameter=cet_param.beam_diameter
     )
     with pytest.raises(ValueError):
-        lwfa.GaussianBeam(w0=cet_param.w0, fwhm=cet_param.fwhm)
+        _ = lwfa.GaussianBeam(w0=cet_param.w0, fwhm=cet_param.fwhm)
     assert g1 == g2
     assert g2 == g3
 
 
 def test_laser_constructors(cet_plasma, cet_param):
-    simple_laser = lwfa.Laser(
-        ɛL=cet_param.ɛL, τL=cet_param.τL, beam=lwfa.GaussianBeam()
-    )
+    _ = lwfa.Laser(ɛL=cet_param.ɛL, τL=cet_param.τL, beam=lwfa.GaussianBeam())
 
     with pytest.raises(TypeError):
-        lwfa.Laser.from_a0(a0=cet_param.a0, ɛL=cet_param.ɛL)
+        _ = lwfa.Laser.from_a0(a0=cet_param.a0, ɛL=cet_param.ɛL)
 
     cetbeam = lwfa.GaussianBeam(w0=cet_param.w0)
 
     with pytest.raises(TypeError):
-        lwfa.Laser.from_power(power=cet_param.power, beam=cetbeam)
+        _ = lwfa.Laser.from_power(power=cet_param.power, beam=cetbeam)
 
     l1 = lwfa.Laser.from_a0(a0=cet_param.a0, ɛL=cet_param.ɛL, τL=cet_param.τL)
     l2 = cet_plasma.laser
@@ -107,7 +105,6 @@ def test_laser_constructors(cet_plasma, cet_param):
     assert l4 == l5
     assert l5 == l6
     assert l6 == l7
-    assert simple_laser == l2
 
 
 def test_w0_to_fwhm(cet_param):
@@ -177,7 +174,7 @@ def test_simulation(cet_plasma, cet_param):
     """Check Simulation class."""
 
     with pytest.raises(TypeError):
-        lwfa.Simulation(
+        _ = lwfa.Simulation(
             lwfa.Plasma(n_pe=cet_param.npe, propagation_distance=13.56555928 * u.mm)
         )
 
