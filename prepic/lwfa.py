@@ -317,6 +317,7 @@ class Simulation(BaseClass):
 
     def __repr__(self):
         return f"<{repr(self.plasma).__class__.__name__}({repr(self.plasma)}, {self.L}, {self.ppc})>"
+
     def __str__(self):
         msg = (
             f"3D simulation with box size ({self.L:.1f})³, Δx={self.Δx:.3f}, Δy={self.Δy:.3f}, "

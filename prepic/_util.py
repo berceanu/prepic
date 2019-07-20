@@ -25,7 +25,7 @@ def flatten_dict(d):
     """
     Concatenate dictionary keys.
     """
-    return dict(('.'.join(ks), v) for ks, v in iteritems_nested(d))
+    return dict((".".join(ks), v) for ks, v in iteritems_nested(d))
 
 
 def todict(obj, baseobj=unyt_quantity):
@@ -39,8 +39,10 @@ def todict(obj, baseobj=unyt_quantity):
         return dict((key, todict(val)) for key, val in obj.items())
     elif isinstance(obj, Iterable):
         return [todict(val) for val in obj]
-    elif hasattr(obj, '__dict__'):
+    elif hasattr(obj, "__dict__"):
         return todict(vars(obj))
-    elif hasattr(obj, '__slots__'):
-        return todict(dict((name, getattr(obj, name)) for name in getattr(obj, '__slots__')))
+    elif hasattr(obj, "__slots__"):
+        return todict(
+            dict((name, getattr(obj, name)) for name in getattr(obj, "__slots__"))
+        )
     return obj

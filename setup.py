@@ -5,42 +5,42 @@
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
+with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
+with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = ['unyt>=2.2.0', 'numpy>=1.16.4']
+requirements = ["unyt>=2.2.0", "numpy>=1.16.4"]
 
-setup_requirements = ['pytest-runner', ]
+setup_requirements = ["pytest-runner"]
 
-test_requirements = ['pytest', ]
+test_requirements = ["pytest"]
 
 setup(
     author="Andrei Berceanu",
-    author_email='andreicberceanu@gmail.com',
+    author_email="andreicberceanu@gmail.com",
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: BSD License',
-        'Natural Language :: English',
-        'Topic :: Scientific/Engineering :: Physics',
-        'Programming Language :: Python :: 3.6',
+        "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: BSD License",
+        "Natural Language :: English",
+        "Topic :: Scientific/Engineering :: Physics",
+        "Programming Language :: Python :: 3.6",
     ],
     description="analytically estimate various laser-plasma parameters for experiments and PIC simulations",
     install_requires=requirements,
-    python_requires = '>= 3.6',
+    python_requires=">= 3.6",
     license="BSD license",
-    long_description=readme + '\n\n' + history,
+    long_description=readme + "\n\n" + history,
     include_package_data=True,
-    keywords='laser plasma physics',
-    name='prepic',
-    packages=find_packages(include=['prepic']),
+    keywords="laser plasma physics",
+    name="prepic",
+    packages=find_packages(include=["prepic"]),
     setup_requires=setup_requirements,
-    test_suite='tests',
+    test_suite="tests",
     tests_require=test_requirements,
-    url='https://github.com/berceanu/prepic',
-    version='0.1.0',
+    url="https://github.com/berceanu/prepic",
+    version="0.1.0",
     zip_safe=False,
 )

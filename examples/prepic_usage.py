@@ -56,7 +56,7 @@ plasma_with_bubble = lwfa.Plasma(
     propagation_distance=param.prop_dist,
 )
 print(plasma_with_bubble.Q)
-print(plasma_with_bubble.η.to_value('dimensionless'))
+print(plasma_with_bubble.η.to_value("dimensionless"))
 
 matched_plasma_flame = lwfa.matched_laser_plasma(a0=flame_laser.a0)
 print(matched_plasma_flame)  # notice density, spot size, etc. changed!
