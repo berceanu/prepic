@@ -63,4 +63,6 @@ if __name__ == "__main__":
     labelLines(ax.get_lines(), align=False, fontsize=8)
 
     fig.suptitle(f"τL = {laser.τL}")
-    canvas.print_png("energy_scaling_vs_density.png")
+    canvas.print_png(
+        f"energy_scaling_vs_density_{str(laser.τL).replace(' ' , '_')}.png"
+    )
