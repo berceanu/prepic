@@ -56,13 +56,9 @@ if __name__ == "__main__":
         ax.set_yscale("log")
         ax.set_xscale("log")
 
-        # ax.legend(loc="lower left")
-        ax.title.set_text(f"w0={beam.w0}, λL={beam.λL}")
-
-    # props = dict(facecolor="white", alpha=0.8, edgecolor="white")
     labelLines(ax.get_lines(), align=False, fontsize=8)
 
-    fig.suptitle(f"τL = {laser.τL}")
+    fig.suptitle(f"w0={beam.w0}, λL={beam.λL}, τL={laser.τL}")
     canvas.print_png(
         f"energy_scaling_vs_density_{str(laser.τL).replace(' ' , '_')}.png"
     )
