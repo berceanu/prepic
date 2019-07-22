@@ -5,7 +5,6 @@ import unyt as u
 from cycler import cycler
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-from unyt._testing import assert_allclose_units
 
 from labellines import labelLines
 from prepic import lwfa
@@ -32,23 +31,23 @@ if __name__ == "__main__":
         y_data = []
         for npe in electron_densities:
             plasma = lwfa.Plasma(n_pe=npe, laser=laser)
-            assert_allclose_units(plasma.npe, npe)
             x_data.append(plasma.npe)
             y_data.append(plasma.ΔE)
 
         h_axis = u.unyt_array(x_data)
         v_axis = u.unyt_array(y_data)
 
+        a0_val = a0.to_value("dimensionless")
         ax.plot(
             h_axis.value,
             v_axis.value,
-            color=STYLE[str(a0.to_value("dimensionless"))]["color"],
-            linestyle=STYLE[str(a0.to_value("dimensionless"))]["linestyle"],
-            label=f"$a_0 =$ {a0.to_value('dimensionless')}",
+            color=STYLE[str(a0_val)]["color"],
+            linestyle=STYLE[str(a0_val)]["linestyle"],
+            label=f"$a_0$={a0_val}",
         )
 
         ax.set(
-            ylabel=f"$\\Delta E$ [${v_axis.units.latex_repr}]$",
+            ylabel=f"$\\Delta E$ [${v_axis.units.latex_repr}$]",
             ylim=[1e2, 1e4],
             xlabel=f"$n_e$ [${h_axis.units.latex_repr}$]",
             xlim=[electron_densities[0].value, electron_densities[-1].value],
