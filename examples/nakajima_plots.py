@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     labelLines(ax.get_lines(), align=False, fontsize=8)
 
+    # Note: the figure only depends on λL.
+    # Different combinations of (w0, τL, ɛL) can give the same a0
     fig.suptitle(f"w0={beam.w0}, λL={beam.λL}, τL={laser.τL}")
-    canvas.print_png(
-        f"energy_scaling_vs_density_{str(laser.τL).replace(' ' , '_')}.png"
-    )
+    canvas.print_png(f"energy_scaling_vs_density.png")
