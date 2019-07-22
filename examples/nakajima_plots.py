@@ -23,7 +23,7 @@ if __name__ == "__main__":
     ax = fig.add_subplot(111)
 
     beam = lwfa.GaussianBeam(w0=15.0 * u.micrometer, λL=0.8 * u.micrometer)
-    electron_densities = np.logspace(-1, 1, 5) * 1e18 / (u.cm ** 3)  # todo 5 -> 25
+    electron_densities = np.logspace(-1, 1, 25) * 1e18 / (u.cm ** 3)
 
     for a0 in np.linspace(2.0, 8.0, 7) * u.dimensionless:
         laser = lwfa.Laser.from_a0(a0=a0, τL=30.0 * u.femtosecond, beam=beam)
