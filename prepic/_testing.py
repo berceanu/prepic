@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from itertools import chain
+import logging
 
 import unyt as u
 from unyt._testing import assert_allclose_units
 from prepic._util import todict, flatten_dict
 
 """Module containing utilities for testing dimensional analysis."""
+
+logger = logging.getLogger(__name__)
 
 
 def allclose_units(actual, desired, rtol=1e-7, atol=0, **kwargs):
@@ -32,7 +35,7 @@ class BaseClass:
                 self_val = self_vars[key]
                 other_val = other_vars[key]
                 if not allclose_units(self_val, other_val, 1e-5):
-                    # print(f"Difference in {key}: {self_val} vs {other_val}")
+                    logger.warning(f"Difference in {key}: {self_val} vs {other_val}")
                     return False
             return True
         return False
@@ -103,3 +106,11 @@ def check_dimensions(**arg_units):
         return new_f
 
     return check_nr_args
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        format="%(asctime)s - %(name)s - %(levelname)-8s - %(message)s",
+        level=logging.INFO,
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
