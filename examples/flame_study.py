@@ -24,7 +24,7 @@ if __name__ == "__main__":
     print(
         (
             f"The smallest possible beam waist for an OAP with focal lenght of {param.f_dist:.1f} "
-            f"and a laser beam diameter of {param.diam:.1f} is w0={beam.w0:.1f} at 1/e^2 in intensity.\n"
+            f"and a laser beam diameter of {param.diam:.1f} is w0={beam.w0:.1f} at 1/e^2 intensity.\n"
         )
     )
 
