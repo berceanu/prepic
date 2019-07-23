@@ -22,7 +22,7 @@ if __name__ == "__main__":
     ax = fig.add_subplot(111)
 
     beam = lwfa.GaussianBeam(w0=15.0 * u.micrometer, λL=0.8 * u.micrometer)
-    electron_densities = np.logspace(-1, 1, 25) * 1e18 / (u.cm ** 3)
+    electron_densities = np.logspace(-2, 2, 20) * 1e18 / (u.cm ** 3)
 
     for a0 in np.linspace(2.0, 8.0, 7) * u.dimensionless:
         laser = lwfa.Laser.from_a0(a0=a0, τL=30.0 * u.femtosecond, beam=beam)
@@ -46,9 +46,19 @@ if __name__ == "__main__":
             label=f"$a_0$={a0_val}",
         )
 
+        matched_plasma = lwfa.matched_laser_plasma(
+            a0=a0, beam=lwfa.GaussianBeam(λL=0.8 * u.micrometer)
+        )
+
+        ax.scatter(
+            matched_plasma.npe.value,
+            matched_plasma.ΔE.value,
+            marker="o",
+            color=STYLE[str(a0_val)]["color"],
+        )
+
         ax.set(
             ylabel=f"$\\Delta E$ [${v_axis.units.latex_repr}$]",
-            ylim=[1e2, 1e4],
             xlabel=f"$n_e$ [${h_axis.units.latex_repr}$]",
             xlim=[electron_densities[0].value, electron_densities[-1].value],
         )
