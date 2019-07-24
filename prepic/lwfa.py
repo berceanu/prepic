@@ -482,8 +482,9 @@ class Radiator(BaseClass):
         msg = (
             f"Betatron radiation is emitted at a mean energy of <ħω> = {self.ħω_avg:.1f}, while the critical "
             f"energy is ħωc = {self.ħωc:.1f}. The number of photons emitted at <ħω> per betatron period "
-            f"and per electron is Nᵧ = {self.Nγ:.1f}, while the total number of betatron photons per laser shot "
-            f"is {self.N_shot:.1e}. The half width of the angular distribution of the radiated energy in the "
+            f"and per electron is Nᵧ = {self.Nγ.to_value('dimensionless'):.1f}, while the total number of "
+            f"betatron photons per laser shot is {self.N_shot.to_value('dimensionless'):.1e}. "
+            f"The half width of the angular distribution of the radiated energy in the "
             f"electron oscillation plane is θᵣ = {self.θ_par:.1f}."
         )
         return msg
