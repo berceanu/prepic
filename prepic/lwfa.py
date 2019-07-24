@@ -68,6 +68,23 @@ def a0_from_intensity(i0, λL=0.8 * u.micrometer):
     return np.sqrt(i0 / (π / 2 * u.clight / r_e * u.me * u.clight ** 2 / λL ** 2))
 
 
+@check_dimensions(i0="flux")
+def helium_ionization_state(i0):
+    """Compute the ionization state of Helium.
+
+    Parameters
+    ----------
+    i0: float, energy/time/area
+        Peak laser intensity in the focal plane.
+    """
+    if i0 < 1.4e15 * u.watt / u.cm ** 2:
+        return "0+"
+    elif i0 < 8.8e15 * u.watt / u.cm ** 2:
+        return "1+"
+    else:
+        return "2+"
+
+
 class GaussianBeam(BaseClass):
     """Contains the (geometric) parameters for a Gaussian laser beam.
 
@@ -246,9 +263,7 @@ class Laser(BaseClass):
 
         if (self.I0 is not None) and (self.E0 is not None) and (self.a0 is not None):
             msg += f"\nI₀={self.I0:.1e}, a₀={self.a0.to_value('dimensionless'):.1f}, E₀={self.E0:.1e}"
-
-        if self.he_ionization is not None:
-            msg += f"\nHelium ionization state: {self.he_ionization}"
+            msg += f"\nHelium ionization state: {helium_ionization_state(self.I0)}"
 
         return msg
 
