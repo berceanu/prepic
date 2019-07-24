@@ -85,6 +85,36 @@ def helium_ionization_state(i0):
         return "2+"
 
 
+# @check_dimensions(ωp="1/time", τL="time")  # todo https://github.com/yt-project/unyt/issues/91
+def interaction_regime(ωp, τL):
+    """Outputs the laser-plasma interaction regime.
+
+    Parameters
+    ----------
+    ωp: float, 1/time
+        Plasma frequency.
+    τL: float, time
+        Laser pulse duration at FWHM in intensity.
+    """
+
+    def magnitude(x):
+        """Get order of magnitude of ``x``.
+        >>> magnitude(100)
+        2
+        """
+        return int(np.log10(x))
+
+    ω_mag = magnitude((1 / ωp).to_value("femtosecond"))
+    τ_mag = magnitude(τL.to_value("femtosecond"))
+
+    if ω_mag == τ_mag:
+        return "LWFA"
+    elif τ_mag > ω_mag:
+        return "SMLWFA/DLA"
+    else:
+        raise NotImplementedError("Unknown interaction regime.")
+
+
 class GaussianBeam(BaseClass):
     """Contains the (geometric) parameters for a Gaussian laser beam.
 
@@ -263,7 +293,7 @@ class Laser(BaseClass):
 
         if (self.I0 is not None) and (self.E0 is not None) and (self.a0 is not None):
             msg += f"\nI₀={self.I0:.1e}, a₀={self.a0.to_value('dimensionless'):.1f}, E₀={self.E0:.1e}"
-            msg += f"\nHelium ionization state: {helium_ionization_state(self.I0)}"
+            msg += f"\nHelium ionization state: {helium_ionization_state(i0=self.I0)}"
 
         return msg
 
@@ -364,6 +394,7 @@ class Plasma(BaseClass):
                 f"Plasma with nₚ={self.npe:.1e} ({n_ratio.to_value('dimensionless'):.2e} × nc), ωₚ={self.ωp:.3f}, "
                 f"kₚ={self.kp:.3f}, λₚ={self.λp:.1f}, Ewb={self.Ewb:.1f}"
             )
+            assert interaction_regime(ωp=self.ωp, τL=self.laser.τL) == "LWFA"
             msg += (
                 f"\nPc={self.Pc:.1f}, Ldeph={self.dephasing:.2f}, Ldepl={self.depletion:.2f}, "
                 f"ΔE={self.ΔE:.1f} over Lacc={self.Lacc:.2f}"
