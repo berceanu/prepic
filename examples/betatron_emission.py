@@ -6,21 +6,21 @@ from prepic import lwfa
 Param = namedtuple("Param", ["npe", "w0", "ɛL", "τL", "prop_dist"])
 
 if __name__ == "__main__":
-    p1 = Param(
+    p1 = Param(  # 15J example from http://doi.org/f4j98s
         npe=1.1e18 / u.cm ** 3,
         w0=21.0 * u.micrometer,
         ɛL=15.0 * u.joule,
         τL=48.0 * u.femtosecond,
         prop_dist=23.0 * u.mm,
     )
-    p2 = Param(
+    p2 = Param(  # external guiding / injection example from from http://doi.org/f4j98s
         npe=5.1e17 / u.cm ** 3,
         w0=21.0 * u.micrometer,
         ɛL=3.0 * u.joule,
         τL=47.0 * u.femtosecond,
         prop_dist=52.0 * u.mm,
     )
-    p3 = Param(
+    p3 = Param(  # CETAL case
         npe=1.5e18 / u.cm ** 3,
         w0=18.0 * u.micrometer,
         ɛL=7.7 * u.joule,
