@@ -240,11 +240,16 @@ class Laser(BaseClass):
 
     def __str__(self):
         msg = (
-            f"laser {self.beam}, kL={self.kL:.3f}, ωL={self.ωL:.3f}, ɛL={self.ɛL:.1f}, "
+            f"laser with kL={self.kL:.3f}, ωL={self.ωL:.3f}, ɛL={self.ɛL:.1f}, "
             f"τL={self.τL:.1f}, P₀={self.P0:.1f}"
         )
-        if self.beam.w0:
+
+        if (self.I0 is not None) and (self.E0 is not None) and (self.a0 is not None):
             msg += f"\nI₀={self.I0:.1e}, a₀={self.a0.to_value('dimensionless'):.1f}, E₀={self.E0:.1e}"
+
+        if self.he_ionization is not None:
+            msg += f"\nHelium ionization state: {self.he_ionization}"
+
         return msg
 
 
@@ -348,7 +353,6 @@ class Plasma(BaseClass):
                 f"\nPc={self.Pc:.1f}, Ldeph={self.dephasing:.2f}, Ldepl={self.depletion:.2f}, "
                 f"ΔE={self.ΔE:.1f} over Lacc={self.Lacc:.2f}"
             )
-            msg += f"\nfor {self.laser}"
             if self.R:
                 msg += (
                     f"\nN={self.N.to_value('dimensionless'):.1e} electrons, Q={self.Q:.1f}, "
@@ -440,7 +444,6 @@ class Radiator(BaseClass):
     The opening angle ``θ_par`` is defined as the maximum deflection angle of the electron trajectory,
     such that the full width of the angular distribution of the radiated energy in the electron
     oscillation plane is 2×``θ_par``.
-
     """
 
     α = (u.qe ** 2 / (4 * np.pi * u.eps_0 * u.hbar * u.clight)).to("dimensionless")
@@ -455,7 +458,6 @@ class Radiator(BaseClass):
         ----------
         plasma : :obj:`Plasma`
             Instance containing a :obj:`Laser`
-
         """
         if not plasma.laser:
             raise TypeError("Given `Plasma` instance must contain `Laser` instance.")
