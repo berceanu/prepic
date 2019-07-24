@@ -474,7 +474,7 @@ class Radiator(BaseClass):
             self.λu / (2 * np.pi ** 2 * u.clight * self.τ0 * self.γ * self.K ** 2)
         ).to("dimensionless")
 
-        if self.K > 5:  # wiggler case
+        if self.K > 5:  # wiggler regime
             self.ħωc = (3 / 2 * self.K * self.γ ** 2 * u.h * u.clight / self.λu).to(
                 "kiloelectronvolt"
             )
