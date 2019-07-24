@@ -495,11 +495,18 @@ class Radiator(BaseClass):
             f"The half width of the angular distribution of the radiated energy in the "
             f"electron oscillation plane is θᵣ = {self.θ_par:.1f}. "
         )
+
         if self.N_RR > 10 * self.Nβ:
             msg += f"Radiation-reaction effects are negligible."
         else:
-            msg += f"Radiation-reaction effects should be taken into consideration!"
+            # todo implement radiation-reaction effects
+            raise NotImplementedError(
+                "Radiation-reaction effects are not yet implemented."
+            )
+
         return msg
+
+    # todo add synchrotron spectrum
 
     def __repr__(self):
         return f"<{self.__class__.__name__}({repr(self.plasma)})>"
