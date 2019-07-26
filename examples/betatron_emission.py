@@ -42,4 +42,5 @@ if __name__ == "__main__":
 
         print("ɛL = %s" % p.ɛL)
         print(radiator)
+        print(f"γ={radiator.γ}")
         print()
