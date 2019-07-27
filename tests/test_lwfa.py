@@ -7,7 +7,7 @@ from collections import namedtuple
 import numpy as np
 import pytest
 import unyt as u
-from unyt._testing import assert_allclose_units
+from unyt import assert_allclose_units
 
 from prepic import lwfa
 

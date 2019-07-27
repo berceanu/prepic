@@ -3,20 +3,12 @@ from itertools import chain
 import logging
 
 import unyt as u
-from unyt._testing import assert_allclose_units
+from unyt import allclose_units
 from prepic._util import todict, flatten_dict
 
 """Module containing utilities for testing dimensional analysis."""
 
 logger = logging.getLogger(__name__)
-
-
-def allclose_units(actual, desired, rtol=1e-7, atol=0, **kwargs):
-    try:
-        assert_allclose_units(actual, desired, rtol, atol, **kwargs)
-    except AssertionError:
-        return False
-    return True
 
 
 def __round__(self):
