@@ -5,6 +5,7 @@ import logging
 import unyt as u
 from unyt import allclose_units
 from prepic._util import todict, flatten_dict
+from unyt.exceptions import UnitConversionError
 
 """Module containing utilities for testing dimensional analysis."""
 
@@ -31,10 +32,6 @@ class BaseClass:
                     return False
             return True
         return False
-
-
-class UnitsError(ValueError):
-    pass
 
 
 def right_units(arg, dim):
@@ -84,12 +81,12 @@ def check_dimensions(**arg_units):
             :param args: positional arguments of :func:`f`
             :param kwargs: keyword arguments of :func:`f`
             :return: result of original function :func:`f`
-            :raises UnitsError: if the units don't match
+            :raises UnitConversionError: if the units don't match
             """
             for arg_name, arg_value in chain(zip(names_of_args, args), kwargs.items()):
                 dimension = arg_units[arg_name]
                 if arg_name in arg_units and not right_units(arg_value, dimension):
-                    raise UnitsError(
+                    raise UnitConversionError(
                         f"arg '{arg_name}'={repr(arg_value)} does not match {dimension}"
                     )
             return f(*args, **kwargs)
