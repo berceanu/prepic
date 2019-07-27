@@ -2,8 +2,9 @@
 import numpy as np
 import unyt as u
 from numpy import pi as π
+from unyt import check_dimensions
 
-from ._testing import check_dimensions, BaseClass, has_units
+from ._testing import BaseClass, has_units
 
 """Laser WakeField Acceleration module."""
 
