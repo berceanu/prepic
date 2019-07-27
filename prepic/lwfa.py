@@ -3,6 +3,7 @@ import numpy as np
 import unyt as u
 from numpy import pi as π
 from unyt import check_dimensions
+from unyt.dimensions import dimensionless, length, flux
 
 from ._testing import BaseClass, has_units
 
@@ -15,7 +16,7 @@ r_e = (1 / (4 * π * u.eps_0) * u.qe ** 2 / (u.me * u.clight ** 2)).to("micromet
 # Utility functions
 
 
-@check_dimensions(w0="length")
+@check_dimensions(w0=length)
 def w0_to_fwhm(w0):
     """Computes Gaussian laser FWHM from its beam waist.
 
@@ -28,7 +29,7 @@ def w0_to_fwhm(w0):
     return 2 * w0 / np.sqrt(2 / np.log(2))
 
 
-@check_dimensions(fwhm="length")
+@check_dimensions(fwhm=length)
 def fwhm_to_w0(fwhm):
     """Computes Gaussian laser beam waist from its FWHM.
 
@@ -41,7 +42,7 @@ def fwhm_to_w0(fwhm):
     return 1 / 2 * np.sqrt(2 / np.log(2)) * fwhm
 
 
-@check_dimensions(a0="dimensionless", λL="length")
+@check_dimensions(a0=dimensionless, λL=length)
 def intensity_from_a0(a0, λL=0.8 * u.micrometer):
     """Compute peak laser intensity in the focal plane.
 
@@ -55,7 +56,7 @@ def intensity_from_a0(a0, λL=0.8 * u.micrometer):
     return π / 2 * u.clight / r_e * u.me * u.clight ** 2 / λL ** 2 * a0 ** 2
 
 
-@check_dimensions(i0="flux", λL="length")
+@check_dimensions(i0=flux, λL=length)
 def a0_from_intensity(i0, λL=0.8 * u.micrometer):
     """Compute laser normalized vector potential.
 
@@ -69,7 +70,7 @@ def a0_from_intensity(i0, λL=0.8 * u.micrometer):
     return np.sqrt(i0 / (π / 2 * u.clight / r_e * u.me * u.clight ** 2 / λL ** 2))
 
 
-@check_dimensions(i0="flux")
+@check_dimensions(i0=flux)
 def helium_ionization_state(i0):
     """Compute the ionization state of Helium.
 
@@ -157,7 +158,7 @@ class GaussianBeam(BaseClass):
             :param f_number: f/# of the off-axis parabolic mirror (float, dimensionless)
             :param λL: laser wavelength (float, length, optional)
         """
-        assert has_units(f_number, "dimensionless"), "f_number should be dimensionless"
+        assert has_units(f_number, dimensionless), "f_number should be dimensionless"
 
         w0 = 2 * np.sqrt(2) / π * λL * f_number
         return cls(w0=w0, λL=λL)
@@ -171,8 +172,8 @@ class GaussianBeam(BaseClass):
             :param beam_diameter: beam diameter after compressor (float, units of length)
             :param λL: laser wavelength (float, length, optional)
         """
-        assert has_units(focal_distance, "length"), "focal_distance should be a length"
-        assert has_units(beam_diameter, "length"), "beam_diameter should be a length"
+        assert has_units(focal_distance, length), "focal_distance should be a length"
+        assert has_units(beam_diameter, length), "beam_diameter should be a length"
 
         return cls.from_f_number(f_number=focal_distance / beam_diameter, λL=λL)
 
@@ -491,7 +492,7 @@ class Radiator(BaseClass):
     """
 
     α = (u.qe ** 2 / (4 * np.pi * u.eps_0 * u.hbar * u.clight)).to("dimensionless")
-    τ0 = ((2 * r_e / (3 * u.clight))).to("yoctosecond")
+    τ0 = (2 * r_e / (3 * u.clight)).to("yoctosecond")
     a = 1510.3 * u.micrometer ** (-1 / 2)
     b = 3 * np.sqrt(2.0e19) * u.cm ** (-3 / 2)
 
