@@ -3,7 +3,7 @@ import numpy as np
 import unyt as u
 from numpy import pi as π
 
-from ._testing import check_dimensions, BaseClass, right_units
+from ._testing import check_dimensions, BaseClass, has_units
 
 """Laser WakeField Acceleration module."""
 
@@ -156,9 +156,7 @@ class GaussianBeam(BaseClass):
             :param f_number: f/# of the off-axis parabolic mirror (float, dimensionless)
             :param λL: laser wavelength (float, length, optional)
         """
-        assert right_units(
-            f_number, "dimensionless"
-        ), "f_number should be dimensionless"
+        assert has_units(f_number, "dimensionless"), "f_number should be dimensionless"
 
         w0 = 2 * np.sqrt(2) / π * λL * f_number
         return cls(w0=w0, λL=λL)
@@ -172,10 +170,8 @@ class GaussianBeam(BaseClass):
             :param beam_diameter: beam diameter after compressor (float, units of length)
             :param λL: laser wavelength (float, length, optional)
         """
-        assert right_units(
-            focal_distance, "length"
-        ), "focal_distance should be a length"
-        assert right_units(beam_diameter, "length"), "beam_diameter should be a length"
+        assert has_units(focal_distance, "length"), "focal_distance should be a length"
+        assert has_units(beam_diameter, "length"), "beam_diameter should be a length"
 
         return cls.from_f_number(f_number=focal_distance / beam_diameter, λL=λL)
 

@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-from itertools import chain
 import logging
 
-import unyt as u
 from unyt import allclose_units
 from prepic._util import todict, flatten_dict
-from unyt.exceptions import UnitConversionError
 
 """Module containing utilities for testing dimensional analysis."""
 
@@ -34,67 +31,36 @@ class BaseClass:
         return False
 
 
-def right_units(arg, dim):
+# todo phase out the usage and remove function
+def has_units(quant, dim):
     """Checks the argument has the right dimensionality.
 
-    :param arg: variable to check
-    :type arg: :py:class:`unyt.array.unyt_quantity`
-    :param dim: SI base quantity, eg. 'time', 'length', etc.
-    :type dim: str
-    :return: True if check successful
-    :rtype: bool
-    :raises AttributeError: if `arg` doesn't have `.units` attribute
+    Parameters
+    ----------
+    quant : :py:class:`unyt.array.unyt_quantity`
+        Quantity whose dimensionality we want to check.
+    dim : :py:class:`sympy.core.symbol.Symbol`
+        SI base unit (or combination of units), eg. length/time
+
+    Returns
+    -------
+    bool
+        True if check successful.
+
+    Examples
+    --------
+    >>> import unyt as u
+    >>> from unyt.dimensions import length, time
+    >>> _has_units(3 * u.m/u.s, length/time)
+    True
+    >>> _has_units(3, length)
+    False
     """
     try:
-        arg_dim = arg.units.dimensions
+        arg_dim = quant.units.dimensions
     except AttributeError:
         arg_dim = None
-    return arg_dim == getattr(u.dimensions, dim)
-
-
-def check_dimensions(**arg_units):
-    """Decorator for checking units of function arguments.
-
-    :param arg_units: dictionary of the form {'arg1': dimension1, etc}
-    :type arg_units: dict
-    :return: :func:`check_nr_args`
-    """
-
-    def check_nr_args(f):
-        """Check correct number of arguments and decorate :func:`f`
-
-        :param f: original function being decorated
-        :return: :func:`new_f` decorated func
-        """
-        number_of_args = f.__code__.co_argcount
-        names_of_args = f.__code__.co_varnames
-
-        assert (
-            len(arg_units) == number_of_args
-        ), f'decorator number of arguments not equal with function number of arguments in "{f.__name__}"'
-
-        def new_f(*args, **kwargs):
-            """The new function being returned from the decorator.
-
-            Checks units of `args` and `kwargs`, then run original function.
-
-            :param args: positional arguments of :func:`f`
-            :param kwargs: keyword arguments of :func:`f`
-            :return: result of original function :func:`f`
-            :raises UnitConversionError: if the units don't match
-            """
-            for arg_name, arg_value in chain(zip(names_of_args, args), kwargs.items()):
-                dimension = arg_units[arg_name]
-                if arg_name in arg_units and not right_units(arg_value, dimension):
-                    raise UnitConversionError(
-                        f"arg '{arg_name}'={repr(arg_value)} does not match {dimension}"
-                    )
-            return f(*args, **kwargs)
-
-        new_f.__name__ = f.__name__
-        return new_f
-
-    return check_nr_args
+    return arg_dim == dim
 
 
 if __name__ == "__main__":
