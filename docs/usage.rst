@@ -8,12 +8,10 @@ and then declare the parameters of the laser system we want to \
 model. For this example, let's consider the parameters from [CABC]_::
 
     >>> from collections import namedtuple  # optional, for grouping input parameters
-    ...
+
     >>> import numpy as np
     >>> import unyt as u  # for physical units support
-    ...
-    >>> from prepic import GaussianBeam, Laser, Plasma
-    ...
+
     >>> Flame = namedtuple(
     ...     "Flame",
     ...     [
@@ -32,14 +30,15 @@ model. For this example, let's consider the parameters from [CABC]_::
     ...     prop_dist=1.18 * u.mm,
     ... )
 
-Notice the use of physical quantities with associated units throughout. In
-particular, see :py:class:`unyt.array.unyt_quantity`.
+Notice the use of physical quantities with associated units throughout.
+See `unyt <https://github.com/yt-project/unyt>`_ for further info.
 
-We start by constructing a :py:class:`prepic.lwfa.GaussianBeam` from the \
+We start by constructing a :py:class:`GaussianBeam <prepic.laser.GaussianBeam>` from the \
 given beam waist ``w0``. Note the the beam can also be constructed by giving its FWHM \
-size instead. Alternatively, one can use :py:meth:`prepic.lwfa.GaussianBeam.from_f_number` or \
-:py:meth:`prepic.lwfa.GaussianBeam.from_focal_distance`::
+size instead. Alternatively, one can use :py:meth:`GaussianBeam.from_f_number <prepic.laser.GaussianBeam.from_f_number>` or \
+:py:meth:`GaussianBeam.from_focal_distance <prepic.laser.GaussianBeam.from_focal_distance>`::
 
+    >>> from prepic import GaussianBeam
     >>> flame_beam = GaussianBeam(w0=param.w0)
 
 We see ``prepic`` computed the FWHM spot size and Rayleigh length of our beam::
@@ -47,12 +46,13 @@ We see ``prepic`` computed the FWHM spot size and Rayleigh length of our beam::
     >>> print(flame_beam)
     beam with w0=6.9 µm (FWHM=8.2 µm), zᵣ=0.19 mm, λL=0.80 µm
 
-We now initialize a :py:class:`prepic.lwfa.Laser` \
+We now initialize a :py:class:`Laser <prepic.laser.Laser>` \
 instance using its default constructor. We could have used \
-:py:meth:`prepic.lwfa.Laser.from_a0`, :py:meth:`prepic.lwfa.Laser.from_intensity` \
-or :py:meth:`prepic.lwfa.Laser.from_power`, depending on which laser parameters are \
+:py:meth:`Laser.from_a0 <prepic.laser.Laser.from_a0>`, :py:meth:`Laser.from_intensity <prepic.laser.Laser.from_intensity>` \
+or :py:meth:`Laser.from_power <prepic.laser.Laser.from_power>`, depending on which laser parameters are \
 known::
 
+    >>> from prepic import Laser
     >>> flame_laser = Laser(ɛL=param.ɛL, τL=param.τL, beam=flame_beam)
     >>> print(flame_laser)
     laser with kL=7.854 1/µm, ωL=2.355 1/fs, ɛL=1.0 J, τL=30.0 fs, P₀=31.3 TW
@@ -73,8 +73,9 @@ from before. For example, we can access its Rayleigh length via::
     >>> print(flame_laser.beam.zR)  # doctest: +FLOAT_CMP
     0.18913801491304671 mm
 
-We now build the :py:class:`prepic.lwfa.Plasma` for our parameters via::
+We now build the :py:class:`Plasma <prepic.plasma.Plasma>` for our parameters via::
 
+    >>> from prepic import Plasma
     >>> flame_plasma = Plasma(
     ...     n_pe=param.npe, laser=flame_laser, propagation_distance=param.prop_dist
     ... )
@@ -89,7 +90,7 @@ before, we would like to access the Rayleigh length, we can do so via::
     0.18913801491304671 mm
 
 All the computed parameters are stored as attributes.
-See :py:class:`prepic.lwfa.Plasma` for their description::
+See :py:class:`Plasma <prepic.plasma.Plasma>` for their description::
 
     >>> print(f"\nThe dephasing length is {flame_plasma.dephasing:.1f}.")
     The dephasing length is 1.7 mm.
@@ -98,12 +99,11 @@ If ``propagation_distance`` is passed, this is used to evaluate the electron \
 energy gain ``ΔE``. If not given, the code assumes that the electrons are accelerated for \
 a distance equal to the dephasing length.
 
-The :py:class:`prepic.lwfa.Plasma` can also be constructed by passing the \
+The ``Plasma`` can also be constructed by passing the \
 (optional) ``bubble_radius``, if known from experiments or numerical \
 simulations. For now, we can estimate the bubble size from the scaling laws of \
 [LTJT]_: :math:`R = 2 \sqrt{a_0} / k_p`. This allows computing the total accelerated \
 charge ``Q`` and laser-to-electron energy transfer efficiency ``η``::
-
 
     >>> bubble_r = 2 * np.sqrt(flame_plasma.laser.a0) / flame_plasma.kp
     >>> print(f"The bubble radius is {bubble_r.to('micrometer'):.1f}.\n")
@@ -120,7 +120,7 @@ charge ``Q`` and laser-to-electron energy transfer efficiency ``η``::
     0.08850500992541349
 
 The ``Plasma`` parameters can also be automagically computed by \
-:py:func:`prepic.lwfa.matched_laser_plasma`, based on the scaling laws of \
+:py:func:`matched_laser_plasma <prepic.lwfa.matched_laser_plasma>`, based on the scaling laws of \
 [LTJT]_. The only input parameter in this case is the laser normalized \
 vector potential :math:`a_0`::
 
@@ -138,8 +138,8 @@ efficiency are all improved compared to their previous values. The acceleration 
 distance is now longer, and equal to the dephasing and depletion lengths. This \
 is possible due to the better matching between laser and plasma parameters.
 
-Finally, the :py:mod:`prepic.lwfa` module also includes a \
-:py:class:`prepic.lwfa.Simulation` convenience class for estimating the \
+Finally, the ``prepic`` package also includes a \
+:py:class:`Simulation <prepic.simulation.Simulation>` convenience class for estimating the \
 recommended parameters for a PIC simulation, based on a particular \
 ``Plasma``::
 
