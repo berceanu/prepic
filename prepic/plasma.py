@@ -3,10 +3,42 @@ Classes for modelling the plasma, without any matching
 
 """
 from prepic._base_class import BaseClass
-from prepic.simulation import interaction_regime
 from prepic._constants import r_e
+from unyt import accepts
+from unyt.dimensions import time
+
 import unyt as u
 import numpy as np
+
+
+@accepts(ωp=1 / time, τL=time)
+def interaction_regime(ωp, τL):
+    """Outputs the laser-plasma interaction regime.
+
+    Parameters
+    ----------
+    ωp: float, 1/time
+        Plasma frequency.
+    τL: float, time
+        Laser pulse duration at FWHM in intensity.
+    """
+
+    def magnitude(x):
+        """Get order of magnitude of ``x``.
+        >>> magnitude(100)
+        2
+        """
+        return int(np.log10(x))
+
+    ω_mag = magnitude((1 / ωp).to_value("femtosecond"))
+    τ_mag = magnitude(τL.to_value("femtosecond"))
+
+    if ω_mag == τ_mag:
+        return "LWFA"
+    elif τ_mag > ω_mag:
+        return "SMLWFA/DLA"
+    else:
+        raise NotImplementedError("Unknown interaction regime.")
 
 
 class Plasma(BaseClass):
