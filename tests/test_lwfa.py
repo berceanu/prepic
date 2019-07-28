@@ -2,65 +2,12 @@
 # -*- coding: utf-8 -*-
 """Tests for `lwfa` module."""
 
-from collections import namedtuple
 
-import numpy as np
 import pytest
 import unyt as u
 from unyt import assert_allclose_units
 
 from prepic import lwfa
-
-
-@pytest.fixture(scope="module")
-def cet_param():
-    Params = namedtuple(
-        "Cetal",
-        [
-            "npe",
-            "kp",
-            "f_number",
-            "focal_distance",
-            "beam_diameter",
-            "w0",
-            "fwhm",
-            "zR",
-            "a0",
-            "ɛL",
-            "τL",
-            "intensity",
-            "power",
-        ],
-    )
-    cetal = Params(
-        npe=1.5e18 / u.cm ** 3,
-        kp=0.2304711 * 1 / u.micrometer,
-        f_number=24.9912 * u.dimensionless,
-        focal_distance=3.2 * u.meter,
-        beam_diameter=128.045071 * u.mm,
-        w0=18 * u.micrometer,
-        fwhm=21.193380405278543 * u.micrometer,
-        zR=1.27234502 * u.mm,
-        a0=4.076967454355432 * u.dimensionless,
-        ɛL=7.7 * u.joule,
-        τL=40 * u.femtosecond,
-        intensity=3.553314404474785e19 * u.watt / u.cm ** 2,
-        power=180.84167614968285 * u.terawatt,
-    )
-    return cetal
-
-
-@pytest.fixture(scope="module")
-def cet_plasma(cet_param):
-    bubble_r = 2 * np.sqrt(cet_param.a0) / cet_param.kp
-
-    return lwfa.Plasma(
-        n_pe=cet_param.npe,
-        laser=lwfa.Laser.from_a0(
-            a0=cet_param.a0, ɛL=cet_param.ɛL, beam=lwfa.GaussianBeam(w0=cet_param.w0)
-        ),
-        bubble_radius=bubble_r,
-    )
 
 
 def test_beam_constructors(cet_plasma, cet_param):
@@ -198,7 +145,3 @@ def test_simulation(cet_plasma, cet_param):
 
     sim2 = lwfa.Simulation(cet_plasma, box_length=4 * cet_plasma.λp, ppc=8)
     assert sim2 == sim
-
-
-# todo: parametrized the fixtures
-# https://docs.pytest.org/en/latest/fixture.html#parametrizing-fixtures
