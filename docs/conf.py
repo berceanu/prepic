@@ -39,16 +39,10 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
-    "sphinx.ext.intersphinx",
 ]
-intersphinx_mapping = {
-    "matplotlib": ("https://matplotlib.org", None),
-    "unyt": ("https://unyt.readthedocs.io/en/latest", None),
-    "python": ("https://docs.python.org/3", None),
-}
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+# templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
