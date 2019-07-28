@@ -3,31 +3,10 @@ Classes for modelling the plasma, without any matching
 
 """
 from prepic._base_class import BaseClass
-from prepic.lwfa import interaction_regime
-from unyt import accepts
-from unyt.dimensions import flux
+from prepic.simulation import interaction_regime
+from prepic._constants import r_e
 import unyt as u
 import numpy as np
-
-# classical electron radius
-r_e = (1 / (4 * np.pi * u.eps_0) * u.qe ** 2 / (u.me * u.clight ** 2)).to("micrometer")
-
-
-@accepts(i0=flux)
-def helium_ionization_state(i0):
-    """Compute the ionization state of Helium.
-
-    Parameters
-    ----------
-    i0: float, energy/time/area
-        Peak laser intensity in the focal plane.
-    """
-    if i0 < 1.4e15 * u.watt / u.cm ** 2:
-        return "0+"
-    elif i0 < 8.8e15 * u.watt / u.cm ** 2:
-        return "1+"
-    else:
-        return "2+"
 
 
 class Plasma(BaseClass):

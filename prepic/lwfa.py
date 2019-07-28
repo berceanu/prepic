@@ -1,42 +1,13 @@
-# -*- coding: utf-8 -*-
-"""Laser WakeField Acceleration module."""
+"""
+Modelling matched laser-plasma conditions in the LWFA regime
+
+"""
 import numpy as np
 import unyt as u
-from unyt import accepts
-from unyt.dimensions import time
 
 from prepic.laser import GaussianBeam, Laser
-from prepic.plasma import Plasma, r_e
-
-
-@accepts(ωp=1 / time, τL=time)
-def interaction_regime(ωp, τL):
-    """Outputs the laser-plasma interaction regime.
-
-    Parameters
-    ----------
-    ωp: float, 1/time
-        Plasma frequency.
-    τL: float, time
-        Laser pulse duration at FWHM in intensity.
-    """
-
-    def magnitude(x):
-        """Get order of magnitude of ``x``.
-        >>> magnitude(100)
-        2
-        """
-        return int(np.log10(x))
-
-    ω_mag = magnitude((1 / ωp).to_value("femtosecond"))
-    τ_mag = magnitude(τL.to_value("femtosecond"))
-
-    if ω_mag == τ_mag:
-        return "LWFA"
-    elif τ_mag > ω_mag:
-        return "SMLWFA/DLA"
-    else:
-        raise NotImplementedError("Unknown interaction regime.")
+from prepic.plasma import Plasma
+from prepic._constants import r_e
 
 
 def matched_laser_plasma(a0, beam=GaussianBeam()):

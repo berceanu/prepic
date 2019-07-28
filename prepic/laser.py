@@ -3,7 +3,8 @@ Classes for modelling the laser pulse, without any matching
 
 """
 from prepic._base_class import BaseClass
-from prepic.plasma import r_e, helium_ionization_state
+from prepic._constants import r_e
+from prepic.ionization import helium_ionization_state
 from unyt.dimensions import dimensionless, length, flux
 from unyt import accepts
 import unyt as u

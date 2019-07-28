@@ -3,7 +3,7 @@ Classes for modelling emitted radiation from laser-plasma interaction
 
 """
 from prepic._base_class import BaseClass
-from prepic.plasma import r_e
+from prepic._constants import r_e
 import unyt as u
 import numpy as np
 
