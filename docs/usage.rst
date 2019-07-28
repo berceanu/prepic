@@ -2,43 +2,35 @@
 Usage
 =====
 
-.. jupyter-kernel::
-  :id: prepic_usage
 
 To use ``prepic`` in a project, we first import the necessary Python modules
-
-.. jupyter-execute::
-
-    import pprint  # optional, pretty-print dictionaries
-    from collections import namedtuple  # optional, for grouping input parameters
-
-    import numpy as np
-    import unyt as u  # for physical units support
-
-    from prepic import lwfa
-
 and then declare the parameters of the laser system we want to \
-model. For this example, let's consider the parameters from [CABC]_:
+model. For this example, let's consider the parameters from [CABC]_::
 
-.. jupyter-execute::
-
-    Flame = namedtuple(
-        "Flame",
-        [
-            "npe",  # electron plasma density
-            "w0",  # laser beam waist (Gaussian beam assumed)
-            "ɛL",  # laser energy on target (focused into the FWHM@intensity spot)
-            "τL",  # laser pulse duration (FWHM@intensity)
-            "prop_dist",  # laser propagation distance (acceleration length)
-        ],
-    )
-    param = Flame(
-        npe=6.14e18 / u.cm ** 3,
-        w0=6.94 * u.micrometer,
-        ɛL=1.0 * u.joule,
-        τL=30 * u.femtosecond,
-        prop_dist=1.18 * u.mm,
-    )
+    >>> from collections import namedtuple  # optional, for grouping input parameters
+    ...
+    >>> import numpy as np
+    >>> import unyt as u  # for physical units support
+    ...
+    >>> from prepic import GaussianBeam, Laser, Plasma
+    ...
+    >>> Flame = namedtuple(
+    ...     "Flame",
+    ...     [
+    ...         "npe",  # electron plasma density
+    ...         "w0",  # laser beam waist (Gaussian beam assumed)
+    ...         "ɛL",  # laser energy on target (focused into the FWHM@intensity spot)
+    ...         "τL",  # laser pulse duration (FWHM@intensity)
+    ...         "prop_dist",  # laser propagation distance (acceleration length)
+    ...     ],
+    ... )
+    >>> param = Flame(
+    ...     npe=6.14e18 / u.cm ** 3,
+    ...     w0=6.94 * u.micrometer,
+    ...     ɛL=1.0 * u.joule,
+    ...     τL=30 * u.femtosecond,
+    ...     prop_dist=1.18 * u.mm,
+    ... )
 
 Notice the use of physical quantities with associated units throughout. In
 particular, see :py:class:`unyt.array.unyt_quantity`.
@@ -46,67 +38,61 @@ particular, see :py:class:`unyt.array.unyt_quantity`.
 We start by constructing a :py:class:`prepic.lwfa.GaussianBeam` from the \
 given beam waist ``w0``. Note the the beam can also be constructed by giving its FWHM \
 size instead. Alternatively, one can use :py:meth:`prepic.lwfa.GaussianBeam.from_f_number` or \
-:py:meth:`prepic.lwfa.GaussianBeam.from_focal_distance`.
+:py:meth:`prepic.lwfa.GaussianBeam.from_focal_distance`::
 
-.. jupyter-execute::
+    >>> flame_beam = GaussianBeam(w0=param.w0)
 
-    flame_beam = lwfa.GaussianBeam(w0=param.w0)
+We see ``prepic`` computed the FWHM spot size and Rayleigh length of our beam::
 
-We see ``prepic`` computed the FWHM spot size and Rayleigh length of our beam:
-
-.. jupyter-execute::
-
-    print(flame_beam)
+    >>> print(flame_beam)
+    beam with w0=6.9 µm (FWHM=8.2 µm), zᵣ=0.19 mm, λL=0.80 µm
 
 We now initialize a :py:class:`prepic.lwfa.Laser` \
 instance using its default constructor. We could have used \
 :py:meth:`prepic.lwfa.Laser.from_a0`, :py:meth:`prepic.lwfa.Laser.from_intensity` \
 or :py:meth:`prepic.lwfa.Laser.from_power`, depending on which laser parameters are \
-known.
+known::
 
-.. jupyter-execute::
-
-    flame_laser = lwfa.Laser(ɛL=param.ɛL, τL=param.τL, beam=flame_beam)
-    print(flame_laser)
+    >>> flame_laser = Laser(ɛL=param.ɛL, τL=param.τL, beam=flame_beam)
+    >>> print(flame_laser)
+    laser with kL=7.854 1/µm, ωL=2.355 1/fs, ɛL=1.0 J, τL=30.0 fs, P₀=31.3 TW
+    I₀=4.1e+19 W/cm**2, a₀=4.4, E₀=1.8e+04 MV/mm
+    Helium ionization state: 2+
 
 The various attributes, such as the critical density ``ncrit`` or peak laser \
-electric field ``E0`` can be easily accessed
+electric field ``E0`` can be easily accessed::
 
-.. jupyter-execute::
-
-    print(f"critical density for this laser is {flame_laser.ncrit:.1e}")
-    flame_laser.E0  # each attribute is a ``unyt_quantity``
+    >>> print(f"critical density for this laser is {flame_laser.ncrit:.1e}")
+    critical density for this laser is 1.7e+21 cm**(-3)
+    >>> print(flame_laser.E0)  # doctest: +FLOAT_CMP
+    17659.733275104507 MV/mm
 
 Also notice that ``flame_laser`` contains the ``flame_beam`` instance \
-from before. For example, we can access its Rayleigh length via
+from before. For example, we can access its Rayleigh length via::
 
-.. jupyter-execute::
+    >>> print(flame_laser.beam.zR)  # doctest: +FLOAT_CMP
+    0.18913801491304671 mm
 
-    print(flame_laser.beam.zR)
+We now build the :py:class:`prepic.lwfa.Plasma` for our parameters via::
 
-We now build the :py:class:`prepic.lwfa.Plasma` for our parameters via
-
-.. jupyter-execute::
-
-    flame_plasma = lwfa.Plasma(
-        n_pe=param.npe, laser=flame_laser, propagation_distance=param.prop_dist
-    )
-    print(flame_plasma)
+    >>> flame_plasma = Plasma(
+    ...     n_pe=param.npe, laser=flame_laser, propagation_distance=param.prop_dist
+    ... )
+    >>> print(flame_plasma)
+    Plasma with nₚ=6.1e+18 cm**(-3) (3.52e-03 × nc), ωₚ=0.140 1/fs, kₚ=0.466 1/µm, λₚ=13.5 µm, Ewb=238.3 MV/mm
+    Pc=4.8 TW, Ldeph=1.70 mm, Ldepl=2.55 mm, ΔE=294.9 MeV over Lacc=1.18 mm
 
 This is the top-level class, which contains all the computed parameters. If, as \
-before, we would like to access the Rayleigh length, we can do so via
+before, we would like to access the Rayleigh length, we can do so via::
 
-.. jupyter-execute::
+    >>> print(flame_plasma.laser.beam.zR)  # doctest: +FLOAT_CMP
+    0.18913801491304671 mm
 
-    flame_plasma.laser.beam.zR
+All the computed parameters are stored as attributes.
+See :py:class:`prepic.lwfa.Plasma` for their description::
 
-All the computed parameters are stored as attributes. Here is the complete list \
-(see :py:class:`prepic.lwfa.Plasma` for their description).
-
-.. jupyter-execute::
-
-    pprint.pprint(flame_plasma.__dict__)
-    print(f"\nThe dephasing length is {flame_plasma.dephasing:.1f}.")
+    >>> print(f"\nThe dephasing length is {flame_plasma.dephasing:.1f}.")
+    The dephasing length is 1.7 mm.
 
 If ``propagation_distance`` is passed, this is used to evaluate the electron \
 energy gain ``ΔE``. If not given, the code assumes that the electrons are accelerated for \
@@ -116,34 +102,36 @@ The :py:class:`prepic.lwfa.Plasma` can also be constructed by passing the \
 (optional) ``bubble_radius``, if known from experiments or numerical \
 simulations. For now, we can estimate the bubble size from the scaling laws of \
 [LTJT]_: :math:`R = 2 \sqrt{a_0} / k_p`. This allows computing the total accelerated \
-charge ``Q`` and laser-to-electron energy transfer efficiency ``η``:
+charge ``Q`` and laser-to-electron energy transfer efficiency ``η``::
 
-.. jupyter-execute::
 
-    bubble_r = 2 * np.sqrt(flame_plasma.laser.a0) / flame_plasma.kp
-    print(f"The bubble radius is {bubble_r.to('micrometer'):.1f}.\n")
-
-    plasma_with_bubble = lwfa.Plasma(
-        n_pe=param.npe,
-        laser=flame_laser,
-        bubble_radius=bubble_r,
-        propagation_distance=param.prop_dist,
-    )
-    print(plasma_with_bubble.Q)
-    print(plasma_with_bubble.η.to_value('dimensionless'))
+    >>> bubble_r = 2 * np.sqrt(flame_plasma.laser.a0) / flame_plasma.kp
+    >>> print(f"The bubble radius is {bubble_r.to('micrometer'):.1f}.\n")
+    The bubble radius is 9.0 µm.
+    >>> plasma_with_bubble = Plasma(
+    ...     n_pe=param.npe,
+    ...     laser=flame_laser,
+    ...     bubble_radius=bubble_r,
+    ...     propagation_distance=param.prop_dist,
+    ... )
+    >>> print(plasma_with_bubble.Q)  # doctest: +FLOAT_CMP
+    300.1260542601371 pC
+    >>> print(plasma_with_bubble.η.to_value('dimensionless'))  # doctest: +FLOAT_CMP
+    0.08850500992541349
 
 The ``Plasma`` parameters can also be automagically computed by \
 :py:func:`prepic.lwfa.matched_laser_plasma`, based on the scaling laws of \
 [LTJT]_. The only input parameter in this case is the laser normalized \
-vector potential :math:`a_0`.
+vector potential :math:`a_0`::
 
-.. jupyter-execute::
-
-    matched_plasma_flame = lwfa.matched_laser_plasma(a0=flame_laser.a0)
-    print(matched_plasma_flame)  # notice density, spot size, etc. changed!
-    print()
-    print(matched_plasma_flame.Q)  # compare to previous value
-    print(matched_plasma_flame.ΔE)  # also much improved :)
+    >>> from prepic import matched_laser_plasma
+    >>> matched_plasma_flame = matched_laser_plasma(a0=flame_laser.a0)
+    >>> print(matched_plasma_flame)  # notice density, spot size, etc. changed!
+    Plasma with nₚ=1.1e+18 cm**(-3) (6.06e-04 × nc), ωₚ=0.058 1/fs, kₚ=0.193 1/µm, λₚ=32.5 µm, Ewb=98.8 MV/mm
+    Pc=28.0 TW, Ldeph=23.86 mm, Ldepl=23.86 mm, ΔE=2472.7 MeV over Lacc=23.86 mm
+    N=4.5e+09 electrons, Q=723.7 pC, η=0.114
+    >>> print(matched_plasma_flame.Q)  # doctest: +FLOAT_CMP
+    723.6933108198331 pC
 
 We see that now the total accelerated charge, final energy, as well as \
 efficiency are all improved compared to their previous values. The acceleration \
@@ -153,18 +141,14 @@ is possible due to the better matching between laser and plasma parameters.
 Finally, the :py:mod:`prepic.lwfa` module also includes a \
 :py:class:`prepic.lwfa.Simulation` convenience class for estimating the \
 recommended parameters for a PIC simulation, based on a particular \
-``Plasma``.
+``Plasma``::
 
-.. jupyter-execute::
-
-    sim_flame = lwfa.Simulation(matched_plasma_flame)
-    print(sim_flame)
+    >>> from prepic import Simulation
+    >>> sim_flame = Simulation(matched_plasma_flame)
+    >>> print(sim_flame)
+    3D simulation with box size (130.0 µm)³, Δx=0.517 µm, Δy=0.517 µm, Δz=0.040 µm, nx=251, ny=251, nz=3249, 1.637522e+09 macro-particles, 5.997110e+05 time steps
 
 These values can then be used as inputs for specialized codes such as `PIConGPU`_ or `fbpic`_.
-
-
-Download this document as a Python script :jupyter-download:script:`prepic_usage` \
-or as a Jupyter notebook :jupyter-download:notebook:`prepic_usage`.
 
 
 .. [CABC] Curcio, A., et al. Physical Review Accelerators and Beams 20.1 (2017): 012801.

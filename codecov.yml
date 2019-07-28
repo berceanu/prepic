@@ -1,2 +1,6 @@
-ignore:
-  - "**/_*.py"       # wildcards accepted
+comment: false
+coverage:
+  status:
+    project:
+      default:
+          threshold: 1%

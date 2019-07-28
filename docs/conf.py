@@ -35,23 +35,14 @@ import prepic  # NOQA: E402
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
-    "sphinx.ext.autosectionlabel",
-    "jupyter_sphinx.execute",
-    "nbsphinx",
+    "sphinx.ext.doctest",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.mathjax",
 ]
-intersphinx_mapping = {
-    "matplotlib": ("https://matplotlib.org", None),
-    "unyt": ("https://unyt.readthedocs.io/en/latest", None),
-    "python": ("https://docs.python.org/3", None),
-}
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+# templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -86,7 +77,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "modules/modules.rst"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -100,7 +91,7 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "alabaster"
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
@@ -112,6 +103,10 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
+
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+# html_logo = "_static/logo.png"
 
 
 # -- Options for HTMLHelp output ---------------------------------------
@@ -168,3 +163,25 @@ texinfo_documents = [
         "Miscellaneous",
     )
 ]
+
+# -- apidoc section ----------------------------------------
+
+autodoc_member_order = "bysource"
+
+
+def run_apidoc(_):
+    try:
+        from sphinx.ext.apidoc import main
+    except ImportError:
+        from sphinx.apidoc import main
+    sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+    cur_dir = os.path.abspath(os.path.dirname(__file__))
+    api_doc_dir = os.path.join(cur_dir, "modules")
+    module = os.path.join(cur_dir, "..", "prepic")
+    ignore = os.path.join(cur_dir, "..", "tests")
+    os.environ["SPHINX_APIDOC_OPTIONS"] = "members,undoc-members,show-inheritance"
+    main(["-M", "-f", "-e", "-T", "-d 0", "-o", api_doc_dir, module, ignore])
+
+
+def setup(app):
+    app.connect("builder-inited", run_apidoc)

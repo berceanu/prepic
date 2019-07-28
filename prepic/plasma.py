@@ -134,8 +134,9 @@ class Plasma(BaseClass):
                 f"Plasma with nₚ={self.npe:.1e} ({n_ratio.to_value('dimensionless'):.2e} × nc), ωₚ={self.ωp:.3f}, "
                 f"kₚ={self.kp:.3f}, λₚ={self.λp:.1f}, Ewb={self.Ewb:.1f}"
             )
-            regime = interaction_regime(ωp=self.ωp, τL=self.laser.τL)
-            assert regime == "LWFA", regime
+            _ = interaction_regime(ωp=self.ωp, τL=self.laser.τL)
+            # fixme
+            # assert regime == "LWFA", regime
             msg += (
                 f"\nPc={self.Pc:.1f}, Ldeph={self.dephasing:.2f}, Ldepl={self.depletion:.2f}, "
                 f"ΔE={self.ΔE:.1f} over Lacc={self.Lacc:.2f}"

@@ -30,10 +30,6 @@ pre-PIC
    :alt: PyPI - License
 
 
-.. image:: https://mybinder.org/badge_logo.svg
-   :target: https://mybinder.org/v2/gh/berceanu/prepic/4178013e8ba5a58a47eb616eea177348a204ef10?filepath=examples%2Fprepic_usage.ipynb
-
-
 analytically estimate various laser-plasma parameters for experiments and PIC simulations
 
 
@@ -78,10 +74,7 @@ Estimate ideal laser-plasma matching parameters based on scaling laws from [LTJT
     N=4.5e+09 electrons, Q=723.5 pC, η=0.114
 
 
-Run the ``prepic`` example notebook `live on
-Binder <https://mybinder.org/v2/gh/berceanu/prepic/4178013e8ba5a58a47eb616eea177348a204ef10?filepath=examples%2Fprepic_usage.ipynb>`_
-to see examples of how to use ``prepic`` or visit the
-`tutorial on Read the Docs <https://prepic.readthedocs.io/en/latest/usage.html>`__.
+Visit the `tutorial on Read the Docs <https://prepic.readthedocs.io/en/latest/usage.html>`__.
 
 
 .. [LTJT] Lu, Wei, et al. Physical Review Special Topics-Accelerators and Beams 10.6 (2007): 061301.

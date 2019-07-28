@@ -11,7 +11,7 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = ["unyt>=2.2.0", "numpy>=1.16.4"]
+requirements = ["unyt>=2.2.0", "numpy>=1.16.4", "scipy>=1.3.0", "matplotlib>=3.1.1"]
 
 setup_requirements = ["pytest-runner"]
 
@@ -34,7 +34,7 @@ setup(
     license="BSD license",
     long_description=readme + "\n\n" + history,
     include_package_data=True,
-    keywords="laser plasma physics",
+    keywords="prepic",
     name="prepic",
     packages=find_packages(include=["prepic"]),
     setup_requires=setup_requirements,
