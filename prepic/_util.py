@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+Utility functions
+
+"""
 from collections import Iterable
 
 from unyt.array import unyt_quantity
-
-"""Module containing various utilities that don't really fit anywhere else."""
 
 
 def iteritems_nested(d):
