@@ -4,7 +4,6 @@ Classes for modelling the laser pulse, without any matching
 """
 from prepic._base_class import BaseClass
 from prepic.plasma import r_e, helium_ionization_state
-from prepic._testing import has_units  # todo remove
 from unyt.dimensions import dimensionless, length, flux
 from unyt import accepts
 import unyt as u
@@ -106,8 +105,6 @@ class GaussianBeam(BaseClass):
             :param f_number: f/# of the off-axis parabolic mirror (float, dimensionless)
             :param λL: laser wavelength (float, length, optional)
         """
-        assert has_units(f_number, dimensionless), "f_number should be dimensionless"
-
         w0 = 2 * np.sqrt(2) / np.pi * λL * f_number
         return cls(w0=w0, λL=λL)
 
@@ -120,9 +117,6 @@ class GaussianBeam(BaseClass):
             :param beam_diameter: beam diameter after compressor (float, units of length)
             :param λL: laser wavelength (float, length, optional)
         """
-        assert has_units(focal_distance, length), "focal_distance should be a length"
-        assert has_units(beam_diameter, length), "beam_diameter should be a length"
-
         return cls.from_f_number(f_number=focal_distance / beam_diameter, λL=λL)
 
     def __repr__(self):
