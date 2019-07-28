@@ -40,9 +40,10 @@ analytically estimate various laser-plasma parameters for experiments and PIC si
 Features
 --------
 
-* ``lwfa`` module for estimating bunch properties (charge, energy, etc.)
-* small codebase, ~ 2k LOC
-* only depends on `unyt <https://github.com/yt-project/unyt>`_, for physical units support
+* estimation of accelerated bunch properties (charge, energy, etc.)
+* estimation of betatron spectrum
+* small codebase, with minimal dependencies
+* support for SI units via `unyt <https://github.com/yt-project/unyt>`_
 
 
 Quick start
@@ -54,9 +55,7 @@ Install the package via:
 
         $ pip install prepic
 
-Estimate ideal laser-plasma matching parameters based on scaling laws from [LTJT]_:
-
-.. code-block:: python
+Estimate ideal laser-plasma matching parameters based on scaling laws from [LTJT]_::
 
     >>> import unyt as u
 
@@ -68,8 +67,6 @@ Estimate ideal laser-plasma matching parameters based on scaling laws from [LTJT
     Pc=28.0 TW, Ldeph=23.85 mm, Ldepl=23.85 mm, ΔE=2472.0 MeV over Lacc=23.85 mm
     N=4.5e+09 electrons, Q=723.5 pC, η=0.114
 
-
 Visit the `tutorial on Read the Docs <https://prepic.readthedocs.io/en/latest/usage.html>`__.
-
 
 .. [LTJT] Lu, Wei, et al. Physical Review Special Topics-Accelerators and Beams 10.6 (2007): 061301.
