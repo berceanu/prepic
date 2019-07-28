@@ -35,14 +35,11 @@ import prepic  # NOQA: E402
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
-    "sphinx.ext.autosectionlabel",
-    "jupyter_sphinx.execute",
-    "nbsphinx",
+    "sphinx.ext.doctest",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.intersphinx",
 ]
 intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org", None),
@@ -86,7 +83,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "modules/modules.rst"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -112,6 +109,10 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
+
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+# html_logo = "_static/logo.png"
 
 
 # -- Options for HTMLHelp output ---------------------------------------
@@ -168,3 +169,25 @@ texinfo_documents = [
         "Miscellaneous",
     )
 ]
+
+# -- apidoc section ----------------------------------------
+
+autodoc_member_order = "bysource"
+
+
+def run_apidoc(_):
+    try:
+        from sphinx.ext.apidoc import main
+    except ImportError:
+        from sphinx.apidoc import main
+    sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+    cur_dir = os.path.abspath(os.path.dirname(__file__))
+    api_doc_dir = os.path.join(cur_dir, "modules")
+    module = os.path.join(cur_dir, "..", "prepic")
+    ignore = os.path.join(cur_dir, "..", "tests")
+    os.environ["SPHINX_APIDOC_OPTIONS"] = "members,undoc-members,show-inheritance"
+    main(["-M", "-f", "-e", "-T", "-d 0", "-o", api_doc_dir, module, ignore])
+
+
+def setup(app):
+    app.connect("builder-inited", run_apidoc)
