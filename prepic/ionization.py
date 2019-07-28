@@ -18,7 +18,6 @@ def helium_ionization_state(i0):
     """
     if i0 < 1.4e15 * u.watt / u.cm ** 2:
         return "0+"
-    elif i0 < 8.8e15 * u.watt / u.cm ** 2:
+    if i0 < 8.8e15 * u.watt / u.cm ** 2:
         return "1+"
-    else:
-        return "2+"
+    return "2+"
