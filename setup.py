@@ -34,7 +34,7 @@ setup(
     license="BSD license",
     long_description=readme + "\n\n" + history,
     include_package_data=True,
-    keywords="laser plasma physics",
+    keywords="prepic",
     name="prepic",
     packages=find_packages(include=["prepic"]),
     setup_requires=setup_requirements,

@@ -4,10 +4,11 @@
 # https://flake8.readthedocs.io/en/latest/user/error-codes.html
 
 # Note: there cannot be spaces after comma's here
-exclude = __init__.py
+exclude = __init__.py .*/
 ignore =
     E26,   # Comments
     W503,  # line break before binary operator
     W504,  # line break after binary operator
     E203,  # whitespace before ':'
+    W605,  # invalid escape sequence
 max-line-length = 120
