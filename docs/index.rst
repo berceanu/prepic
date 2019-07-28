@@ -1,15 +1,14 @@
-Welcome to prepic's documentation!
-======================================
+prepic
+======
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    readme
    installation
    usage
-   physics
-   modules
+   API Documentation <modules/prepic>
    contributing
    authors
    history
