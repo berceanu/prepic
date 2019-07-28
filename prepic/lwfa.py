@@ -2,8 +2,8 @@
 import numpy as np
 import unyt as u
 from numpy import pi as π
-from unyt import check_dimensions
-from unyt.dimensions import dimensionless, length, flux
+from unyt import accepts
+from unyt.dimensions import dimensionless, length, flux, time
 
 from ._testing import BaseClass, has_units
 
@@ -16,7 +16,7 @@ r_e = (1 / (4 * π * u.eps_0) * u.qe ** 2 / (u.me * u.clight ** 2)).to("micromet
 # Utility functions
 
 
-@check_dimensions(w0=length)
+@accepts(w0=length)
 def w0_to_fwhm(w0):
     """Computes Gaussian laser FWHM from its beam waist.
 
@@ -29,7 +29,7 @@ def w0_to_fwhm(w0):
     return 2 * w0 / np.sqrt(2 / np.log(2))
 
 
-@check_dimensions(fwhm=length)
+@accepts(fwhm=length)
 def fwhm_to_w0(fwhm):
     """Computes Gaussian laser beam waist from its FWHM.
 
@@ -42,7 +42,7 @@ def fwhm_to_w0(fwhm):
     return 1 / 2 * np.sqrt(2 / np.log(2)) * fwhm
 
 
-@check_dimensions(a0=dimensionless, λL=length)
+@accepts(a0=dimensionless, λL=length)
 def intensity_from_a0(a0, λL=0.8 * u.micrometer):
     """Compute peak laser intensity in the focal plane.
 
@@ -56,7 +56,7 @@ def intensity_from_a0(a0, λL=0.8 * u.micrometer):
     return π / 2 * u.clight / r_e * u.me * u.clight ** 2 / λL ** 2 * a0 ** 2
 
 
-@check_dimensions(i0=flux, λL=length)
+@accepts(i0=flux, λL=length)
 def a0_from_intensity(i0, λL=0.8 * u.micrometer):
     """Compute laser normalized vector potential.
 
@@ -70,7 +70,7 @@ def a0_from_intensity(i0, λL=0.8 * u.micrometer):
     return np.sqrt(i0 / (π / 2 * u.clight / r_e * u.me * u.clight ** 2 / λL ** 2))
 
 
-@check_dimensions(i0=flux)
+@accepts(i0=flux)
 def helium_ionization_state(i0):
     """Compute the ionization state of Helium.
 
@@ -87,7 +87,7 @@ def helium_ionization_state(i0):
         return "2+"
 
 
-# @check_dimensions(ωp="1/time", τL="time")  # todo https://github.com/yt-project/unyt/issues/91
+@accepts(ωp=1 / time, τL=time)
 def interaction_regime(ωp, τL):
     """Outputs the laser-plasma interaction regime.
 
