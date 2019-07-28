@@ -106,3 +106,9 @@ ENV/
 
 
 *.png
+
+docs/modules/
+
+docs/modules\.rst
+
+docs/prepic\.rst
