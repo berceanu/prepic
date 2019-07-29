@@ -47,12 +47,32 @@ class Radiator(BaseClass):
     N_RR: :obj:`unyt_quantity`
         Threshold number of oscillations for noticeable radiation-reaction effects.
 
-    Note
-    ----
+    Notes
+    -----
     ``a`` and ``b`` were obtained by fitting the example data from http://doi.org/f4j98s.
     The opening angle ``θ_par`` is defined as the maximum deflection angle of the electron trajectory,
     such that the full width of the angular distribution of the radiated energy in the electron
     oscillation plane is 2×``θ_par``.
+
+    Examples
+    --------
+    >>> import unyt as u
+    >>> from prepic import Plasma, Laser, GaussianBeam
+    >>> waist = 15 * u.micrometer
+    >>> mylaser = Laser.from_power(power=1 * u.petawatt, ɛL=3 * u.joule,
+    ...                            beam=GaussianBeam(w0=waist))
+    >>> myplasma = Plasma(n_pe=1e18 / u.cm**3, laser=mylaser, bubble_radius=waist)
+    >>> myradiator = Radiator(myplasma)
+    >>> myradiator
+    <Radiator(<Plasma(1e+18 cm**(-3), <Laser(3.0 J, 2.818311836098954 fs, <GaussianBeam(15.0 µm, 0.8 µm)>)>, 15.0 µm)>)>
+    >>> print(myradiator)
+    Betatron radiation is emitted at a mean energy of <ħω> = 1475.6 keV, while the critical
+    energy is ħωc = 4792.0 keV. The number of photons emitted at <ħω> per betatron period
+    and per electron is Nᵧ = 2.6, while the total number of
+    betatron photons per laser shot is 4.9e+10.
+    The half width of the angular distribution of the radiated energy in the
+    electron oscillation plane is θᵣ = 5.9 mrad.
+    Radiation-reaction effects are negligible.
     """
 
     α = (u.qe ** 2 / (4 * np.pi * u.eps_0 * u.hbar * u.clight)).to("dimensionless")
@@ -99,12 +119,12 @@ class Radiator(BaseClass):
 
     def __str__(self):
         msg = (
-            f"Betatron radiation is emitted at a mean energy of <ħω> = {self.ħω_avg:.1f}, while the critical "
-            f"energy is ħωc = {self.ħωc:.1f}. The number of photons emitted at <ħω> per betatron period "
-            f"and per electron is Nᵧ = {self.Nγ.to_value('dimensionless'):.1f}, while the total number of "
-            f"betatron photons per laser shot is {self.N_shot.to_value('dimensionless'):.1e}. "
-            f"The half width of the angular distribution of the radiated energy in the "
-            f"electron oscillation plane is θᵣ = {self.θ_par:.1f}. "
+            f"Betatron radiation is emitted at a mean energy of <ħω> = {self.ħω_avg:.1f}, while the critical\n"
+            f"energy is ħωc = {self.ħωc:.1f}. The number of photons emitted at <ħω> per betatron period\n"
+            f"and per electron is Nᵧ = {self.Nγ.to_value('dimensionless'):.1f}, while the total number of\n"
+            f"betatron photons per laser shot is {self.N_shot.to_value('dimensionless'):.1e}.\n"
+            f"The half width of the angular distribution of the radiated energy in the\n"
+            f"electron oscillation plane is θᵣ = {self.θ_par:.1f}.\n"
         )
 
         if self.N_RR > 10 * self.Nβ:
