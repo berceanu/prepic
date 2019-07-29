@@ -8,24 +8,49 @@ import unyt as u
 
 class Simulation(BaseClass):
     """Class for estimating the recommended simulation parameters.
-    Attributes:
-        Δx (float, length): transverse spatial resolution
-        Δy (float, length): transverse spatial resolution
-        Δz (float, length): longitudinal spatial resolution
-        nx (int, dimensionless): transverse number of cells
-        ny (int, dimensionless): transverse number of cells
-        nz (int, dimensionless): longitudinal number of cells
-        L (float, length): length of cubic simulation box
-        ppc (int, dimensionless): number of particles per cell
-        npart (int, dimensionless): total number of (macro-)particles in the
-            simulation box
-        dt (float, time): simulation time step per iteration
-        t_interact (float, time): time it takes for the moving window to slide
-            across the plasma
-        nstep (int, dimensionless): number of iterations to perform
-    Note:
-        Here longitudinal means along the laser propagation direction.
-        Recommended number of particles per cell: 64 (1D), 10 (2D), 8 (3D).
+
+    Attributes
+    ----------
+
+    Δx : float, length
+        Transverse spatial resolution.
+    Δy : float, length
+        Transverse spatial resolution.
+    Δz : float, length
+        Longitudinal spatial resolution.
+    nx : int, dimensionless
+        Transverse number of cells.
+    ny : int, dimensionless
+        Transverse number of cells.
+    nz : int, dimensionless
+        Longitudinal number of cells.
+    L : float, length
+        Length of cubic simulation box.
+    ppc : int, dimensionless
+        Number of particles per cell.
+    npart : int, dimensionless
+        Total number of (macro-)particles in the simulation box.
+    dt : float, time
+        Simulation time step per iteration.
+    t_interact : float, time
+        Time it takes for the moving window to slide across the plasma.
+    nstep : int, dimensionless
+        Number of iterations to perform.
+
+    Notes
+    -----
+    Here longitudinal means along the laser propagation direction.
+    Recommended number of particles per cell: 64 (1D), 10 (2D), 8 (3D).
+
+    Examples
+    --------
+    >>> import unyt as u
+    >>> from prepic import Plasma, Laser, GaussianBeam
+    >>> mylaser = Laser.from_power(power=10 * u.petawatt, ɛL=300 * u.joule,
+    ...                            beam=GaussianBeam(w0=5 * u.micrometer))
+    >>> myplasma = Plasma(n_pe=1e18 / u.cm**3, laser=mylaser)
+    >>> Simulation(myplasma)
+    <Simulation(<Plasma(1e+18 cm**(-3), <Laser(300.0 J, 28.18311836098954 fs, <GaussianBeam(5.0 µm, 0.8 µm)>)>, None)>, 133.5577261430166 µm, 8 dimensionless)>  # NOQA: E501
     """
 
     def __init__(self, plasma, box_length=None, ppc=None):

@@ -176,9 +176,10 @@ class Laser(BaseClass):
     --------
     >>> import unyt as u
     >>> from prepic import GaussianBeam
-    >>> mylaser = Laser.from_power(power=10 * u.petawatt, ɛL=300 * u.joule)
+    >>> mylaser = Laser.from_power(power=10 * u.petawatt, ɛL=300 * u.joule,
+    ...                            beam=GaussianBeam(w0=5 * u.micrometer))
     >>> mylaser
-    <Laser(300.0 J, 28.18311836098954 fs, <GaussianBeam(None, 0.8 µm)>)>
+    <Laser(300.0 J, 28.18311836098954 fs, <GaussianBeam(5.0 µm, 0.8 µm)>)>
     """
 
     def __init__(self, ɛL, τL, beam=GaussianBeam()):
@@ -239,10 +240,12 @@ class Laser(BaseClass):
         return cls.from_a0(a0=a0, ɛL=ɛL, τL=τL, beam=beam)
 
     @classmethod
-    def from_power(cls, power, beam=GaussianBeam(), ɛL=None, τL=None):
+    def from_power(cls, power, beam, ɛL=None, τL=None):
         """Construct laser by giving its power P0 and beam size.
-        Must supply either ɛL or τL.
+
+        Must supply either ɛL or τL and a beam with a defined size.
         """
+        assert beam.w0 is not None, "Must supply laser beam size!"
         prefactor = 2 * np.sqrt(np.log(2) / np.pi)
 
         if ɛL and (not τL):
