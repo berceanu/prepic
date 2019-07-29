@@ -68,11 +68,24 @@ def a0_from_intensity(i0, λL=0.8 * u.micrometer):
 class GaussianBeam(BaseClass):
     """Contains the (geometric) parameters for a Gaussian laser beam.
 
-    Attributes:
-        w0 (float, length): beam waist @ 1/e^2 intensity
-        fwhm (float, length): beam FWHM @ 1/2 intensity
-        λL (float, length): wavelength
-        zR (float, length): Rayleigh length
+    Parameters
+    ----------
+    w0 : float, length
+        Beam waist @ 1/e^2 intensity.
+    fwhm : float, length
+        Beam FWHM @ 1/2 intensity
+    λL : float, length
+        Wavelength.
+    zR : float, length
+        Rayleigh length.
+
+    Examples
+    --------
+    >>> import unyt as u
+    >>> mybeam = GaussianBeam.from_focal_distance(focal_distance=3 * u.m,
+    ...                             beam_diameter=200 * u.mm, λL=1.0 * u.micrometer)
+    >>> mybeam
+    <GaussianBeam(13.504744742356593 µm, 1.0 µm)>
     """
 
     def __init__(self, w0=None, fwhm=None, λL=0.8 * u.micrometer):
@@ -135,7 +148,9 @@ class GaussianBeam(BaseClass):
 class Laser(BaseClass):
     """Class containing laser parameters.
 
-    Attributes:
+    Parameters
+    ----------
+
         beam (:obj:`GaussianBeam`): class instance containing beam params
         ɛL (float, energy): pulse energy on target (after compressor
                             and beam transport, focused into the FWHM@intensity spot)
@@ -147,6 +162,14 @@ class Laser(BaseClass):
         I0 (float, energy/time/area): peak intensity in the focal plane
         a0 (float, dimensionless): normalized vector potential
         E0 (float, energy/charge/length): peak electric field
+
+    Examples
+    --------
+    >>> import unyt as u
+    >>> from prepic import GaussianBeam
+    >>> mylaser = Laser.from_power(power=10 * u.petawatt, ɛL=300 * u.joule, beam=GaussianBeam(w0=5 * u.micrometer))
+    >>> mylaser
+    <Laser(300.0 J, 28.18311836098954 fs, <GaussianBeam(5.0 µm, 0.8 µm)>)>
     """
 
     def __init__(self, ɛL, τL, beam=GaussianBeam()):
