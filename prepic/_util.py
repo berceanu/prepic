@@ -31,9 +31,26 @@ def flatten_dict(d):
 
 
 def todict(obj, baseobj=unyt_quantity):
-    """
+    """ Convert a Python object to primitives.
+
     Recursively convert a Python object graph to sequences (lists)
     and mappings (dicts) of primitives (bool, int, float, string, ...)
+
+    Examples
+    --------
+    >>> import unyt as u
+    >>> mytuple = (3 * u.m, 2 * u.s, 6 * u.m/u.s)
+    >>> todict(mytuple)
+    [unyt_quantity(3, 'm'), unyt_quantity(2, 's'), unyt_quantity(6, 'm/s')]
+    >>> class MyClass:
+    ...     __slots__ = ['distance', 'speed']
+    ...     def __init__(self, distance, speed):
+    ...         self.distance = distance
+    ...         self.speed = speed
+    ...
+    >>> slotted = MyClass(distance=3 * u.m, speed=6 * u.m/u.s)
+    >>> todict(slotted)
+    {'distance': unyt_quantity(3, 'm'), 'speed': unyt_quantity(6, 'm/s')}
     """
     if isinstance(obj, baseobj):
         return obj
