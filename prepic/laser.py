@@ -150,26 +150,35 @@ class Laser(BaseClass):
 
     Parameters
     ----------
-
-        beam (:obj:`GaussianBeam`): class instance containing beam params
-        ɛL (float, energy): pulse energy on target (after compressor
-                            and beam transport, focused into the FWHM@intensity spot)
-        τL (float, time): pulse duration at FWHM in intensity
-        kL (float, 1/length): wavenumber
-        ωL (float, 1/time): angular frequency
-        ncrit (float, 1/volume): critical plasma density for this laser
-        P0 (float, energy/time): power
-        I0 (float, energy/time/area): peak intensity in the focal plane
-        a0 (float, dimensionless): normalized vector potential
-        E0 (float, energy/charge/length): peak electric field
+    beam : :obj:`GaussianBeam`
+        Class instance containing beam params.
+    ɛL : float, energy
+        Pulse energy on target (after compressor
+        and beam transport, focused into the FWHM@intensity spot).
+    τL : float, time
+        Pulse duration at FWHM in intensity
+    kL : float, 1/length
+        Wavenumber.
+    ωL : float, 1/time
+        Agular frequency.
+    ncrit : float, 1/volume
+        Critical plasma density for this laser.
+    P0 : float, energy/time
+        Power.
+    I0 : float, energy/time/area
+        Peak intensity in the focal plane.
+    a0 : float, dimensionless
+        Normalized vector potential.
+    E0 : float, energy/charge/length
+        Peak electric field.
 
     Examples
     --------
     >>> import unyt as u
     >>> from prepic import GaussianBeam
-    >>> mylaser = Laser.from_power(power=10 * u.petawatt, ɛL=300 * u.joule, beam=GaussianBeam(w0=5 * u.micrometer))
+    >>> mylaser = Laser.from_power(power=10 * u.petawatt, ɛL=300 * u.joule)
     >>> mylaser
-    <Laser(300.0 J, 28.18311836098954 fs, <GaussianBeam(5.0 µm, 0.8 µm)>)>
+    <Laser(300.0 J, 28.18311836098954 fs, <GaussianBeam(None, 0.8 µm)>)>
     """
 
     def __init__(self, ɛL, τL, beam=GaussianBeam()):
@@ -230,7 +239,7 @@ class Laser(BaseClass):
         return cls.from_a0(a0=a0, ɛL=ɛL, τL=τL, beam=beam)
 
     @classmethod
-    def from_power(cls, power, beam, ɛL=None, τL=None):
+    def from_power(cls, power, beam=GaussianBeam(), ɛL=None, τL=None):
         """Construct laser by giving its power P0 and beam size.
         Must supply either ɛL or τL.
         """
