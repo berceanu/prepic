@@ -55,12 +55,15 @@ class Simulation(BaseClass):
 
     def __init__(self, plasma, box_length=None, ppc=None):
         """Estimate recommended simulation params for given plasma (and laser).
-        Args:
-            plasma (:obj:`Plasma`): instance containing laser and plasma params
-            box_length (float, length, optional): length of the cubic
-                simulation box. Defaults to 4λₚ.
-            ppc (int, dimensionless, optional): number of particles per cell.
-                Defaults to 8 (3D).
+
+        Parameters
+        ----------
+        plasma : :obj:`Plasma`
+            Instance containing laser and plasma params.
+        box_length : float, length, optional
+            Length of the cubic simulation box (defaults to 4λₚ).
+        ppc : int, dimensionless, optional
+            Number of particles per cell (defaults to 8 in 3D).
         """
         if not plasma.laser:
             raise TypeError("Given `Plasma` instance must contain `Laser` instance.")
