@@ -68,7 +68,7 @@ def a0_from_intensity(i0, λL=0.8 * u.micrometer):
 class GaussianBeam(BaseClass):
     """Contains the (geometric) parameters for a Gaussian laser beam.
 
-    Parameters
+    Attributes
     ----------
     w0 : float, length
         Beam waist @ 1/e^2 intensity.
@@ -148,7 +148,7 @@ class GaussianBeam(BaseClass):
 class Laser(BaseClass):
     """Class containing laser parameters.
 
-    Parameters
+    Attributes
     ----------
     beam : :obj:`GaussianBeam`
         Class instance containing beam params.

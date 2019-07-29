@@ -43,41 +43,73 @@ def interaction_regime(ωp, τL):
 
 class Plasma(BaseClass):
     """Class containing plasma parameters.
-    Attributes:
-        npe (float, 1/volume): plasma electron (number) density
-        ωp (float, 1/time): plasma frequency
-        lp (float, length): unit of length
-        tp (float, time): unit of time
-        λp (float, length): plasma skin depth
-        kp (float, 1/length): plasma wavenumber
-        Ewb (float, energy/charge/length): cold, 1D wave-breaking field
-        laser (:obj:`Laser`): instance containing laser params
-        γp (float, dimensionless): plasma γ factor
-        Pc (float, energy/time): critical power for self-focusing
-        dephasing (float, length): electron dephasing length
-        depletion (float, length): pump depletion length
-        Ez_avg (float, energy/charge/length): average accelerating field \
-                                    in the direction of electron propagation
-        R (float, length): radius of the plasma bubble
-        Lacc (float, length): distance over which laser propagates
-        N (float, dimensionless): estimated number of electrons in the bunch
-        Q (float, charge): estimated total electron bunch charge
-        ΔE (float, energy): maximum energy gained by one electron \
-                        propagating for Lacc \
-                        see Lu et al., 2007 Phys. Rev. ST. Accel. Beams
-        η (float, dimensionless): energy transfer efficiency, defined as \
-                        total bunch energy `N` * `ΔE` / laser energy `ɛL` \
-            under matching conditions, `η` ~ 1 / (2 * a0)
+
+    Attributes
+    ----------
+    npe : float, 1/volume
+        Plasma electron (number) density.
+    ωp : float, 1/time
+        Plasma frequency.
+    lp : float, length
+        Unit of length.
+    tp : float, time
+        Unit of time.
+    λp : float, length
+        Plasma skin depth.
+    kp : float, 1/length
+        Plasma wavenumber.
+    Ewb : float, energy/charge/length
+        Cold, 1D wave-breaking field.
+    laser : :obj:`Laser`
+        Instance containing laser params.
+    γp : float, dimensionless
+        Plasma γ factor.
+    Pc : float, energy/time
+        Critical power for self-focusing.
+    dephasing : float, length
+        Electron dephasing length.
+    depletion : float, length
+        Pump depletion length.
+    Ez_avg : float, energy/charge/length
+        Average accelerating field \
+        in the direction of electron propagation.
+    R : float, length
+        Radius of the plasma bubble.
+    Lacc : float, length
+        Distance over which laser propagates.
+    N : float, dimensionless
+        Estimated number of electrons in the bunch.
+    Q : float, charge
+        Estimated total electron bunch charge.
+    ΔE : float, energy
+        Maximum energy gained by one electron \
+        propagating for Lacc \
+        see Lu et al., 2007 Phys. Rev. ST. Accel. Beams.
+    η : float, dimensionless
+        Energy transfer efficiency, defined as \
+        total bunch energy `N` * `ΔE` / laser energy `ɛL` \
+        under matching conditions, `η` ~ 1 / (2 * a0).
+
+    Examples
+    --------
+    >>> import unyt as u
+    >>> Plasma(n_pe=1e18 / u.cm**3)
+    <Plasma(1e+18 cm**(-3), None, None)>
     """
 
     def __init__(self, n_pe, laser=None, bubble_radius=None, propagation_distance=None):
         """Creates plasma with given density.
-        Args:
-            n_pe (float, 1/volume): plasma electron (number) density
-            laser (:obj:`Laser`, optional): instance containing laser params
-            bubble_radius (float, length, optional): radius of the plasma bubble
-            propagation_distance (float, length, optional): length of plasma region
-                                                    defaults to `dephasing`
+
+        Parameters
+        ----------
+        n_pe : float, 1/volume
+            Plasma electron (number) density.
+        laser : :obj:`Laser`, optional
+            Instance containing laser params.
+        bubble_radius : float, length, optional
+            Radius of the plasma bubble.
+        propagation_distance : float, length, optional
+            Length of plasma region (defaults to `dephasing`).
         """
         self.npe = n_pe.to("1/cm**3")
         self.λp = np.sqrt(np.pi / (r_e * self.npe)).to("micrometer")
@@ -122,6 +154,7 @@ class Plasma(BaseClass):
                 self.R = None
         else:
             self.laser = None
+            self.R = None
 
     def __repr__(self):
         return f"<{self.__class__.__name__}({self.npe}, {repr(self.laser)}, {self.R})>"
