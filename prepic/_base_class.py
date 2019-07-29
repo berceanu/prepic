@@ -10,6 +10,29 @@ logger = logging.getLogger(__name__)
 
 
 class BaseClass:
+    """Implements equality testing between class instances which inherit it.
+
+    Does a floating point comparison (including unit checking) between common
+    instance attributes of two instances of a class that inherits from `BaseClass`.
+    The instance attributes are collected recursively, ie. if the child class contains
+    sub-classes as attributes, their attributes are collected as well.
+
+    Examples
+    --------
+    >>> import unyt as u
+    >>> class MyClass(BaseClass):
+    ...     def __init__(self, attr1, attr2):
+    ...         self.attr1 = attr1
+    ...         self.attr2 = attr2
+    ...
+    >>> inst1 = MyClass(attr1=5.2 * u.m, attr2= 3.2 * u.s)
+    >>> inst2 = MyClass(attr1=2.5 * u.m, attr2= 3.2 * u.s)
+    >>> inst1 == inst2
+    False
+    >>> inst1 == 5.2 * u.m
+    False
+    """
+
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(other, type(self)):
