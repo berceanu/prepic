@@ -50,7 +50,8 @@ class Simulation(BaseClass):
     ...                            beam=GaussianBeam(w0=5 * u.micrometer))
     >>> myplasma = Plasma(n_pe=1e18 / u.cm**3, laser=mylaser)
     >>> Simulation(myplasma)
-    <Simulation(<Plasma(1e+18 cm**(-3), <Laser(300.0 J, 28.18311836098954 fs, <GaussianBeam(5.0 µm, 0.8 µm)>)>, None)>, 133.5577261430166 µm, 8 dimensionless)>  # NOQA: E501
+    <Simulation(<Plasma(1e+18 cm**(-3), <Laser(300.0 J, 28.18311836098954 fs, <GaussianBeam(5.0 µm, 0.8 µm)>)>, None)>,\
+ 133.5577261430166 µm, 8 dimensionless)>
     """
 
     def __init__(self, plasma, box_length=None, ppc=None):
