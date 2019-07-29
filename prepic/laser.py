@@ -99,6 +99,7 @@ class GaussianBeam(BaseClass):
             self.zR = None
 
     @classmethod
+    @accepts(f_number=dimensionless, λL=length)
     def from_f_number(cls, f_number, λL=0.8 * u.micrometer):
         """Construct beam by giving the OAP's f/#.
 
@@ -110,6 +111,7 @@ class GaussianBeam(BaseClass):
         return cls(w0=w0, λL=λL)
 
     @classmethod
+    @accepts(focal_distance=length, beam_diameter=length, λL=length)
     def from_focal_distance(cls, focal_distance, beam_diameter, λL=0.8 * u.micrometer):
         """Constuct beam from OAP's focal distance and beam diameter.
 
