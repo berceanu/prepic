@@ -2,10 +2,163 @@
 Classes for modelling emitted radiation from laser-plasma interaction
 
 """
+import warnings
+
+import numpy as np
+import unyt as u
+from scipy.integrate import quad
+from scipy.special import kv
+from unyt import accepts, returns
+from unyt.dimensions import dimensionless, energy, time
+
 from prepic._base_class import BaseClass
 from prepic._constants import r_e
-import unyt as u
-import numpy as np
+
+
+@returns(energy)
+@accepts(ωc=1 / time, γ=dimensionless)
+def _total_radiated_energy(ωc, γ):
+    r"""Computes total energy radiated per betatron oscillation.
+
+    .. math:: I = \frac{2}{9} \omega_c \gamma \frac{e^2}{\epsilon_0 c}
+
+    Parameters
+    ----------
+    γ : float, dimensionless
+        Electron Lorentz factor.
+    ωc : float, 1/time
+        Critical synchrotron frequency.
+
+    Returns
+    -------
+    intensity : float, energy
+        Total radiated energy per electron, per betatron oscillation.
+
+    References
+    ----------
+    See [1]_, Section 14.6.
+
+    .. [1] Jackson, J. D. (1999). Classical electrodynamics.
+
+    Examples
+    --------
+    >>> I = _total_radiated_energy(ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
+    >>> print("{:.1f}".format(I))
+    20119.6 keV
+    """
+    intensity = 2 / 9 * u.qe ** 2 / (u.eps_0 * u.clight) * ωc * γ
+    return intensity.to("keV")
+
+
+@returns(dimensionless)
+@accepts(y=dimensionless)
+def _s_function(y, max_abserr=1e-5):
+    r"""Shape of the synchrotron spectrum.
+
+    Integral that appears in the photon frequency distribution of a
+    synchrotron spectrum.
+
+    .. math:: S(y) = \int_{y}^{\infty} dx\, K_{5/3}(x)
+
+    Parameters
+    ----------
+    y : float, dimensionless
+        Ratio of frequency to critical frequency, :math:`\omega/\omega_c`.
+    max_abserr : float
+        Maximum threshold for the absolute integration error.
+
+    Returns
+    -------
+    float, dimensionless
+        The result of numerical integration.
+
+    Raises
+    ------
+    FloatingPointError
+        If the absolute integration error is too large.
+    IntegrationWarning
+        If the integral is divergent, or slowly convergent.
+
+    References
+    ----------
+    See [1]_, Section 14.6.
+
+    .. [1] Jackson, J. D. (1999). Classical electrodynamics.
+
+    Examples
+    --------
+    >>> import unyt as u
+    >>> res = _s_function(0.5 * u.dimensionless)
+    >>> print(res)
+    1.7416382937508474 dimensionless
+    >>> _s_function(0.0 * u.dimensionless)
+    Traceback (most recent call last):
+    ...
+    scipy.integrate.quadpack.IntegrationWarning: The integral is probably divergent, or slowly convergent.
+    >>> _s_function(1e-5 * u.dimensionless, max_abserr=1e-6)
+    Traceback (most recent call last):
+    ...
+    FloatingPointError: S integration error too large, 9.50743117487246e-06 at y=1e-05 dimensionless
+    """
+    warnings.filterwarnings("error")
+
+    result, abserr = quad(lambda x: kv(5 / 3, x), y, np.inf)
+
+    if abserr > max_abserr:
+        raise FloatingPointError(
+            "S integration error too large, %s at y=%s" % (abserr, y)
+        )
+    else:
+        return result * u.dimensionless
+
+
+@returns(dimensionless)
+@accepts(ω=1 / time, ωc=1 / time, γ=dimensionless)
+def photon_frequency_distribution(ω, ωc, γ):
+    r"""Computes the number of photons per unit frequency interval.
+
+    Computes the number of photons per unit frequency interval, at frequency :math:`\omega`,
+    per betatron oscillation and per electron, integrated over all angles.
+
+    .. math::
+
+        \frac{dN}{dy} = \frac{9 \sqrt{3}}{8 \pi} \frac{I}{\hbar \omega_c} y S(y)
+
+        I = \frac{2}{9} \omega_c \gamma \frac{e^2}{\epsilon_0 c}
+
+        S(y) = \int_{y=\omega/\omega_c}^{\infty} dx\, K_{5/3}(x)
+
+    Parameters
+    ----------
+    ω : float, 1/time
+        Observation frequency.
+    ωc : float, 1/time
+        Critical synchrotron frequency.
+    γ : float, dimensionless
+        Electron Lorentz factor.
+
+    Returns
+    -------
+    dN_over_dy : float, dimensionless
+        Number of photons per unit frequency interval :math:`y=\omega/\omega_c`.
+
+    References
+    ----------
+    See [1]_, Section 14.6.
+
+    .. [1] Jackson, J. D. (1999). Classical electrodynamics.
+
+    Examples
+    --------
+    >>> Ny = photon_frequency_distribution(ω=9e4 / u.fs, ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
+    >>> print("{:.1f}".format(Ny))
+    58.0 dimensionless
+
+    """
+    a = 9 * np.sqrt(3) / (8 * np.pi)  # prefactor
+    y = (ω / ωc).to("dimensionless")
+    dN_over_dy = a * _total_radiated_energy(ωc, γ) / (u.hbar * ωc) * y * _s_function(y)
+    return dN_over_dy.to("dimensionless")
 
 
 class Radiator(BaseClass):

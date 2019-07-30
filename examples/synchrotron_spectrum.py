@@ -1,38 +1,10 @@
 import numpy as np
-import scipy.integrate as integrate
-import scipy.special as special
 import unyt as u
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-
-def s_function(y):
-    y = y.to_value("dimensionless")
-    integral = integrate.quad(lambda x: special.kv(5 / 3, x), y, np.inf)
-    if integral[1] > 1e-05:
-        raise FloatingPointError(
-            "S integration error too large, %s at y = %s" % (integral[1], y)
-        )
-    else:
-        return integral[0]
-
-
-def total_radiated_energy(ωc, γ):
-    """Computes total energy radiated per betatron oscillation.
-    Jackson Section 14.6"""
-    intensity = 2 / 9 * u.qe ** 2 / (u.eps_0 * u.clight) * ωc * γ
-    return intensity.to("keV")
-
-
-def photon_frequency_distribution(ω, ωc, γ):
-    """Computes the number of photons per unit frequency interval,
-    integrated over all angles. Also per betatron oscillation and per electron.
-    Jackson Section 14.6"""
-    a = 9 * np.sqrt(3) / (8 * np.pi)  # prefactor
-    y = (ω / ωc).to("dimensionless")
-    dN_over_dy = a * total_radiated_energy(ωc, γ) / (u.hbar * ωc) * y * s_function(y)
-    return dN_over_dy.to("dimensionless")
+from prepic.radiation import photon_frequency_distribution
 
 
 def photon_angle_distribution(ω, ωc, γ, θ):
@@ -58,7 +30,6 @@ print(ω_avg / ωc * 55)
 
 omegas = np.linspace(1e-5 * ωc, 2 * ωc, 100)
 freq_distr = np.empty(omegas.size) * u.dimensionless
-
 
 for i, ω in enumerate(omegas):
     freq_distr[i] = photon_frequency_distribution(
