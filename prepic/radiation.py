@@ -3,9 +3,11 @@ Classes for modelling emitted radiation from laser-plasma interaction
 
 """
 import warnings
+from functools import partial
 
 import numpy as np
 import unyt as u
+from matplotlib.figure import Figure
 from scipy.integrate import quad
 from scipy.special import kv
 from unyt import accepts, returns
@@ -196,6 +198,87 @@ def photon_angle_distribution(θ, ωc, γ):
     return dN_over_dΩ.to("dimensionless")
 
 
+class Spectrum:
+    r"""Base class for holding raw spectrum data and plotting it."""
+
+    def __init__(self, horiz_axis_data, spectrum, horiz_norm=None):
+        """Constructs spectrum from raw data.
+
+        Parameters
+        ----------
+        horiz_axis_data : 1d array_like
+            Raw data (incl. units) for the dependent variable, ie. frequency, angle etc.
+        horiz_norm : float
+            Normalization factor (incl. units) to be applied to `horiz_axis_data`.
+        spectrum : 1d array_like
+            Raw data (incl. units) for the dependent variable, ie. the spectrum data.
+
+        """
+        if horiz_norm is None:
+            self.x_data = horiz_axis_data
+        else:
+            # norm_freq
+            self.x_data = (horiz_axis_data / horiz_norm).to_value(dimensionless)
+
+        if spectrum.units == u.dimensionless:
+            # distr
+            self.spectrum = spectrum.to_value(dimensionless)
+        else:
+            self.spectrum = spectrum
+
+    def plot(self, ax=None, fig_width=6.4, fill_between=True, mark_val=None):
+        if ax is None:
+            fig = Figure()
+            fig.subplots_adjust(left=0.15, bottom=0.16, right=0.99, top=0.97)
+
+            fig_height = fig_width / 1.618  # golden ratio
+            fig.set_size_inches(fig_width, fig_height)
+
+            ax = fig.add_subplot(111)
+        else:
+            fig = ax.figure
+
+        ax.plot(self.x_data, self.spectrum)
+
+        if fill_between:
+            ax.fill_between(
+                self.x_data,
+                self.spectrum,
+                where=self.x_data < 1,
+                facecolor="C3",
+                alpha=0.5,
+            )
+
+        if mark_val is not None:
+            ax.axvline(x=mark_val["position"], linestyle="--", color="C3")
+            ax.text(mark_val["position"], 0, mark_val["label"])
+
+        ax.set_ylim(bottom=0)
+
+        return ax
+
+
+class SynchrotronFrequencySpectrum(Spectrum):
+    def __init__(self, horiz_axis_data, spectrum, horiz_norm, vline):
+        super().__init__(horiz_axis_data, spectrum, horiz_norm)
+        self.mark_val = dict(
+            position=vline.to_value(dimensionless), label=r"$\langle \omega \rangle$"
+        )
+
+    def plot(self, ax=None, fig_width=6.4, **kwargs):
+        ax = super().plot(
+            ax=ax, fig_width=fig_width, fill_between=True, mark_val=self.mark_val
+        )
+
+        ax.set(
+            ylabel=r"$\frac{dN}{dy}$",
+            xlabel=r"$y = \omega / \omega_c$",
+            xlim=[-0.1, 2.0],
+        )
+
+        return ax.figure
+
+
 class Radiator(BaseClass):
     """Class for estimating the properties of emitted radiation of a given laser-plasma.
 
@@ -303,7 +386,9 @@ class Radiator(BaseClass):
             self.ħωc = (3 / 2 * self.K * self.γ ** 2 * u.h * u.clight / self.λu).to(
                 "kiloelectronvolt"
             )
+            self.ωc = (self.ħωc / u.hbar).to(1 / u.fs)
             self.ħω_avg = (8 / (15 * np.sqrt(3)) * self.ħωc).to("kiloelectronvolt")
+            self.ω_avg = (self.ħω_avg / u.hbar).to(1 / u.fs)
             self.Nγ = 5 * np.sqrt(3) * np.pi * self.α * self.K / 6
             self.θ_par = (self.K / self.γ * u.radian).to("miliradian")
             self.N_shot = (self.Nγ * self.Nβ * self.plasma.N).to("dimensionless")
@@ -311,7 +396,7 @@ class Radiator(BaseClass):
             # todo implement undulator case
             raise NotImplementedError("The undulator case is not yet implemented.")
 
-    def frequency_spectrum(self, ω):
+    def frequency_spectrum(self, ω=None):
         r"""Computes photon frequency distribution over a range of frequencies.
 
         Computes the number of synchrotron photons emitted at each of the frequencies in `ω`.
@@ -320,6 +405,7 @@ class Radiator(BaseClass):
         ----------
         ω : (N,) unyt_array of floats
             Frequency container, with dimensions of 1/time.
+            Defaults to ``np.linspace(1e-5 * self.ωc, 2 * self.ωc, 100)``
 
         Returns
         -------
@@ -328,9 +414,26 @@ class Radiator(BaseClass):
         --------
 
         """
-        # from functools import partial
-        # freq_dist = partial()
-        # map(photon_frequency_distribution,
+        freq_dist = partial(photon_frequency_distribution, ωc=self.ωc, γ=self.γ)
+
+        if ω is None:
+            ω = np.linspace(1e-5 * self.ωc, 2 * self.ωc, 100)
+
+        # call once to get unit
+        unit_of_spectrum = freq_dist(ω[0]).units
+
+        # pre-allocate
+        spectrum = np.empty(ω.size) * unit_of_spectrum
+
+        for i, freq in enumerate(ω):
+            spectrum[i] = freq_dist(freq)
+
+        return SynchrotronFrequencySpectrum(
+            horiz_axis_data=ω,
+            spectrum=spectrum,
+            horiz_norm=self.ωc,
+            vline=self.ω_avg / self.ωc,
+        )
 
     def angular_spectrum(self):
         raise NotImplementedError
