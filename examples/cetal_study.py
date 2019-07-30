@@ -2,22 +2,22 @@ from collections import namedtuple
 
 import unyt as u
 
-from prepic import lwfa
+from prepic import GaussianBeam, Laser, matched_laser_plasma
 
 Cetal = namedtuple("Cetal", ["w0", "ɛL", "τL"])
 
 if __name__ == "__main__":
     param = Cetal(w0=18.0 * u.micrometer, ɛL=7.7 * u.joule, τL=40.0 * u.femtosecond)
 
-    beam = lwfa.GaussianBeam.from_focal_distance(
+    beam = GaussianBeam.from_focal_distance(
         focal_distance=3.2 * u.meter, beam_diameter=200 * u.mm
     )
     print(f"Smallest possible beam waist for this setup is w0={beam.w0:.1f}.\n")
 
-    laser = lwfa.Laser(ɛL=param.ɛL, τL=param.τL, beam=lwfa.GaussianBeam(w0=param.w0))
+    laser = Laser(ɛL=param.ɛL, τL=param.τL, beam=GaussianBeam(w0=param.w0))
     print(f"{laser}\n")
 
-    matched_plasma = lwfa.matched_laser_plasma(a0=laser.a0)
+    matched_plasma = matched_laser_plasma(a0=laser.a0)
     print(f"{matched_plasma}\n")
 
     print(f"Plasma density: {matched_plasma.npe:.1e}")

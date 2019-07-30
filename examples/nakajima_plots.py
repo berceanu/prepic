@@ -7,7 +7,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from labellines import labelLines
-from prepic import lwfa
+from prepic import GaussianBeam, Laser, Plasma, matched_laser_plasma
 
 line_styles = ["-", "--", ":", "-."]
 line_colors = ["C0", "C1", "C3", "C4"]
@@ -21,16 +21,16 @@ if __name__ == "__main__":
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
 
-    beam = lwfa.GaussianBeam(w0=15.0 * u.micrometer, λL=0.8 * u.micrometer)
+    beam = GaussianBeam(w0=15.0 * u.micrometer, λL=0.8 * u.micrometer)
     electron_densities = np.logspace(-2, 2, 20) * 1e18 / (u.cm ** 3)
 
     for a0 in np.linspace(2.0, 8.0, 7) * u.dimensionless:
-        laser = lwfa.Laser.from_a0(a0=a0, τL=30.0 * u.femtosecond, beam=beam)
+        laser = Laser.from_a0(a0=a0, τL=30.0 * u.femtosecond, beam=beam)
 
         x_data = []
         y_data = []
         for npe in electron_densities:
-            plasma = lwfa.Plasma(n_pe=npe, laser=laser)
+            plasma = Plasma(n_pe=npe, laser=laser)
             x_data.append(plasma.npe)
             y_data.append(plasma.ΔE)
 
@@ -46,8 +46,8 @@ if __name__ == "__main__":
             label=f"$a_0$={a0_val}",
         )
 
-        matched_plasma = lwfa.matched_laser_plasma(
-            a0=a0, beam=lwfa.GaussianBeam(λL=0.8 * u.micrometer)
+        matched_plasma = matched_laser_plasma(
+            a0=a0, beam=GaussianBeam(λL=0.8 * u.micrometer)
         )
 
         ax.scatter(

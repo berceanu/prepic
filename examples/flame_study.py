@@ -2,7 +2,7 @@ from collections import namedtuple
 
 import unyt as u
 
-from prepic import lwfa
+from prepic import GaussianBeam, Laser, Plasma
 
 Flame = namedtuple("Flame", ["npe", "w0", "ɛL", "τL", "prop_dist", "f_dist", "diam"])
 
@@ -18,7 +18,7 @@ if __name__ == "__main__":
         diam=100 * u.mm,
     )
 
-    beam = lwfa.GaussianBeam.from_focal_distance(
+    beam = GaussianBeam.from_focal_distance(
         focal_distance=param.f_dist, beam_diameter=param.diam
     )
     print(
@@ -28,9 +28,9 @@ if __name__ == "__main__":
         )
     )
 
-    laser = lwfa.Laser(ɛL=param.ɛL, τL=param.τL, beam=lwfa.GaussianBeam(w0=param.w0))
+    laser = Laser(ɛL=param.ɛL, τL=param.τL, beam=GaussianBeam(w0=param.w0))
 
-    plasma = lwfa.Plasma(
+    plasma = Plasma(
         n_pe=param.npe,
         laser=laser,
         bubble_radius=param.w0,
