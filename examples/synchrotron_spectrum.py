@@ -6,23 +6,6 @@ from matplotlib.figure import Figure
 
 from prepic.radiation import photon_frequency_distribution
 
-
-def photon_angle_distribution(ω, ωc, γ, θ):
-    """Computes the number of photons per unit solid angle, integrated over
-    all frequencies, observed at an angle θ from the electron's plane of oscillation.
-    Jackson Section 14.6"""
-    a = (7 * u.qe ** 2 * ωc / (96 * np.pi * u.eps_0 * u.clight) / (u.hbar * ωc)).to(
-        "dimensionless"
-    )
-    dN_over_dΩ = (
-        a
-        * γ ** 2
-        / ((1 + γ ** 2 * θ ** 2) ** (5 / 2))
-        * (1 + 5 / 7 * γ ** 2 * θ ** 2 / (1 + γ ** 2 * θ ** 2))
-    )
-    return dN_over_dΩ.to("dimensionless")
-
-
 ωc = (197.0 * u.kiloelectronvolt / u.hbar).to(1 / u.fs)
 ω_avg = (60.7 * u.keV / u.hbar).to(1 / u.fs)
 

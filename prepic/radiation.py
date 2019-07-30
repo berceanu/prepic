@@ -9,7 +9,7 @@ import unyt as u
 from scipy.integrate import quad
 from scipy.special import kv
 from unyt import accepts, returns
-from unyt.dimensions import dimensionless, energy, time
+from unyt.dimensions import dimensionless, energy, time, angle
 
 from prepic._base_class import BaseClass
 from prepic._constants import r_e
@@ -33,12 +33,6 @@ def _total_radiated_energy(ωc, γ):
     -------
     intensity : float, energy
         Total radiated energy per electron, per betatron oscillation.
-
-    References
-    ----------
-    See [1]_, Section 14.6.
-
-    .. [1] Jackson, J. D. (1999). Classical electrodynamics.
 
     Examples
     --------
@@ -78,12 +72,6 @@ def _s_function(y, max_abserr=1e-5):
         If the absolute integration error is too large.
     IntegrationWarning
         If the integral is divergent, or slowly convergent.
-
-    References
-    ----------
-    See [1]_, Section 14.6.
-
-    .. [1] Jackson, J. D. (1999). Classical electrodynamics.
 
     Examples
     --------
@@ -142,12 +130,6 @@ def photon_frequency_distribution(ω, ωc, γ):
     dN_over_dy : float, dimensionless
         Number of photons per unit frequency interval :math:`y=\omega/\omega_c`.
 
-    References
-    ----------
-    See [1]_, Section 14.6.
-
-    .. [1] Jackson, J. D. (1999). Classical electrodynamics.
-
     Examples
     --------
     >>> Ny = photon_frequency_distribution(ω=9e4 / u.fs, ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
@@ -159,6 +141,59 @@ def photon_frequency_distribution(ω, ωc, γ):
     y = (ω / ωc).to("dimensionless")
     dN_over_dy = a * _total_radiated_energy(ωc, γ) / (u.hbar * ωc) * y * _s_function(y)
     return dN_over_dy.to("dimensionless")
+
+
+@returns(dimensionless)
+@accepts(θ=angle, ωc=1 / time, γ=dimensionless)
+def photon_angle_distribution(θ, ωc, γ):
+    r"""Computes the number of photons per unit solid angle.
+
+    Computes the number of photons observed at an angle
+    :math:`\theta` from the electron's plane of oscillation,
+    per unit solid angle, per betatron oscillation and per electron,
+    integrated over all frequencies.
+
+    .. math::
+
+        \frac{dN}{d\Omega} = \frac{7 e^2}{96 \pi \epsilon_0 \hbar c}
+        \frac{\gamma^2}{(1 + \gamma^2 \theta^2)^{5 / 2}}
+        \left(1 + \frac{5}{7} \frac{\gamma^2 \theta^2}{1 + \gamma^2 \theta^2}\right)
+
+    Parameters
+    ----------
+    ωc : float, 1/time
+        Critical synchrotron frequency.
+    γ : float, dimensionless
+        Electron Lorentz factor.
+    θ : float, angle
+        Observation angle relative to the particle's orbital plane (latitude).
+
+    Returns
+    -------
+    dN_over_dΩ : float, dimensionless
+        Number of photons :math:`N` per solid angle :math:`\Omega`.
+
+    References
+    ----------
+    See [DZDS]_, Eq. (18), where we divided by :math:`\hbar \omega_c`
+
+    .. [DZDS] Downer, M. C., et al. Reviews of Modern Physics 90.3 (2018): 035002.
+
+    Examples
+    --------
+    >>> NΩ = photon_angle_distribution(θ=45 * u.degree, ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
+    >>> print("{:.1e}".format(NΩ))
+    9.8e-14 dimensionless
+    """
+    θ = θ.to_value(u.radian)
+    a = 7 * u.qe ** 2 / (96 * np.pi * u.eps_0 * u.hbar * u.clight)  # prefactor
+    dN_over_dΩ = (
+        a.to(dimensionless)
+        * γ ** 2
+        / ((1 + γ ** 2 * θ ** 2) ** (5 / 2))
+        * (1 + 5 / 7 * γ ** 2 * θ ** 2 / (1 + γ ** 2 * θ ** 2))
+    )
+    return dN_over_dΩ.to("dimensionless")
 
 
 class Radiator(BaseClass):
@@ -206,6 +241,12 @@ class Radiator(BaseClass):
     The opening angle ``θ_par`` is defined as the maximum deflection angle of the electron trajectory,
     such that the full width of the angular distribution of the radiated energy in the electron
     oscillation plane is 2×``θ_par``.
+
+    References
+    ----------
+    See [JCK]_, Section 14.6.
+
+    .. [JCK] Jackson, J. D. (1999). Classical electrodynamics.
 
     Examples
     --------
@@ -270,6 +311,19 @@ class Radiator(BaseClass):
             # todo implement undulator case
             raise NotImplementedError("The undulator case is not yet implemented.")
 
+    def frequency_spectrum(self, ω):
+        r"""Computes photon frequency distribution over a range of frequencies.
+
+        Computes the number of synchrotron photons emitted at each of the frequencies in `ω`.
+
+
+        Give the frequencies :math:`\omega`, computes the number of photons
+        at each frequency in that range.
+        """
+
+    def angular_spectrum(self):
+        raise NotImplementedError
+
     def __str__(self):
         msg = (
             f"Betatron radiation is emitted at a mean energy of <ħω> = {self.ħω_avg:.1f}, while the critical\n"
@@ -289,8 +343,6 @@ class Radiator(BaseClass):
             )
 
         return msg
-
-    # todo add synchrotron spectrum
 
     def __repr__(self):
         return f"<{self.__class__.__name__}({repr(self.plasma)})>"
