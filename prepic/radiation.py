@@ -316,10 +316,21 @@ class Radiator(BaseClass):
 
         Computes the number of synchrotron photons emitted at each of the frequencies in `ω`.
 
+        Parameters
+        ----------
+        ω : (N,) unyt_array of floats
+            Frequency container, with dimensions of 1/time.
 
-        Give the frequencies :math:`\omega`, computes the number of photons
-        at each frequency in that range.
+        Returns
+        -------
+
+        Examples
+        --------
+
         """
+        # from functools import partial
+        # freq_dist = partial()
+        # map(photon_frequency_distribution,
 
     def angular_spectrum(self):
         raise NotImplementedError
