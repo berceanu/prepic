@@ -5,10 +5,9 @@ python:
   - 3.6
 
 # Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install: pip install -U tox-travis codecov
+install: pip install -U tox-travis codacy-coverage
 
 # Command to run tests, e.g. python setup.py test
 script: tox -vvv
 
-after_success: codecov
-
+after_success: python-codacy-coverage -r coverage.xml
