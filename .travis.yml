@@ -4,11 +4,13 @@ language: python
 python:
   - 3.6
 
+env:
+  - CODACY_PROJECT_TOKEN=a7f3a31b008449fd9a2d83b34c7f4f8e
+
 # Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install: pip install -U tox-travis codecov
+install: pip install -U tox-travis codacy-coverage
 
 # Command to run tests, e.g. python setup.py test
 script: tox -vvv
 
-after_success: codecov
-
+after_success: python-codacy-coverage -r coverage.xml
