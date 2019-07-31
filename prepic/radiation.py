@@ -15,7 +15,7 @@ from unyt import accepts, returns
 from unyt.dimensions import dimensionless, energy, time, angle
 
 from prepic._base_class import BaseClass
-from prepic._constants import r_e
+from prepic._constants import r_e, α
 
 from prepic.mplstyle import TALK
 
@@ -23,7 +23,65 @@ style.use("seaborn-talk")
 style.use("ggplot")
 style.use(TALK)
 
+
 # todo add docstrings
+
+
+@returns(dimensionless)
+@accepts(ω=1 / time, θ=angle, ωc=1 / time, γ=dimensionless)
+def diferential_intensity_distribution(ω, θ, ωc, γ):
+    r"""Computes the synchrotron energy distribution in frequency and solid angle.
+
+    Doubly differential intensity distribution :math:`\frac{d^2I}{d \hbar \omega d \Omega}`, representing the radiated
+    energy per unit energy interval :math:`d \hbar \omega` per unit solid angle :math:`d \Omega`.
+
+    .. math:: \frac{d^2I}{d \hbar \omega d \Omega} = \frac{3 \alpha}{4 \pi^2} \left(\frac{\omega}{\omega_c}\right)^2 \gamma^6 \left(\frac{1}{\gamma^2} + \theta^2\right)^2 \left[K^2_{2/3}(\xi) + \frac{\theta^2}{1/\gamma^2 + \theta^2} K^2_{1/3}(\xi)\right]
+
+    where
+
+    .. math:: \xi \simeq \frac{\omega}{2 \omega_c} \left(1 + \gamma^2 \theta^2 \right)^{3/2}
+
+    Parameters
+    ----------
+    ω : float, 1/time
+        Observation frequency.
+    θ : float, angle
+        Observation angle relative to the particle's orbital plane (latitude).
+    ωc : float, 1/time
+        Critical synchrotron frequency.
+    γ : float, dimensionless
+        Electron Lorentz factor.
+
+    Returns
+    -------
+    d2I : float, dimensionless
+        Doubly differential cross section.
+
+    References
+    ----------
+    Eq. (24) of [DE]_.
+
+    .. [DE] Don Edwards, `"Notes on Synchrotron Radiation" <https://www.researchgate.net/profile/Thierry_De_Mees3/post/Is_there_something_similar_to_synchrotron_radiation_in_gravitoelectromagnetism_GEM/attachment59d62c2e79197b807798a8ee/AS%3A346000725168128%401459504409173/download/syncradnotes.pdf>`_.
+
+    Examples
+    --------
+    >>> d2I = diferential_intensity_distribution(ω=9e4 / u.fs, θ=0.5 * u.degree, ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
+    >>> print("{:.1f}".format(d2I))
+    2.0 dimensionless
+    """  # noqa E501
+    γ = γ.to_value(u.dimensionless)
+    θ = θ.to_value(u.radian)
+    ξ = (ω / (2 * ωc) * (1 + γ ** 2 * θ ** 2) ** (3 / 2)).to_value(u.dimensionless)
+    d2I = (
+        (3 * α)
+        / (4 * np.pi ** 2)
+        * (ω / ωc) ** 2
+        * γ ** 6
+        * (1 / γ ** 2 + θ ** 2) ** 2
+        * (kv(2 / 3, ξ) ** 2 + θ ** 2 / (1 / γ ** 2 + θ ** 2) * kv(1 / 3, ξ) ** 2)
+    )
+    # todo check above and update example
+    return d2I.to(u.dimensionless)
 
 
 @returns(energy)
@@ -317,8 +375,6 @@ class Radiator(BaseClass):
 
     Attributes
     ----------
-    α: :obj:`unyt_quantity`
-        Fine structure constant.
     τ0: :obj:`unyt_quantity`
         Radiation-reaction time-scale.
     a: :obj:`unyt_quantity`
@@ -385,7 +441,6 @@ class Radiator(BaseClass):
     Radiation-reaction effects are negligible.
     """
 
-    α = (u.qe ** 2 / (4 * np.pi * u.eps_0 * u.hbar * u.clight)).to("dimensionless")
     τ0 = (2 * r_e / (3 * u.clight)).to("yoctosecond")
     a = 1510.3 * u.micrometer ** (-1 / 2)
     b = 3 * np.sqrt(2.0e19) * u.cm ** (-3 / 2)
