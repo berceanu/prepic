@@ -7,6 +7,8 @@ from functools import partial
 
 import numpy as np
 import unyt as u
+import matplotlib.style
+import matplotlib as mpl
 from matplotlib.figure import Figure
 from scipy.integrate import quad
 from scipy.special import kv
@@ -15,6 +17,9 @@ from unyt.dimensions import dimensionless, energy, time, angle
 
 from prepic._base_class import BaseClass
 from prepic._constants import r_e
+from prepic.mplstyle import PUBLICATION
+
+mpl.style.use(PUBLICATION)
 
 
 @returns(energy)
@@ -181,9 +186,9 @@ def photon_angle_distribution(θ, γ):
 
     Examples
     --------
-    >>> NΩ = photon_angle_distribution(θ=45 * u.degree, γ=5e3 * u.dimensionless)
+    >>> NΩ = photon_angle_distribution(θ=0.5 * u.degree, γ=5e3 * u.dimensionless)
     >>> print("{:.1e}".format(NΩ))
-    9.8e-14 dimensionless
+    5.8e-04 dimensionless
     """
     θ = θ.to_value(u.radian)
     a = 7 * u.qe ** 2 / (96 * np.pi * u.eps_0 * u.hbar * u.clight)  # prefactor
@@ -233,6 +238,7 @@ class Spectrum:
 
         ax.plot(self.x_data, self.spectrum)
 
+        ax.set_xlim(left=0)
         ax.set_ylim(bottom=0)
 
         return ax
@@ -251,11 +257,8 @@ class SynchrotronFrequencySpectrum(Spectrum):
     def plot(self, ax=None, fig_width=6.4):
         ax = super().plot(ax=ax, fig_width=fig_width)
 
-        ax.set(
-            ylabel=r"$\frac{dN}{dy}$",
-            xlabel=r"$y = \omega / \omega_c$",
-            xlim=[-0.1, 2.0],
-        )
+        ax.set(ylabel=r"$\frac{dN}{dy}$", xlabel=r"$y = \omega / \omega_c$")
+        ax.set_xlim(right=2)
 
         ax.fill_between(
             self.x_data, self.spectrum, where=self.x_data < 1, facecolor="C3", alpha=0.5
@@ -274,11 +277,8 @@ class SynchrotronAngularSpectrum(Spectrum):
     def plot(self, ax=None, fig_width=6.4):
         ax = super().plot(ax=ax, fig_width=fig_width)
 
-        ax.set(
-            ylabel=r"$\frac{dN}{d\Omega}$",
-            xlabel=r"$\theta$ [rad]",
-            # xlim=[-0.1, 2.0],
-        )
+        ax.set(ylabel=r"$\frac{dN}{d\Omega}$", xlabel=r"$\theta$ [rad]")
+        ax.set_xlim(right=2)
 
         return ax.figure
 
@@ -445,7 +445,7 @@ class Radiator(BaseClass):
         angle_dist = partial(photon_angle_distribution, γ=self.γ)
 
         if θ is None:
-            θ = np.linspace(0, np.pi, 50) * u.radian
+            θ = np.linspace(0, 0.4, 50) * u.miliradian
 
         # call once to get unit
         unit_of_spectrum = angle_dist(θ[0]).units
