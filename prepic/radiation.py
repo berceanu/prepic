@@ -3,16 +3,85 @@ Classes for modelling emitted radiation from laser-plasma interaction
 
 """
 import warnings
+from functools import partial
 
 import numpy as np
 import unyt as u
+import matplotlib.style as style
+from matplotlib.figure import Figure
 from scipy.integrate import quad
 from scipy.special import kv
 from unyt import accepts, returns
 from unyt.dimensions import dimensionless, energy, time, angle
 
 from prepic._base_class import BaseClass
-from prepic._constants import r_e
+from prepic._constants import r_e, α
+
+from prepic.mplstyle import TALK
+
+style.use("seaborn-talk")
+style.use("ggplot")
+style.use(TALK)
+
+
+# todo add docstrings
+
+
+@returns(dimensionless)
+@accepts(ω=1 / time, θ=angle, ωc=1 / time, γ=dimensionless)
+def diferential_intensity_distribution(ω, θ, ωc, γ):
+    r"""Computes the synchrotron energy distribution in frequency and solid angle.
+
+    Doubly differential intensity distribution :math:`\frac{d^2I}{d \hbar \omega d \Omega}`, representing the radiated
+    energy per unit energy interval :math:`d \hbar \omega` per unit solid angle :math:`d \Omega`.
+
+    .. math:: \frac{d^2I}{d \hbar \omega d \Omega} = \frac{3 \alpha}{4 \pi^2} \left(\frac{\omega}{\omega_c}\right)^2 \gamma^6 \left(\frac{1}{\gamma^2} + \theta^2\right)^2 \left[K^2_{2/3}(\xi) + \frac{\theta^2}{1/\gamma^2 + \theta^2} K^2_{1/3}(\xi)\right]
+
+    where
+
+    .. math:: \xi \simeq \frac{\omega}{2 \omega_c} \left(1 + \gamma^2 \theta^2 \right)^{3/2}
+
+    Parameters
+    ----------
+    ω : float, 1/time
+        Observation frequency.
+    θ : float, angle
+        Observation angle relative to the particle's orbital plane (latitude).
+    ωc : float, 1/time
+        Critical synchrotron frequency.
+    γ : float, dimensionless
+        Electron Lorentz factor.
+
+    Returns
+    -------
+    d2I : float, dimensionless
+        Doubly differential cross section.
+
+    References
+    ----------
+    Eq. (24) of [DE]_.
+
+    .. [DE] Don Edwards, `"Notes on Synchrotron Radiation" <https://www.researchgate.net/profile/Thierry_De_Mees3/post/Is_there_something_similar_to_synchrotron_radiation_in_gravitoelectromagnetism_GEM/attachment59d62c2e79197b807798a8ee/AS%3A346000725168128%401459504409173/download/syncradnotes.pdf>`_.
+
+    Examples
+    --------
+    >>> d2I = diferential_intensity_distribution(ω=9e4 / u.fs, θ=1 * u.miliradian, ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
+    >>> print("{:.1f}".format(d2I))
+    0.0 dimensionless
+    """  # noqa E501
+    γ = γ.to_value(u.dimensionless)
+    θ = θ.to_value(u.radian)
+    ξ = (ω / (2 * ωc) * (1 + γ ** 2 * θ ** 2) ** (3 / 2)).to_value(u.dimensionless)
+    d2I = (
+        (3 * α)
+        / (4 * np.pi ** 2)
+        * (ω / ωc) ** 2
+        * γ ** 6
+        * (1 / γ ** 2 + θ ** 2) ** 2
+        * (kv(2 / 3, ξ) ** 2 + θ ** 2 / (1 / γ ** 2 + θ ** 2) * kv(1 / 3, ξ) ** 2)
+    )
+    # todo check above and update example
+    return d2I.to(u.dimensionless)
 
 
 @returns(energy)
@@ -144,8 +213,8 @@ def photon_frequency_distribution(ω, ωc, γ):
 
 
 @returns(dimensionless)
-@accepts(θ=angle, ωc=1 / time, γ=dimensionless)
-def photon_angle_distribution(θ, ωc, γ):
+@accepts(θ=angle, γ=dimensionless)
+def photon_angle_distribution(θ, γ):
     r"""Computes the number of photons per unit solid angle.
 
     Computes the number of photons observed at an angle
@@ -161,8 +230,6 @@ def photon_angle_distribution(θ, ωc, γ):
 
     Parameters
     ----------
-    ωc : float, 1/time
-        Critical synchrotron frequency.
     γ : float, dimensionless
         Electron Lorentz factor.
     θ : float, angle
@@ -181,19 +248,126 @@ def photon_angle_distribution(θ, ωc, γ):
 
     Examples
     --------
-    >>> NΩ = photon_angle_distribution(θ=45 * u.degree, ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
+    >>> NΩ = photon_angle_distribution(θ=0.5 * u.degree, γ=5e3 * u.dimensionless)
     >>> print("{:.1e}".format(NΩ))
-    9.8e-14 dimensionless
+    5.8e-04 dimensionless
     """
     θ = θ.to_value(u.radian)
     a = 7 * u.qe ** 2 / (96 * np.pi * u.eps_0 * u.hbar * u.clight)  # prefactor
     dN_over_dΩ = (
-        a.to(dimensionless)
+        a.to(u.dimensionless)
         * γ ** 2
         / ((1 + γ ** 2 * θ ** 2) ** (5 / 2))
         * (1 + 5 / 7 * γ ** 2 * θ ** 2 / (1 + γ ** 2 * θ ** 2))
     )
-    return dN_over_dΩ.to("dimensionless")
+    return dN_over_dΩ.to(u.dimensionless)
+
+
+class Spectrum:
+    r"""Base class for holding raw spectrum data and plotting it."""
+
+    def __init__(self, horiz_axis_data, spectrum, text=None):
+        """Constructs spectrum from raw data.
+
+        Parameters
+        ----------
+        horiz_axis_data : 1d array_like
+            Raw data (incl. units) for the dependent variable, ie. frequency, angle etc.
+        horiz_norm : float
+            Normalization factor (incl. units) to be applied to `horiz_axis_data`.
+        spectrum : 1d array_like
+            Raw data (incl. units) for the dependent variable, ie. the spectrum data.
+
+        """
+        self.x_data = horiz_axis_data
+        self.spectrum = spectrum
+        self.text = text
+
+        if self.x_data.units == u.dimensionless:
+            self.x_data = self.x_data.to_value(u.dimensionless)
+
+        if self.spectrum.units == u.dimensionless:
+            self.spectrum = self.spectrum.to_value(u.dimensionless)
+
+    def plot(self, ax=None):
+        if ax is None:
+            fig = Figure()
+            fig.subplots_adjust(left=0.125, bottom=0.18, right=0.95, top=0.92)
+
+            ax = fig.add_subplot(111)
+
+        ax.plot(self.x_data, self.spectrum, color="darkred")
+
+        ax.set_xlim(left=0)
+        ax.set_ylim(bottom=0)
+
+        ax.ticklabel_format(
+            axis="y",
+            style="scientific",
+            scilimits=(0, 0),
+            useOffset=False,
+            useMathText=True,
+        )
+
+        ax.fill_between(
+            self.x_data,
+            self.spectrum,
+            where=self.x_data <= 1,
+            facecolor="firebrick",
+            alpha=0.5,
+        )
+
+        if self.text is not None:
+            ax.text(
+                0.6, 0.9, self.text, transform=ax.transAxes, fontsize=16, weight="bold"
+            )
+
+        return ax
+
+
+class SynchrotronFrequencySpectrum(Spectrum):
+    def __init__(self, horiz_axis_data, spectrum, horiz_norm, vline, text):
+        super().__init__(horiz_axis_data, spectrum, text)
+
+        self.x_data = (self.x_data / horiz_norm).to_value(u.dimensionless)
+
+        self.mark_val = dict(
+            position=vline.to_value(u.dimensionless), label=r"$\langle \omega \rangle$"
+        )
+
+    def plot(self, ax=None):
+        ax = super().plot(ax=ax)
+
+        ax.set(ylabel=r"$\frac{dN}{dy}$", xlabel=r"$y = \omega / \omega_c$")
+        ax.set_xlim(right=2)
+
+        ax.axvline(x=self.mark_val["position"], linestyle="--", color="firebrick")
+        ax.text(
+            self.mark_val["position"],
+            0,
+            self.mark_val["label"],
+            fontsize=16,
+            weight="bold",
+        )
+
+        return ax.figure
+
+
+class SynchrotronAngularSpectrum(Spectrum):
+    def __init__(self, horiz_axis_data, spectrum, text):
+        super().__init__(horiz_axis_data, spectrum, text)
+
+    def plot(self, ax=None):
+        ax = super().plot(ax=ax)
+
+        ax.set(
+            ylabel=r"$\frac{dN}{d\Omega}$",
+            xlabel=r"$\gamma \theta$ [%s]" % self.x_data.units,
+        )
+
+        ax.set_xlim(right=2)
+
+        return ax.figure
 
 
 class Radiator(BaseClass):
@@ -201,8 +375,6 @@ class Radiator(BaseClass):
 
     Attributes
     ----------
-    α: :obj:`unyt_quantity`
-        Fine structure constant.
     τ0: :obj:`unyt_quantity`
         Radiation-reaction time-scale.
     a: :obj:`unyt_quantity`
@@ -269,7 +441,6 @@ class Radiator(BaseClass):
     Radiation-reaction effects are negligible.
     """
 
-    α = (u.qe ** 2 / (4 * np.pi * u.eps_0 * u.hbar * u.clight)).to("dimensionless")
     τ0 = (2 * r_e / (3 * u.clight)).to("yoctosecond")
     a = 1510.3 * u.micrometer ** (-1 / 2)
     b = 3 * np.sqrt(2.0e19) * u.cm ** (-3 / 2)
@@ -303,15 +474,17 @@ class Radiator(BaseClass):
             self.ħωc = (3 / 2 * self.K * self.γ ** 2 * u.h * u.clight / self.λu).to(
                 "kiloelectronvolt"
             )
+            self.ωc = (self.ħωc / u.hbar).to(1 / u.fs)
             self.ħω_avg = (8 / (15 * np.sqrt(3)) * self.ħωc).to("kiloelectronvolt")
-            self.Nγ = 5 * np.sqrt(3) * np.pi * self.α * self.K / 6
+            self.ω_avg = (self.ħω_avg / u.hbar).to(1 / u.fs)
+            self.Nγ = 5 * np.sqrt(3) * np.pi * α * self.K / 6
             self.θ_par = (self.K / self.γ * u.radian).to("miliradian")
             self.N_shot = (self.Nγ * self.Nβ * self.plasma.N).to("dimensionless")
         else:
             # todo implement undulator case
             raise NotImplementedError("The undulator case is not yet implemented.")
 
-    def frequency_spectrum(self, ω):
+    def frequency_spectrum(self, ω=None):
         r"""Computes photon frequency distribution over a range of frequencies.
 
         Computes the number of synchrotron photons emitted at each of the frequencies in `ω`.
@@ -320,6 +493,7 @@ class Radiator(BaseClass):
         ----------
         ω : (N,) unyt_array of floats
             Frequency container, with dimensions of 1/time.
+            Defaults to ``np.linspace(1e-5 * self.ωc, 2 * self.ωc, 100)``
 
         Returns
         -------
@@ -328,12 +502,51 @@ class Radiator(BaseClass):
         --------
 
         """
-        # from functools import partial
-        # freq_dist = partial()
-        # map(photon_frequency_distribution,
+        freq_dist = partial(photon_frequency_distribution, ωc=self.ωc, γ=self.γ)
 
-    def angular_spectrum(self):
-        raise NotImplementedError
+        if ω is None:
+            ω = np.linspace(1e-5 * self.ωc, 2 * self.ωc, 50)
+
+        # call once to get unit
+        unit_of_spectrum = freq_dist(ω[0]).units
+
+        # pre-allocate
+        spectrum = np.empty(ω.size) * unit_of_spectrum
+
+        # compute spectrum at each point
+        for i, freq in enumerate(ω):
+            spectrum[i] = freq_dist(freq)
+
+        return SynchrotronFrequencySpectrum(
+            horiz_axis_data=ω,
+            spectrum=spectrum,
+            horiz_norm=self.ωc,
+            vline=self.ω_avg / self.ωc,
+            text=r"$\hbar \omega_c = {:.1f}$".format(self.ħωc),
+        )
+
+    def angular_spectrum(self, θ=None):
+        """."""
+        angle_dist = partial(photon_angle_distribution, γ=self.γ)
+
+        if θ is None:
+            θ = np.linspace(0, 0.4, 50) * u.miliradian
+
+        # call once to get unit
+        unit_of_spectrum = angle_dist(θ[0]).units
+
+        # pre-allocate
+        spectrum = np.empty(θ.size) * unit_of_spectrum
+
+        # compute spectrum at each point
+        for i, theta in enumerate(θ):
+            spectrum[i] = angle_dist(theta)
+
+        return SynchrotronAngularSpectrum(
+            horiz_axis_data=(self.γ * θ).to(u.radian),
+            spectrum=spectrum,
+            text=r"$\gamma = {:.1f}$".format(self.γ.to_value(u.dimensionless)),
+        )
 
     def __str__(self):
         msg = (
