@@ -80,7 +80,8 @@ def diferential_intensity_distribution(ω, θ, ωc, γ):
         * (1 / γ ** 2 + θ ** 2) ** 2
         * (kv(2 / 3, ξ) ** 2 + θ ** 2 / (1 / γ ** 2 + θ ** 2) * kv(1 / 3, ξ) ** 2)
     )
-    # todo check above and update example
+    # todo update example
+    # todo why is the result 0
     return d2I.to(u.dimensionless)
 
 

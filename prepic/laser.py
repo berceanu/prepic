@@ -245,7 +245,8 @@ class Laser(BaseClass):
 
         Must supply either ɛL or τL and a beam with a defined size.
         """
-        assert beam.w0 is not None, "Must supply laser beam size!"
+        if beam.w0 is None:
+            raise AssertionError("Must supply laser beam size!")
         prefactor = 2 * np.sqrt(np.log(2) / np.pi)
 
         if ɛL and (not τL):
