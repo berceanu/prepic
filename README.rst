@@ -21,6 +21,11 @@ pre-PIC
    :alt: Updates
 
 
+.. image:: https://api.codacy.com/project/badge/Grade/a7f3a31b008449fd9a2d83b34c7f4f8e
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/app/berceanu/prepic?utm_source=github.com&utm_medium=referral&utm_content=berceanu/prepic&utm_campaign=Badge_Grade_Dashboard
+
+
 .. image:: https://codecov.io/gh/berceanu/prepic/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/berceanu/prepic
 
@@ -69,8 +74,3 @@ Estimate ideal laser-plasma matching parameters based on scaling laws from [LTJT
 
 
 .. [LTJT] Lu, Wei, et al. Physical Review Special Topics-Accelerators and Beams 10.6 (2007): 061301.
-
-
-.. image:: https://api.codacy.com/project/badge/Grade/a7f3a31b008449fd9a2d83b34c7f4f8e
-   :alt: Codacy Badge
-   :target: https://app.codacy.com/app/berceanu/prepic?utm_source=github.com&utm_medium=referral&utm_content=berceanu/prepic&utm_campaign=Badge_Grade_Dashboard
