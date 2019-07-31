@@ -65,9 +65,9 @@ def diferential_intensity_distribution(ω, θ, ωc, γ):
 
     Examples
     --------
-    >>> d2I = diferential_intensity_distribution(ω=9e4 / u.fs, θ=0.5 * u.degree, ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
+    >>> d2I = diferential_intensity_distribution(ω=9e4 / u.fs, θ=1 * u.miliradian, ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
     >>> print("{:.1f}".format(d2I))
-    2.0 dimensionless
+    0.0 dimensionless
     """  # noqa E501
     γ = γ.to_value(u.dimensionless)
     θ = θ.to_value(u.radian)
@@ -477,7 +477,7 @@ class Radiator(BaseClass):
             self.ωc = (self.ħωc / u.hbar).to(1 / u.fs)
             self.ħω_avg = (8 / (15 * np.sqrt(3)) * self.ħωc).to("kiloelectronvolt")
             self.ω_avg = (self.ħω_avg / u.hbar).to(1 / u.fs)
-            self.Nγ = 5 * np.sqrt(3) * np.pi * self.α * self.K / 6
+            self.Nγ = 5 * np.sqrt(3) * np.pi * α * self.K / 6
             self.θ_par = (self.K / self.γ * u.radian).to("miliradian")
             self.N_shot = (self.Nγ * self.Nβ * self.plasma.N).to("dimensionless")
         else:
