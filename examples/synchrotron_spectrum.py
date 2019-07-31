@@ -22,6 +22,8 @@ plasma = Plasma(
 
 radiator = Radiator(plasma=plasma)
 
-fig = radiator.frequency_spectrum().plot()
+fig_freq = radiator.frequency_spectrum().plot()
+fig_freq.savefig("frequency.png")
 
-fig.savefig("frequency.png")
+fig_ang = radiator.angular_spectrum().plot()
+fig_ang.savefig("angle.png")

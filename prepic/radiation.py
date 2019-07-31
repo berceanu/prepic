@@ -146,8 +146,8 @@ def photon_frequency_distribution(ω, ωc, γ):
 
 
 @returns(dimensionless)
-@accepts(θ=angle, ωc=1 / time, γ=dimensionless)
-def photon_angle_distribution(θ, ωc, γ):
+@accepts(θ=angle, γ=dimensionless)
+def photon_angle_distribution(θ, γ):
     r"""Computes the number of photons per unit solid angle.
 
     Computes the number of photons observed at an angle
@@ -163,8 +163,6 @@ def photon_angle_distribution(θ, ωc, γ):
 
     Parameters
     ----------
-    ωc : float, 1/time
-        Critical synchrotron frequency.
     γ : float, dimensionless
         Electron Lorentz factor.
     θ : float, angle
@@ -183,25 +181,25 @@ def photon_angle_distribution(θ, ωc, γ):
 
     Examples
     --------
-    >>> NΩ = photon_angle_distribution(θ=45 * u.degree, ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
+    >>> NΩ = photon_angle_distribution(θ=45 * u.degree, γ=5e3 * u.dimensionless)
     >>> print("{:.1e}".format(NΩ))
     9.8e-14 dimensionless
     """
     θ = θ.to_value(u.radian)
     a = 7 * u.qe ** 2 / (96 * np.pi * u.eps_0 * u.hbar * u.clight)  # prefactor
     dN_over_dΩ = (
-        a.to(dimensionless)
+        a.to(u.dimensionless)
         * γ ** 2
         / ((1 + γ ** 2 * θ ** 2) ** (5 / 2))
         * (1 + 5 / 7 * γ ** 2 * θ ** 2 / (1 + γ ** 2 * θ ** 2))
     )
-    return dN_over_dΩ.to("dimensionless")
+    return dN_over_dΩ.to(u.dimensionless)
 
 
 class Spectrum:
     r"""Base class for holding raw spectrum data and plotting it."""
 
-    def __init__(self, horiz_axis_data, spectrum, horiz_norm=None):
+    def __init__(self, horiz_axis_data, spectrum):
         """Constructs spectrum from raw data.
 
         Parameters
@@ -214,15 +212,14 @@ class Spectrum:
             Raw data (incl. units) for the dependent variable, ie. the spectrum data.
 
         """
-        if horiz_norm is None:
-            self.x_data = horiz_axis_data
-        else:
-            self.x_data = (horiz_axis_data / horiz_norm).to_value(u.dimensionless)
+        self.x_data = horiz_axis_data
+        self.spectrum = spectrum
 
-        if spectrum.units == u.dimensionless:
-            self.spectrum = spectrum.to_value(u.dimensionless)
-        else:
-            self.spectrum = spectrum
+        if self.x_data.units == u.dimensionless:
+            self.x_data = self.x_data.to_value(u.dimensionless)
+
+        if self.spectrum.units == u.dimensionless:
+            self.spectrum = self.spectrum.to_value(u.dimensionless)
 
     def plot(self, ax=None, fig_width=6.4):
         if ax is None:
@@ -243,7 +240,10 @@ class Spectrum:
 
 class SynchrotronFrequencySpectrum(Spectrum):
     def __init__(self, horiz_axis_data, spectrum, horiz_norm, vline):
-        super().__init__(horiz_axis_data, spectrum, horiz_norm)
+        super().__init__(horiz_axis_data, spectrum)
+
+        self.x_data = (self.x_data / horiz_norm).to_value(u.dimensionless)
+
         self.mark_val = dict(
             position=vline.to_value(u.dimensionless), label=r"$\langle \omega \rangle$"
         )
@@ -263,6 +263,22 @@ class SynchrotronFrequencySpectrum(Spectrum):
 
         ax.axvline(x=self.mark_val["position"], linestyle="--", color="C3")
         ax.text(self.mark_val["position"], 0, self.mark_val["label"])
+
+        return ax.figure
+
+
+class SynchrotronAngularSpectrum(Spectrum):
+    def __init__(self, horiz_axis_data, spectrum):
+        super().__init__(horiz_axis_data, spectrum)
+
+    def plot(self, ax=None, fig_width=6.4):
+        ax = super().plot(ax=ax, fig_width=fig_width)
+
+        ax.set(
+            ylabel=r"$\frac{dN}{d\Omega}$",
+            xlabel=r"$\theta$ [rad]",
+            # xlim=[-0.1, 2.0],
+        )
 
         return ax.figure
 
@@ -424,8 +440,24 @@ class Radiator(BaseClass):
             vline=self.ω_avg / self.ωc,
         )
 
-    def angular_spectrum(self):
-        raise NotImplementedError
+    def angular_spectrum(self, θ=None):
+        """."""
+        angle_dist = partial(photon_angle_distribution, γ=self.γ)
+
+        if θ is None:
+            θ = np.linspace(0, np.pi, 50) * u.radian
+
+        # call once to get unit
+        unit_of_spectrum = angle_dist(θ[0]).units
+
+        # pre-allocate
+        spectrum = np.empty(θ.size) * unit_of_spectrum
+
+        # compute spectrum at each point
+        for i, theta in enumerate(θ):
+            spectrum[i] = angle_dist(theta)
+
+        return SynchrotronAngularSpectrum(horiz_axis_data=θ, spectrum=spectrum)
 
     def __str__(self):
         msg = (
