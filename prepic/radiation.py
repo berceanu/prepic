@@ -217,16 +217,14 @@ class Spectrum:
         if horiz_norm is None:
             self.x_data = horiz_axis_data
         else:
-            # norm_freq
-            self.x_data = (horiz_axis_data / horiz_norm).to_value(dimensionless)
+            self.x_data = (horiz_axis_data / horiz_norm).to_value(u.dimensionless)
 
         if spectrum.units == u.dimensionless:
-            # distr
-            self.spectrum = spectrum.to_value(dimensionless)
+            self.spectrum = spectrum.to_value(u.dimensionless)
         else:
             self.spectrum = spectrum
 
-    def plot(self, ax=None, fig_width=6.4, fill_between=True, mark_val=None):
+    def plot(self, ax=None, fig_width=6.4):
         if ax is None:
             fig = Figure()
             fig.subplots_adjust(left=0.15, bottom=0.16, right=0.99, top=0.97)
@@ -235,23 +233,8 @@ class Spectrum:
             fig.set_size_inches(fig_width, fig_height)
 
             ax = fig.add_subplot(111)
-        else:
-            fig = ax.figure
 
         ax.plot(self.x_data, self.spectrum)
-
-        if fill_between:
-            ax.fill_between(
-                self.x_data,
-                self.spectrum,
-                where=self.x_data < 1,
-                facecolor="C3",
-                alpha=0.5,
-            )
-
-        if mark_val is not None:
-            ax.axvline(x=mark_val["position"], linestyle="--", color="C3")
-            ax.text(mark_val["position"], 0, mark_val["label"])
 
         ax.set_ylim(bottom=0)
 
@@ -262,19 +245,24 @@ class SynchrotronFrequencySpectrum(Spectrum):
     def __init__(self, horiz_axis_data, spectrum, horiz_norm, vline):
         super().__init__(horiz_axis_data, spectrum, horiz_norm)
         self.mark_val = dict(
-            position=vline.to_value(dimensionless), label=r"$\langle \omega \rangle$"
+            position=vline.to_value(u.dimensionless), label=r"$\langle \omega \rangle$"
         )
 
-    def plot(self, ax=None, fig_width=6.4, **kwargs):
-        ax = super().plot(
-            ax=ax, fig_width=fig_width, fill_between=True, mark_val=self.mark_val
-        )
+    def plot(self, ax=None, fig_width=6.4):
+        ax = super().plot(ax=ax, fig_width=fig_width)
 
         ax.set(
             ylabel=r"$\frac{dN}{dy}$",
             xlabel=r"$y = \omega / \omega_c$",
             xlim=[-0.1, 2.0],
         )
+
+        ax.fill_between(
+            self.x_data, self.spectrum, where=self.x_data < 1, facecolor="C3", alpha=0.5
+        )
+
+        ax.axvline(x=self.mark_val["position"], linestyle="--", color="C3")
+        ax.text(self.mark_val["position"], 0, self.mark_val["label"])
 
         return ax.figure
 
@@ -417,7 +405,7 @@ class Radiator(BaseClass):
         freq_dist = partial(photon_frequency_distribution, ωc=self.ωc, γ=self.γ)
 
         if ω is None:
-            ω = np.linspace(1e-5 * self.ωc, 2 * self.ωc, 100)
+            ω = np.linspace(1e-5 * self.ωc, 2 * self.ωc, 50)
 
         # call once to get unit
         unit_of_spectrum = freq_dist(ω[0]).units
@@ -425,6 +413,7 @@ class Radiator(BaseClass):
         # pre-allocate
         spectrum = np.empty(ω.size) * unit_of_spectrum
 
+        # compute spectrum at each point
         for i, freq in enumerate(ω):
             spectrum[i] = freq_dist(freq)
 
