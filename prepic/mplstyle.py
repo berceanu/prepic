@@ -1,1 +1,6 @@
-PUBLICATION = {"axes.labelsize": 8, "xtick.labelsize": 8, "ytick.labelsize": 8}
+TALK = {
+    "font.family": "serif",
+    "axes.labelsize": 15,
+    "xtick.labelsize": 12,
+    "ytick.labelsize": 12,
+}
