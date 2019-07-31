@@ -1,6 +1,0 @@
-{
-    "python.pythonPath": "/home/berceanu/.virtualenvs/prepic/bin/python",
-    "python.autoComplete.extraPaths": [
-        "."
-    ],
-}

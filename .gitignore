@@ -104,6 +104,9 @@ ENV/
 # PyCharm
 .idea/
 
+#VSCode
+.vscode/
+
 
 *.png
 
