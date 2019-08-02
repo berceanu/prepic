@@ -11,7 +11,13 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = ["unyt>=2.2.0", "numpy>=1.16.4", "scipy>=1.3.0", "matplotlib>=3.1.1"]
+requirements = [
+    "unyt>=2.2.0",
+    "numpy>=1.16.4",
+    "scipy>=1.3.0",
+    "matplotlib>=3.1.1",
+    "sliceplots>=0.2.1",
+]
 
 setup_requirements = ["pytest-runner"]
 
