@@ -57,7 +57,7 @@ test: ## run tests quickly with the default Python
 	pytest --doctest-modules --doctest-rst --doctest-plus
 
 test-all: ## run tests on every Python version with tox
-	tox
+	tox -vvv
 
 docs: ## generate Sphinx HTML documentation, including API docs
 	$(MAKE) -C docs clean
