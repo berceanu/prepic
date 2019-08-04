@@ -1,9 +1,9 @@
 """
-The class from which all others inherit
-
+Abstract base classes and interface for prepic.
 """
+
 from unyt import allclose_units
-from prepic._util import todict, flatten_dict
+from prepic.util import todict, flatten_dict
 import logging
 
 logger = logging.getLogger(__name__)

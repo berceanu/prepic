@@ -2,7 +2,7 @@
 Classes for modelling PIC simulation parameters
 
 """
-from prepic._base_class import BaseClass
+from prepic.base import BaseClass
 import unyt as u
 
 

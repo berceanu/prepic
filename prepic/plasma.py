@@ -2,8 +2,8 @@
 Classes for modelling the plasma, without any matching
 
 """
-from prepic._base_class import BaseClass
-from prepic._constants import r_e
+from prepic.base import BaseClass
+from prepic.constants import r_e
 
 import numpy as np
 import unyt as u

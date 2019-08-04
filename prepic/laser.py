@@ -2,8 +2,8 @@
 Classes for modelling the laser pulse, without any matching
 
 """
-from prepic._base_class import BaseClass
-from prepic._constants import r_e
+from prepic.base import BaseClass
+from prepic.constants import r_e
 from prepic.ionization import helium_ionization_state
 import numpy as np
 import unyt as u
