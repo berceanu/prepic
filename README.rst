@@ -21,9 +21,9 @@ pre-PIC
    :alt: Updates
 
 
-.. image:: https://api.codacy.com/project/badge/Grade/a7f3a31b008449fd9a2d83b34c7f4f8e
-   :alt: Codacy Badge
-   :target: https://app.codacy.com/app/berceanu/prepic?utm_source=github.com&utm_medium=referral&utm_content=berceanu/prepic&utm_campaign=Badge_Grade_Dashboard
+.. image:: https://img.shields.io/lgtm/grade/python/g/berceanu/prepic.svg?logo=lgtm&logoWidth=18
+   :alt: Language grade: Python
+   :target: https://lgtm.com/projects/g/berceanu/prepic/context:python
 
 
 .. image:: https://codecov.io/gh/berceanu/prepic/branch/master/graph/badge.svg
