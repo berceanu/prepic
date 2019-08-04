@@ -6,23 +6,16 @@ import warnings
 from functools import partial
 
 import numpy as np
-import matplotlib.style as style
 from matplotlib.figure import Figure
 from scipy.integrate import quad
 from scipy.special import kv
 
 import unyt as u
 
-from prepic._base_class import BaseClass
-from prepic._constants import r_e, α
-
-from prepic.mplstyle import TALK
+from prepic.base import BaseClass
+from prepic.constants import r_e, α
 
 dim = u.dimensions
-
-style.use("seaborn-talk")
-style.use("ggplot")
-style.use(TALK)
 
 
 # todo add docstrings
