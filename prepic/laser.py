@@ -121,7 +121,7 @@ class GaussianBeam(BaseClass):
             :param λL: laser wavelength (float, length, optional)
         """
         w0 = 2 * np.sqrt(2) / np.pi * λL * f_number
-        return cls.__init__(w0=w0, λL=λL)
+        return cls(w0=w0, λL=λL)
 
     @classmethod
     @u.accepts(focal_distance=dim.length, beam_diameter=dim.length, λL=dim.length)
