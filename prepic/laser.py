@@ -5,13 +5,13 @@ Classes for modelling the laser pulse, without any matching
 from prepic._base_class import BaseClass
 from prepic._constants import r_e
 from prepic.ionization import helium_ionization_state
-from unyt.dimensions import dimensionless, length, flux
-from unyt import accepts
-import unyt as u
 import numpy as np
+import unyt as u
+
+dim = u.dimensions
 
 
-@accepts(w0=length)
+@u.accepts(w0=dim.length)
 def w0_to_fwhm(w0):
     """Computes Gaussian laser FWHM from its beam waist.
 
@@ -24,7 +24,7 @@ def w0_to_fwhm(w0):
     return 2 * w0 / np.sqrt(2 / np.log(2))
 
 
-@accepts(fwhm=length)
+@u.accepts(fwhm=dim.length)
 def fwhm_to_w0(fwhm):
     """Computes Gaussian laser beam waist from its FWHM.
 
@@ -37,7 +37,7 @@ def fwhm_to_w0(fwhm):
     return 1 / 2 * np.sqrt(2 / np.log(2)) * fwhm
 
 
-@accepts(a0=dimensionless, λL=length)
+@u.accepts(a0=dim.dimensionless, λL=dim.length)
 def intensity_from_a0(a0, λL=0.8 * u.micrometer):
     """Compute peak laser intensity in the focal plane.
 
@@ -51,13 +51,13 @@ def intensity_from_a0(a0, λL=0.8 * u.micrometer):
     return np.pi / 2 * u.clight / r_e * u.me * u.clight ** 2 / λL ** 2 * a0 ** 2
 
 
-@accepts(i0=flux, λL=length)
+@u.accepts(i0=dim.flux, λL=dim.length)
 def a0_from_intensity(i0, λL=0.8 * u.micrometer):
     """Compute laser normalized vector potential.
 
     Args:
         i0 (float, energy/time/area): peak laser intensity in the focal plane
-        λL (float, length): laser wavelength
+        λL (float, dim.length): laser wavelength
 
     Returns:
         a0 (float, dimensionless): normalized laser vector potential
@@ -112,7 +112,7 @@ class GaussianBeam(BaseClass):
             self.zR = None
 
     @classmethod
-    @accepts(f_number=dimensionless, λL=length)
+    @u.accepts(f_number=dim.dimensionless, λL=dim.length)
     def from_f_number(cls, f_number, λL=0.8 * u.micrometer):
         """Construct beam by giving the OAP's f/#.
 
@@ -121,10 +121,10 @@ class GaussianBeam(BaseClass):
             :param λL: laser wavelength (float, length, optional)
         """
         w0 = 2 * np.sqrt(2) / np.pi * λL * f_number
-        return cls(w0=w0, λL=λL)
+        return cls.__init__(w0=w0, λL=λL)
 
     @classmethod
-    @accepts(focal_distance=length, beam_diameter=length, λL=length)
+    @u.accepts(focal_distance=dim.length, beam_diameter=dim.length, λL=dim.length)
     def from_focal_distance(cls, focal_distance, beam_diameter, λL=0.8 * u.micrometer):
         """Constuct beam from OAP's focal distance and beam diameter.
 
@@ -134,6 +134,9 @@ class GaussianBeam(BaseClass):
             :param λL: laser wavelength (float, length, optional)
         """
         return cls.from_f_number(f_number=focal_distance / beam_diameter, λL=λL)
+
+    def __eq__(self, other):
+        return super().__eq__(other)
 
     def __repr__(self):
         return f"<{self.__class__.__name__}({self.w0}, {self.λL})>"
@@ -257,6 +260,9 @@ class Laser(BaseClass):
             raise TypeError("Must supply either ɛL or τL.")
 
         return cls(ɛL=ɛL, τL=τL, beam=beam)
+
+    def __eq__(self, other):
+        return super().__eq__(other)
 
     def __repr__(self):
         return f"<{self.__class__.__name__}({self.ɛL}, {self.τL}, {repr(self.beam)})>"

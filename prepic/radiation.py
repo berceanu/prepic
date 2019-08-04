@@ -6,18 +6,19 @@ import warnings
 from functools import partial
 
 import numpy as np
-import unyt as u
 import matplotlib.style as style
 from matplotlib.figure import Figure
 from scipy.integrate import quad
 from scipy.special import kv
-from unyt import accepts, returns
-from unyt.dimensions import dimensionless, energy, time, angle
+
+import unyt as u
 
 from prepic._base_class import BaseClass
 from prepic._constants import r_e, α
 
 from prepic.mplstyle import TALK
+
+dim = u.dimensions
 
 style.use("seaborn-talk")
 style.use("ggplot")
@@ -27,8 +28,8 @@ style.use(TALK)
 # todo add docstrings
 
 
-@returns(dimensionless)
-@accepts(ω=1 / time, θ=angle, ωc=1 / time, γ=dimensionless)
+@u.returns(dim.dimensionless)
+@u.accepts(ω=1 / dim.time, θ=dim.angle, ωc=1 / dim.time, γ=dim.dimensionless)
 def diferential_intensity_distribution(ω, θ, ωc, γ):
     r"""Computes the synchrotron energy distribution in frequency and solid angle.
 
@@ -85,8 +86,8 @@ def diferential_intensity_distribution(ω, θ, ωc, γ):
     return d2I.to(u.dimensionless)
 
 
-@returns(energy)
-@accepts(ωc=1 / time, γ=dimensionless)
+@u.returns(dim.energy)
+@u.accepts(ωc=1 / dim.time, γ=dim.dimensionless)
 def _total_radiated_energy(ωc, γ):
     r"""Computes total energy radiated per betatron oscillation.
 
@@ -114,8 +115,8 @@ def _total_radiated_energy(ωc, γ):
     return intensity.to("keV")
 
 
-@returns(dimensionless)
-@accepts(y=dimensionless)
+@u.returns(dim.dimensionless)
+@u.accepts(y=dim.dimensionless)
 def _s_function(y, max_abserr=1e-5):
     r"""Shape of the synchrotron spectrum.
 
@@ -170,8 +171,8 @@ def _s_function(y, max_abserr=1e-5):
         return result * u.dimensionless
 
 
-@returns(dimensionless)
-@accepts(ω=1 / time, ωc=1 / time, γ=dimensionless)
+@u.returns(dim.dimensionless)
+@u.accepts(ω=1 / dim.time, ωc=1 / dim.time, γ=dim.dimensionless)
 def photon_frequency_distribution(ω, ωc, γ):
     r"""Computes the number of photons per unit frequency interval.
 
@@ -213,8 +214,8 @@ def photon_frequency_distribution(ω, ωc, γ):
     return dN_over_dy.to("dimensionless")
 
 
-@returns(dimensionless)
-@accepts(θ=angle, γ=dimensionless)
+@u.returns(dim.dimensionless)
+@u.accepts(θ=dim.angle, γ=dim.dimensionless)
 def photon_angle_distribution(θ, γ):
     r"""Computes the number of photons per unit solid angle.
 
@@ -548,6 +549,9 @@ class Radiator(BaseClass):
             spectrum=spectrum,
             text=r"$\gamma = {:.1f}$".format(self.γ.to_value(u.dimensionless)),
         )
+
+    def __eq__(self, other):
+        return super().__eq__(other)
 
     def __str__(self):
         msg = (
