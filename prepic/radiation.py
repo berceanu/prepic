@@ -6,13 +6,12 @@ import warnings
 from functools import partial
 
 import numpy as np
-from matplotlib.figure import Figure
 from scipy.integrate import quad
 from scipy.special import kv
 
 import unyt as u
 
-from prepic.base import BaseClass
+from prepic.base import BaseClass, Visualizer
 from prepic.constants import r_e, α
 
 dim = u.dimensions
@@ -258,22 +257,178 @@ def photon_angle_distribution(θ, γ):
     return dN_over_dΩ.to(u.dimensionless)
 
 
+class AnnotationText:
+    """
+    Examples
+    --------
+    >>> text = AnnotationText(text="blarg", xy=(0.6, 0.9), xycoords='axes fraction')
+    """
+
+    def __init__(self, *, text, xy, xycoords="data"):
+        self.text = text
+        self.xy = xy
+        self.xycoords = xycoords
+
+
+class SynchrotronSpectrum(Visualizer):
+    def __init__(self, radiator, ax=None, **kwargs):
+        super().__init__(ax=ax, **kwargs)
+        self.rad = radiator
+        self.xdata = kwargs.pop("xdata", np.array([]))
+        self.ydata = kwargs.pop("ydata", np.array([]))
+
+    def transform(self, *args, **kwargs):
+        self.draw()
+        return self
+
+    def generate_spectrum(self, *args, **kwargs):
+        raise NotImplementedError(
+            "Subclasses must implement a spectrum-generating method."
+        )
+
+    def draw(self):
+        self.ax.plot(self.xdata, self.ydata, color="darkred")
+
+        self.ax.set_xlim(0, 2)
+        self.ax.set_ylim(bottom=0)
+
+        return self.ax
+
+    def finalize(self, *, xlabel, ylabel, ax_title, annotations):
+
+        self.ax.ticklabel_format(
+            axis="y",
+            style="scientific",
+            scilimits=(0, 0),
+            useOffset=False,
+            useMathText=True,
+        )
+
+        self.ax.fill_between(
+            self.xdata,
+            self.ydata,
+            where=self.xdata <= 1,
+            facecolor="firebrick",
+            alpha=0.5,
+        )
+
+        for ann in annotations:
+            self.ax.annotate(s=ann.text, xy=ann.xy, xycoords=ann.xycoords)
+
+        self.ax.set_ylabel(ylabel)
+        self.ax.set_xlabel(xlabel)
+        self.set_title(ax_title)
+
+        return self.ax
+
+
+class SynchrotronAngularSpectrum(SynchrotronSpectrum):
+    """
+    Examples
+    --------
+    >>> import unyt as u
+    >>> from prepic import Plasma, Laser, GaussianBeam
+    >>> from matplotlib import pyplot
+
+    >>> waist = 15 * u.micrometer
+    >>> mylaser = Laser.from_power(power=1 * u.petawatt, ɛL=3 * u.joule,
+    ...                            beam=GaussianBeam(w0=waist))
+
+    >>> myplasma = Plasma(n_pe=1e18 / u.cm**3, laser=mylaser, bubble_radius=waist)
+    >>> r = Radiator(myplasma)
+
+    >>> _, ax = pyplot.subplots()
+    >>> s = SynchrotronAngularSpectrum(r, ax=ax).transform()
+    >>> s.poof()
+    """
+
+    def __init__(self, radiator, ax=None, **kwargs):
+        super().__init__(radiator, ax=ax, **kwargs)
+
+    def transform(self, *args, **kwargs):
+        self.generate_spectrum().draw()
+        return self
+
+    def generate_spectrum(self, θ=None):
+        angle_dist = partial(photon_angle_distribution, γ=self.rad.γ)
+
+        if θ is None:
+            θ = np.linspace(0, 0.4, 50) * u.miliradian
+
+        # call once to get unit
+        unit_of_spectrum = angle_dist(θ[0]).units
+
+        # pre-allocate
+        spectrum = np.empty(θ.size) * unit_of_spectrum
+
+        # compute spectrum at each point
+        for i, theta in enumerate(θ):
+            spectrum[i] = angle_dist(theta)
+
+        self.xdata = (self.rad.γ * θ).to(u.radian)
+        self.ydata = spectrum.to_value(u.dimensionless)
+
+        return self
+
+    def draw(self):
+        super().draw()
+        return self.ax
+
+    def finalize(self, **kwargs):
+        gamma = AnnotationText(
+            text=r"$\gamma = {:.1f}$".format(self.rad.γ.to_value(u.dimensionless)),
+            xy=(0.6, 0.9),
+            xycoords="axes fraction",
+        )
+
+        super().finalize(
+            annotations=(gamma,),
+            ylabel=r"$\frac{dN}{d\Omega}$",
+            xlabel=r"$\gamma \theta$ [%s]" % self.xdata.units,
+            ax_title="Synchrotron Angular Spectrum",
+        )
+
+        return self.ax
+
+
+# class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
+#     def __init__(self, radiator, ax=None, **kwargs):
+#         super().__init__(radiator, ax=ax, **kwargs)
+
+#     def transform(self, *args, **kwargs):
+#         self.draw(x, y, c)
+#         return self
+
+#     def generate_spectrum(self, *args, **kwargs):
+#         raise NotImplementedError(
+#             "Subclasses must implement a spectrum-generating method."
+#         )
+
+#     def draw(self, x, y, c):
+#         self.ax.axvline(x=self.mark_val["position"], linestyle="--", color="firebrick")
+#         return self.ax
+
+#     def finalize(self, **kwargs):
+#         text = kwargs.pop("text")
+#         hbar_omega_c = AnnotationText(
+#             text=text, xy=(0.6, 0.9), xycoords="axes fraction"
+#         )
+#         omega_average = AnnotationText(
+#             text=r"$\langle \omega \rangle$", xy=(vline.to_value(u.dimensionless), 0)
+#         )
+
+#         super().finalize(
+#             annotations=(hbar_omega_c, omega_average),
+#             ylabel=r"$\frac{dN}{dy}$",
+#             xlabel=r"$y = \omega / \omega_c$",
+#             ax_title="Synchrotron Frequency Spectrum",
+#         )
+
+#         return self.ax
+
+
 class Spectrum:
-    r"""Base class for holding raw spectrum data and plotting it."""
-
     def __init__(self, horiz_axis_data, spectrum, text=None):
-        """Constructs spectrum from raw data.
-
-        Parameters
-        ----------
-        horiz_axis_data : 1d array_like
-            Raw data (incl. units) for the dependent variable, ie. frequency, angle etc.
-        horiz_norm : float
-            Normalization factor (incl. units) to be applied to `horiz_axis_data`.
-        spectrum : 1d array_like
-            Raw data (incl. units) for the dependent variable, ie. the spectrum data.
-
-        """
         self.x_data = horiz_axis_data
         self.spectrum = spectrum
         self.text = text
@@ -285,24 +440,7 @@ class Spectrum:
             self.spectrum = self.spectrum.to_value(u.dimensionless)
 
     def plot(self, ax=None):
-        if ax is None:
-            fig = Figure()
-            fig.subplots_adjust(left=0.125, bottom=0.18, right=0.95, top=0.92)
-
-            ax = fig.add_subplot(111)
-
         ax.plot(self.x_data, self.spectrum, color="darkred")
-
-        ax.set_xlim(left=0)
-        ax.set_ylim(bottom=0)
-
-        ax.ticklabel_format(
-            axis="y",
-            style="scientific",
-            scilimits=(0, 0),
-            useOffset=False,
-            useMathText=True,
-        )
 
         ax.fill_between(
             self.x_data,
@@ -311,58 +449,6 @@ class Spectrum:
             facecolor="firebrick",
             alpha=0.5,
         )
-
-        if self.text is not None:
-            ax.text(
-                0.6, 0.9, self.text, transform=ax.transAxes, fontsize=16, weight="bold"
-            )
-
-        return ax
-
-
-class SynchrotronFrequencySpectrum(Spectrum):
-    def __init__(self, horiz_axis_data, spectrum, horiz_norm, vline, text):
-        super().__init__(horiz_axis_data, spectrum, text)
-
-        self.x_data = (self.x_data / horiz_norm).to_value(u.dimensionless)
-
-        self.mark_val = dict(
-            position=vline.to_value(u.dimensionless), label=r"$\langle \omega \rangle$"
-        )
-
-    def plot(self, ax=None):
-        ax = super().plot(ax=ax)
-
-        ax.set(ylabel=r"$\frac{dN}{dy}$", xlabel=r"$y = \omega / \omega_c$")
-        ax.set_xlim(right=2)
-
-        ax.axvline(x=self.mark_val["position"], linestyle="--", color="firebrick")
-        ax.text(
-            self.mark_val["position"],
-            0,
-            self.mark_val["label"],
-            fontsize=16,
-            weight="bold",
-        )
-
-        return ax.figure
-
-
-class SynchrotronAngularSpectrum(Spectrum):
-    def __init__(self, horiz_axis_data, spectrum, text):
-        super().__init__(horiz_axis_data, spectrum, text)
-
-    def plot(self, ax=None):
-        ax = super().plot(ax=ax)
-
-        ax.set(
-            ylabel=r"$\frac{dN}{d\Omega}$",
-            xlabel=r"$\gamma \theta$ [%s]" % self.x_data.units,
-        )
-
-        ax.set_xlim(right=2)
-
-        return ax.figure
 
 
 class Radiator(BaseClass):
@@ -512,36 +598,13 @@ class Radiator(BaseClass):
         for i, freq in enumerate(ω):
             spectrum[i] = freq_dist(freq)
 
-        return SynchrotronFrequencySpectrum(
-            horiz_axis_data=ω,
-            spectrum=spectrum,
-            horiz_norm=self.ωc,
-            vline=self.ω_avg / self.ωc,
-            text=r"$\hbar \omega_c = {:.1f}$".format(self.ħωc),
-        )
-
-    def angular_spectrum(self, θ=None):
-        """."""
-        angle_dist = partial(photon_angle_distribution, γ=self.γ)
-
-        if θ is None:
-            θ = np.linspace(0, 0.4, 50) * u.miliradian
-
-        # call once to get unit
-        unit_of_spectrum = angle_dist(θ[0]).units
-
-        # pre-allocate
-        spectrum = np.empty(θ.size) * unit_of_spectrum
-
-        # compute spectrum at each point
-        for i, theta in enumerate(θ):
-            spectrum[i] = angle_dist(theta)
-
-        return SynchrotronAngularSpectrum(
-            horiz_axis_data=(self.γ * θ).to(u.radian),
-            spectrum=spectrum,
-            text=r"$\gamma = {:.1f}$".format(self.γ.to_value(u.dimensionless)),
-        )
+        # return SynchrotronFrequencySpectrum(
+        #     horiz_axis_data=ω,
+        #     spectrum=spectrum,
+        #     horiz_norm=self.ωc,
+        #     vline=self.ω_avg / self.ωc,
+        #     text=r"$\hbar \omega_c = {:.1f}$".format(self.ħωc),
+        # )
 
     def __eq__(self, other):
         return super().__eq__(other)

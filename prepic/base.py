@@ -58,9 +58,9 @@ class BaseClass:
 
 
 # Inspired by yellowbrick.
-class Plot:
+class Visualizer:
     """
-    The root of the visual object hierarchy that defines how sliceplots
+    The root of the visual object hierarchy that defines how prepic
     creates, stores, and renders visual artifacts using matplotlib.
 
     Parameters
@@ -88,9 +88,9 @@ class Plot:
 
     Notes
     -----
-    Plots maintain a reference to an ``ax`` object, a Matplotlib Axes where the
+    Visualizers maintain a reference to an ``ax`` object, a Matplotlib Axes where the
     figures are drawn and rendered, as well as to a ``fig`` object, a Matplotlib
-    Figure on which the object will be plotted.
+    Figure on which the Visualizer will be plotted.
     """
 
     def __init__(self, ax=None, fig=None, **kwargs):
@@ -103,8 +103,8 @@ class Plot:
     @property
     def ax(self):
         """
-        The matplotlib axes that the object draws upon (can also be a grid
-        of multiple axes objects). The visualizer uses :meth:`~matplotlib.pyplot.gca`
+        The matplotlib axes that the visualizer draws upon (can also be a grid
+        of multiple axes objects). The visualizer uses :func:`matplotlib.pyplot.gca`
         to create an axes for the user if one has not been specified.
         """
         if not hasattr(self, "_ax") or self._ax is None:
@@ -118,8 +118,8 @@ class Plot:
     @property
     def fig(self):
         """
-        The matplotlib fig that the object draws upon. The visualizer uses
-        the matplotlib method :meth:`~matplotlib.pyplot.gcf` to create a figure for
+        The matplotlib fig that the visualizer draws upon. The visualizer uses
+        the matplotlib method :func:`matplotlib.pyplot.gcf` to create a figure for
         the user if one has not been specified.
         """
         if not hasattr(self, "_fig") or self._fig is None:
@@ -149,42 +149,39 @@ class Plot:
             height_in_inches = height / self.fig.get_dpi()
             self.fig.set_size_inches(width_in_inches, height_in_inches)
 
-    def process(self, X, y=None, **kwargs):
+    def transform(self, **kwargs):  # todo change
         """
-        Processes the data to be plotted.
+        Transforms the data to be plotted and is the primary entry point for producing
+        a visualization.
 
         Parameters
         ----------
-        X : ndarray or DataFrame of shape n x m
-            A matrix of n instances with m features
-
-        y : ndarray or Series of length n
-            An array or series of target or class values
-
         kwargs: dict
             Keyword arguments passed to the drawing functionality.
+            See visualizer specific details for how to use
+            the kwargs to modify the visualization or transformation process.
 
         Returns
         -------
-        self : Plot
-            The process method must always return self to support pipelines.
+        self : visualizer
+            The fit method must always return self to support pipelines.
         """
         return self
 
     def draw(self, **kwargs):
         """
-        This function is implemented for developers to hook into the
+        The transformation process usually calls draw (not the
+        user). This function is implemented for developers to hook into the
         matplotlib interface and to create an internal representation of the
         data in the form of a figure or axes.
 
         Parameters
         ----------
-
         kwargs: dict
             generic keyword arguments.
 
         """
-        raise NotImplementedError("Subclasses must implement a drawing interface.")
+        raise NotImplementedError("Visualizers must implement a drawing interface.")
 
     def finalize(self, **kwargs):
         """
@@ -198,7 +195,7 @@ class Plot:
         Notes
         -----
         The user calls poof and poof calls finalize. Developers should
-        implement specific finalization methods like setting titles
+        implement visualizer-specific finalization methods like setting titles
         or axes labels, etc.
         """
         return self.ax
@@ -224,7 +221,7 @@ class Plot:
 
         Notes
         -----
-        Developers don't usually override poof, as it is
+        Developers of visualizers don't usually override poof, as it is
         primarily called by the user to render the visualization.
         """
         # Ensure that draw has been called
@@ -233,7 +230,7 @@ class Plot:
                 "{} does not have a reference to a matplotlib.Axes "
                 "the figure may not render as expected!"
             )
-            warnings.warn(warn_message.format(self.__class__.__name__), UserWarning)
+            warnings.warn(warn_message.format(self.__class__.__name__), Warning)
 
         # Finalize the figure
         self.finalize()
