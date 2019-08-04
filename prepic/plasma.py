@@ -4,14 +4,14 @@ Classes for modelling the plasma, without any matching
 """
 from prepic._base_class import BaseClass
 from prepic._constants import r_e
-from unyt import accepts
-from unyt.dimensions import time
 
-import unyt as u
 import numpy as np
+import unyt as u
+
+dim = u.dimensions
 
 
-@accepts(ωp=1 / time, τL=time)
+@u.accepts(ωp=1 / dim.time, τL=dim.time)
 def interaction_regime(ωp, τL):
     """Outputs the laser-plasma interaction regime.
 
@@ -155,6 +155,9 @@ class Plasma(BaseClass):
         else:
             self.laser = None
             self.R = None
+
+    def __eq__(self, other):
+        return super().__eq__(other)
 
     def __repr__(self):
         return f"<{self.__class__.__name__}({self.npe}, {repr(self.laser)}, {self.R})>"

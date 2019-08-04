@@ -35,19 +35,23 @@ class BaseClass:
 
     def __eq__(self, other):
         """Overrides the default implementation"""
-        if isinstance(other, type(self)):
-            self_vars = flatten_dict(todict(self))
-            other_vars = flatten_dict(todict(other))
-            common_vars = self_vars.keys() & other_vars.keys()
+        if not isinstance(other, type(self)):
+            return False
 
-            for key in common_vars:
-                self_val = self_vars[key]
-                other_val = other_vars[key]
-                if not allclose_units(self_val, other_val, 1e-5):
-                    logger.warning(f"Difference in {key}: {self_val} vs {other_val}")
-                    return False
-            return True
-        return False
+        self_vars = flatten_dict(todict(self))
+        other_vars = flatten_dict(todict(other))
+        common_vars = self_vars.keys() & other_vars.keys()
+
+        # instances are not equal if any of the common attributes have different values
+        for key in common_vars:
+            self_val = self_vars[key]
+            other_val = other_vars[key]
+
+            if not allclose_units(self_val, other_val, 1e-5):
+                logger.warning(f"Difference in {key}: {self_val} vs {other_val}")
+                return False
+
+        return True
 
 
 if __name__ == "__main__":

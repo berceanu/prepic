@@ -102,6 +102,9 @@ class Simulation(BaseClass):
             dtype="int",
         )
 
+    def __eq__(self, other):
+        return super().__eq__(other)
+
     def __repr__(self):
         return f"<{self.__class__.__name__}({repr(self.plasma)}, {self.L}, {self.ppc})>"
 

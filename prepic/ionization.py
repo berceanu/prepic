@@ -2,12 +2,12 @@
 Model ionization processes
 
 """
-from unyt import accepts
-from unyt.dimensions import flux
 import unyt as u
 
+dim = u.dimensions
 
-@accepts(i0=flux)
+
+@u.accepts(i0=dim.flux)
 def helium_ionization_state(i0):
     """Compute the ionization state of Helium.
 
