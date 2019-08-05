@@ -467,30 +467,6 @@ class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
         return self.ax
 
 
-class Spectrum:
-    def __init__(self, horiz_axis_data, spectrum, text=None):
-        self.x_data = horiz_axis_data
-        self.spectrum = spectrum
-        self.text = text
-
-        if self.x_data.units == u.dimensionless:
-            self.x_data = self.x_data.to_value(u.dimensionless)
-
-        if self.spectrum.units == u.dimensionless:
-            self.spectrum = self.spectrum.to_value(u.dimensionless)
-
-    def plot(self, ax=None):
-        ax.plot(self.x_data, self.spectrum, color="darkred")
-
-        ax.fill_between(
-            self.x_data,
-            self.spectrum,
-            where=self.x_data <= 1,
-            facecolor="firebrick",
-            alpha=0.5,
-        )
-
-
 class Radiator(BaseClass):
     """Class for estimating the properties of emitted radiation of a given laser-plasma.
 
