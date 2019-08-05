@@ -297,7 +297,6 @@ class SynchrotronSpectrum(Visualizer):
         return self.ax
 
     def finalize(self, *, xlabel, ylabel, ax_title, annotations):
-
         self.ax.ticklabel_format(
             axis="y",
             style="scientific",
@@ -393,40 +392,79 @@ class SynchrotronAngularSpectrum(SynchrotronSpectrum):
         return self.ax
 
 
-# class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
-#     def __init__(self, radiator, ax=None, **kwargs):
-#         super().__init__(radiator, ax=ax, **kwargs)
+class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
+    """
+    Examples
+    --------
+    >>> import unyt as u
+    >>> from prepic import Plasma, Laser, GaussianBeam
+    >>> from matplotlib import pyplot
 
-#     def transform(self, *args, **kwargs):
-#         self.draw(x, y, c)
-#         return self
+    >>> waist = 15 * u.micrometer
+    >>> mylaser = Laser.from_power(power=1 * u.petawatt, ɛL=3 * u.joule,
+    ...                            beam=GaussianBeam(w0=waist))
 
-#     def generate_spectrum(self, *args, **kwargs):
-#         raise NotImplementedError(
-#             "Subclasses must implement a spectrum-generating method."
-#         )
+    >>> myplasma = Plasma(n_pe=1e18 / u.cm**3, laser=mylaser, bubble_radius=waist)
+    >>> r = Radiator(myplasma)
 
-#     def draw(self, x, y, c):
-#         self.ax.axvline(x=self.mark_val["position"], linestyle="--", color="firebrick")
-#         return self.ax
+    >>> _, ax = pyplot.subplots()
+    >>> s = SynchrotronFrequencySpectrum(r, ax=ax).transform()
+    >>> s.poof()
+    """
 
-#     def finalize(self, **kwargs):
-#         text = kwargs.pop("text")
-#         hbar_omega_c = AnnotationText(
-#             text=text, xy=(0.6, 0.9), xycoords="axes fraction"
-#         )
-#         omega_average = AnnotationText(
-#             text=r"$\langle \omega \rangle$", xy=(vline.to_value(u.dimensionless), 0)
-#         )
+    def __init__(self, radiator, ax=None, **kwargs):
+        super().__init__(radiator, ax=ax, **kwargs)
 
-#         super().finalize(
-#             annotations=(hbar_omega_c, omega_average),
-#             ylabel=r"$\frac{dN}{dy}$",
-#             xlabel=r"$y = \omega / \omega_c$",
-#             ax_title="Synchrotron Frequency Spectrum",
-#         )
+    def transform(self, *args, **kwargs):
+        self.generate_spectrum().draw()
+        return self
 
-#         return self.ax
+    def generate_spectrum(self, ω=None):
+        freq_dist = partial(photon_frequency_distribution, ωc=self.rad.ωc, γ=self.rad.γ)
+
+        if ω is None:
+            ω = np.linspace(1e-5 * self.rad.ωc, 2 * self.rad.ωc, 50)
+
+        # call once to get unit
+        unit_of_spectrum = freq_dist(ω[0]).units
+
+        # pre-allocate
+        spectrum = np.empty(ω.size) * unit_of_spectrum
+
+        # compute spectrum at each point
+        for i, freq in enumerate(ω):
+            spectrum[i] = freq_dist(freq)
+
+        self.xdata = (ω / self.rad.ωc).to_value(u.dimensionless)
+        self.ydata = spectrum.to_value(u.dimensionless)
+
+        return self
+
+    def draw(self):
+        super().draw()
+        x_pos = (self.rad.ω_avg / self.rad.ωc).to_value(u.dimensionless)
+        self.ax.axvline(x=x_pos, linestyle="--", color="firebrick")
+        return self.ax
+
+    def finalize(self, **kwargs):
+        hbar_omega_c = AnnotationText(
+            text=r"$\hbar \omega_c = {:.1f}$".format(self.rad.ħωc),
+            xy=(0.6, 0.9),
+            xycoords="axes fraction",
+        )
+        omega_average = AnnotationText(
+            text=r"$\langle \omega \rangle$",
+            xy=((self.rad.ω_avg / self.rad.ωc).to_value(u.dimensionless), 0),
+        )
+
+        super().finalize(
+            annotations=(hbar_omega_c, omega_average),
+            ylabel=r"$\frac{dN}{dy}$",
+            xlabel=r"$y = \omega / \omega_c$",
+            ax_title="Synchrotron Frequency Spectrum",
+        )
+
+        return self.ax
 
 
 class Spectrum:
