@@ -273,20 +273,33 @@ class AnnotationText:
 
 
 class SynchrotronSpectrum(Visualizer):
-    def __init__(self, radiator, ax=None, **kwargs):
+    def __init__(self, radiator, var=np.array([]), ax=None, **kwargs):
         super().__init__(ax=ax, **kwargs)
         self.rad = radiator
-        self.xdata = kwargs.pop("xdata", np.array([]))
-        self.ydata = kwargs.pop("ydata", np.array([]))
+        self.var = var
+
+        # self.dist_func = lambda v: None  # can i delete it?
+
+        # can i delete these?
+        self.xdata = np.array([])
+        self.ydata = np.array([])
 
     def transform(self, *args, **kwargs):
-        self.draw()
+        self.generate_spectrum().draw()
         return self
 
-    def generate_spectrum(self, *args, **kwargs):
-        raise NotImplementedError(
-            "Subclasses must implement a spectrum-generating method."
-        )
+    def generate_spectrum(self):
+        # call once to get unit
+        unit_of_spectrum = self.dist_func(self.var[0]).units
+
+        # pre-allocate
+        spectrum = np.empty(self.var.size) * unit_of_spectrum
+
+        # compute spectrum at each point
+        for i, v in enumerate(self.var):
+            spectrum[i] = self.dist_func(v)
+
+        self.ydata = spectrum.to_value(u.dimensionless)
 
     def draw(self):
         self.ax.plot(self.xdata, self.ydata, color="darkred")
@@ -343,37 +356,18 @@ class SynchrotronAngularSpectrum(SynchrotronSpectrum):
     >>> s.poof()
     """
 
-    def __init__(self, radiator, ax=None, **kwargs):
-        super().__init__(radiator, ax=ax, **kwargs)
+    def __init__(
+        self, radiator, var=np.linspace(0, 0.4, 50) * u.miliradian, ax=None, **kwargs
+    ):
+        super().__init__(radiator, var, ax, **kwargs)
+        self.dist_func = partial(photon_angle_distribution, γ=self.rad.γ)
 
-    def transform(self, *args, **kwargs):
-        self.generate_spectrum().draw()
-        return self
+    def generate_spectrum(self):
+        super().generate_spectrum()
 
-    def generate_spectrum(self, θ=None):
-        angle_dist = partial(photon_angle_distribution, γ=self.rad.γ)
-
-        if θ is None:
-            θ = np.linspace(0, 0.4, 50) * u.miliradian
-
-        # call once to get unit
-        unit_of_spectrum = angle_dist(θ[0]).units
-
-        # pre-allocate
-        spectrum = np.empty(θ.size) * unit_of_spectrum
-
-        # compute spectrum at each point
-        for i, theta in enumerate(θ):
-            spectrum[i] = angle_dist(theta)
-
-        self.xdata = (self.rad.γ * θ).to(u.radian)
-        self.ydata = spectrum.to_value(u.dimensionless)
+        self.xdata = (self.rad.γ * self.var).to(u.radian)
 
         return self
-
-    def draw(self):
-        super().draw()
-        return self.ax
 
     def finalize(self, **kwargs):
         gamma = AnnotationText(
@@ -412,49 +406,32 @@ class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
     >>> s.poof()
     """
 
-    def __init__(self, radiator, ax=None, **kwargs):
-        super().__init__(radiator, ax=ax, **kwargs)
+    def __init__(self, radiator, **kwargs):
+        super().__init__(
+            radiator,
+            dist_func=partial(
+                photon_frequency_distribution, ωc=radiator.ωc, γ=radiator.γ
+            ),
+            var=np.linspace(1e-5 * radiator.ωc, 2 * radiator.ωc, 50),
+            **kwargs,
+        )
 
-    def transform(self, *args, **kwargs):
-        self.generate_spectrum().draw()
-        return self
+    def generate_spectrum(self):
+        super().generate_spectrum()
 
-    def generate_spectrum(self, ω=None):
-        freq_dist = partial(photon_frequency_distribution, ωc=self.rad.ωc, γ=self.rad.γ)
-
-        if ω is None:
-            ω = np.linspace(1e-5 * self.rad.ωc, 2 * self.rad.ωc, 50)
-
-        # call once to get unit
-        unit_of_spectrum = freq_dist(ω[0]).units
-
-        # pre-allocate
-        spectrum = np.empty(ω.size) * unit_of_spectrum
-
-        # compute spectrum at each point
-        for i, freq in enumerate(ω):
-            spectrum[i] = freq_dist(freq)
-
-        self.xdata = (ω / self.rad.ωc).to_value(u.dimensionless)
-        self.ydata = spectrum.to_value(u.dimensionless)
+        self.xdata = (self.var / self.rad.ωc).to_value(u.dimensionless)
 
         return self
-
-    def draw(self):
-        super().draw()
-        x_pos = (self.rad.ω_avg / self.rad.ωc).to_value(u.dimensionless)
-        self.ax.axvline(x=x_pos, linestyle="--", color="firebrick")
-        return self.ax
 
     def finalize(self, **kwargs):
+        x_pos = (self.rad.ω_avg / self.rad.ωc).to_value(u.dimensionless)
+        self.ax.axvline(x=x_pos, linestyle="--", color="firebrick")
+
+        omega_average = AnnotationText(text=r"$\langle \omega \rangle$", xy=(x_pos, 0))
         hbar_omega_c = AnnotationText(
             text=r"$\hbar \omega_c = {:.1f}$".format(self.rad.ħωc),
             xy=(0.6, 0.9),
             xycoords="axes fraction",
-        )
-        omega_average = AnnotationText(
-            text=r"$\langle \omega \rangle$",
-            xy=((self.rad.ω_avg / self.rad.ωc).to_value(u.dimensionless), 0),
         )
 
         super().finalize(
