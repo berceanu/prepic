@@ -273,14 +273,13 @@ class AnnotationText:
 
 
 class SynchrotronSpectrum(Visualizer):
-    def __init__(self, radiator, var=np.array([]), ax=None, **kwargs):
+    def __init__(self, radiator, ax=None, **kwargs):
         super().__init__(ax=ax, **kwargs)
         self.rad = radiator
-        self.var = var
 
-        # self.dist_func = lambda v: None  # can i delete it?
+        self.var = np.array([])
+        self.dist_func = lambda v: v
 
-        # can i delete these?
         self.xdata = np.array([])
         self.ydata = np.array([])
 
@@ -356,10 +355,9 @@ class SynchrotronAngularSpectrum(SynchrotronSpectrum):
     >>> s.poof()
     """
 
-    def __init__(
-        self, radiator, var=np.linspace(0, 0.4, 50) * u.miliradian, ax=None, **kwargs
-    ):
-        super().__init__(radiator, var, ax, **kwargs)
+    def __init__(self, radiator, ax=None, **kwargs):
+        super().__init__(radiator, ax, **kwargs)
+        self.var = np.linspace(0, 0.4, 50) * u.miliradian
         self.dist_func = partial(photon_angle_distribution, γ=self.rad.γ)
 
     def generate_spectrum(self):
@@ -406,14 +404,11 @@ class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
     >>> s.poof()
     """
 
-    def __init__(self, radiator, **kwargs):
-        super().__init__(
-            radiator,
-            dist_func=partial(
-                photon_frequency_distribution, ωc=radiator.ωc, γ=radiator.γ
-            ),
-            var=np.linspace(1e-5 * radiator.ωc, 2 * radiator.ωc, 50),
-            **kwargs,
+    def __init__(self, radiator, ax=None, **kwargs):
+        super().__init__(radiator, ax, **kwargs)
+        self.var = np.linspace(1e-5 * self.rad.ωc, 2 * self.rad.ωc, 50)
+        self.dist_func = partial(
+            photon_frequency_distribution, ωc=self.rad.ωc, γ=self.rad.γ
         )
 
     def generate_spectrum(self):
