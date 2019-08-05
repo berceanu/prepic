@@ -301,7 +301,15 @@ class SynchrotronSpectrum(Visualizer):
         self.ydata = spectrum.to_value(u.dimensionless)
 
     def draw(self):
-        self.ax.plot(self.xdata, self.ydata, color="darkred")
+        self.ax.plot(self.xdata, self.ydata, color=self.color)
+
+        self.ax.fill_between(
+            self.xdata,
+            self.ydata,
+            where=self.xdata <= 1,
+            facecolor=self.color,
+            alpha=0.5,
+        )
 
         self.ax.set_xlim(0, 2)
         self.ax.set_ylim(bottom=0)
@@ -315,14 +323,6 @@ class SynchrotronSpectrum(Visualizer):
             scilimits=(0, 0),
             useOffset=False,
             useMathText=True,
-        )
-
-        self.ax.fill_between(
-            self.xdata,
-            self.ydata,
-            where=self.xdata <= 1,
-            facecolor="firebrick",
-            alpha=0.5,
         )
 
         for ann in annotations:
@@ -351,14 +351,16 @@ class SynchrotronAngularSpectrum(SynchrotronSpectrum):
     >>> r = Radiator(myplasma)
 
     >>> _, ax = pyplot.subplots()
-    >>> s = SynchrotronAngularSpectrum(r, ax=ax).transform()
+    >>> s = SynchrotronAngularSpectrum(r, ax=ax, color="darkred")
     >>> s.poof()
     """
 
     def __init__(self, radiator, ax=None, **kwargs):
-        super().__init__(radiator, ax, **kwargs)
-        self.var = np.linspace(0, 0.4, 50) * u.miliradian
+        super().__init__(radiator=radiator, ax=ax, **kwargs)
+        self.var = np.linspace(0, 0.4, 50) * u.miliradian  # var = θ
         self.dist_func = partial(photon_angle_distribution, γ=self.rad.γ)
+
+        self.transform()  # generate the spectrum and draw it
 
     def generate_spectrum(self):
         super().generate_spectrum()
@@ -400,16 +402,18 @@ class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
     >>> r = Radiator(myplasma)
 
     >>> _, ax = pyplot.subplots()
-    >>> s = SynchrotronFrequencySpectrum(r, ax=ax).transform()
+    >>> s = SynchrotronFrequencySpectrum(r, ax=ax, color="darkred")
     >>> s.poof()
     """
 
     def __init__(self, radiator, ax=None, **kwargs):
-        super().__init__(radiator, ax, **kwargs)
-        self.var = np.linspace(1e-5 * self.rad.ωc, 2 * self.rad.ωc, 50)
+        super().__init__(radiator=radiator, ax=ax, **kwargs)
+        self.var = np.linspace(1e-5 * self.rad.ωc, 2 * self.rad.ωc, 50)  # var = ω
         self.dist_func = partial(
             photon_frequency_distribution, ωc=self.rad.ωc, γ=self.rad.γ
         )
+
+        self.transform()  # generate the spectrum and draw it
 
     def generate_spectrum(self):
         super().generate_spectrum()
@@ -420,7 +424,7 @@ class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
 
     def finalize(self, **kwargs):
         x_pos = (self.rad.ω_avg / self.rad.ωc).to_value(u.dimensionless)
-        self.ax.axvline(x=x_pos, linestyle="--", color="firebrick")
+        self.ax.axvline(x=x_pos, linestyle="--", color=self.color)
 
         omega_average = AnnotationText(text=r"$\langle \omega \rangle$", xy=(x_pos, 0))
         hbar_omega_c = AnnotationText(
