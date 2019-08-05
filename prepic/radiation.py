@@ -261,7 +261,9 @@ class AnnotationText:
     """
     Examples
     --------
-    >>> text = AnnotationText(text="blarg", xy=(0.6, 0.9), xycoords='axes fraction')
+    >>> ann = AnnotationText(text="blarg", xy=(0.6, 0.9), xycoords='axes fraction')
+    >>> ann.text
+    'blarg'
     """
 
     def __init__(self, *, text, xy, xycoords="data"):
