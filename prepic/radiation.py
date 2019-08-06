@@ -340,19 +340,32 @@ class SynchrotronAngularSpectrum(SynchrotronSpectrum):
     Examples
     --------
     >>> import unyt as u
-    >>> from prepic import Plasma, Laser, GaussianBeam
+    >>> from prepic import Plasma, Laser, GaussianBeam, Radiator
     >>> from matplotlib import pyplot
+    >>> from collections import namedtuple
 
-    >>> waist = 15 * u.micrometer
-    >>> mylaser = Laser.from_power(power=1 * u.petawatt, ɛL=3 * u.joule,
-    ...                            beam=GaussianBeam(w0=waist))
+    >>> Param = namedtuple("Param", ["npe", "w0", "ɛL", "τL", "prop_dist"])
 
-    >>> myplasma = Plasma(n_pe=1e18 / u.cm**3, laser=mylaser, bubble_radius=waist)
-    >>> r = Radiator(myplasma)
+    >>> p = Param(  # external guiding / injection example from from http://doi.org/f4j98s
+    ...     npe=5.1e17 / u.cm ** 3,
+    ...     w0=21.0 * u.micrometer,
+    ...     ɛL=3.0 * u.joule,
+    ...     τL=47.0 * u.femtosecond,
+    ...     prop_dist=52.0 * u.mm,
+    ... )
+
+    >>> laser = Laser(ɛL=p.ɛL, τL=p.τL, beam=GaussianBeam(w0=p.w0))
+
+    >>> plasma = Plasma(
+    ...     n_pe=p.npe, laser=laser, bubble_radius=p.w0, propagation_distance=p.prop_dist
+    ... )
+
+    >>> radiator = Radiator(plasma=plasma)
 
     >>> _, ax = pyplot.subplots()
-    >>> s = SynchrotronAngularSpectrum(r, ax=ax, color="darkred")
-    >>> s.poof()
+    >>> s = SynchrotronAngularSpectrum(radiator, ax=ax, color="darkred")
+    >>> s.size = (800, 800 / 1.618)  # golden ratio
+    >>> s.poof("out.png")
     """
 
     def __init__(self, radiator, ax=None, **kwargs):
@@ -391,19 +404,32 @@ class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
     Examples
     --------
     >>> import unyt as u
-    >>> from prepic import Plasma, Laser, GaussianBeam
+    >>> from prepic import Plasma, Laser, GaussianBeam, Radiator
     >>> from matplotlib import pyplot
+    >>> from collections import namedtuple
 
-    >>> waist = 15 * u.micrometer
-    >>> mylaser = Laser.from_power(power=1 * u.petawatt, ɛL=3 * u.joule,
-    ...                            beam=GaussianBeam(w0=waist))
+    >>> Param = namedtuple("Param", ["npe", "w0", "ɛL", "τL", "prop_dist"])
 
-    >>> myplasma = Plasma(n_pe=1e18 / u.cm**3, laser=mylaser, bubble_radius=waist)
-    >>> r = Radiator(myplasma)
+    >>> p = Param(  # external guiding / injection example from from http://doi.org/f4j98s
+    ...     npe=5.1e17 / u.cm ** 3,
+    ...     w0=21.0 * u.micrometer,
+    ...     ɛL=3.0 * u.joule,
+    ...     τL=47.0 * u.femtosecond,
+    ...     prop_dist=52.0 * u.mm,
+    ... )
+
+    >>> laser = Laser(ɛL=p.ɛL, τL=p.τL, beam=GaussianBeam(w0=p.w0))
+
+    >>> plasma = Plasma(
+    ...     n_pe=p.npe, laser=laser, bubble_radius=p.w0, propagation_distance=p.prop_dist
+    ... )
+
+    >>> radiator = Radiator(plasma=plasma)
 
     >>> _, ax = pyplot.subplots()
-    >>> s = SynchrotronFrequencySpectrum(r, ax=ax, color="darkred")
-    >>> s.poof()
+    >>> s = SynchrotronFrequencySpectrum(radiator, ax=ax, color="darkred")
+    >>> s.size = (800, 800 / 1.618)  # golden ratio
+    >>> s.poof("out.png")
     """
 
     def __init__(self, radiator, ax=None, **kwargs):
