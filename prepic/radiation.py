@@ -22,7 +22,7 @@ dim = u.dimensions
 
 @u.returns(dim.dimensionless)
 @u.accepts(ω=1 / dim.time, θ=dim.angle, ωc=1 / dim.time, γ=dim.dimensionless)
-def diferential_intensity_distribution(ω, θ, ωc, γ):
+def differential_intensity_distribution(ω, θ, ωc, γ):
     r"""Computes the synchrotron energy distribution in frequency and solid angle.
 
     Doubly differential intensity distribution :math:`\frac{d^2I}{d \hbar \omega d \Omega}`, representing the radiated
@@ -58,7 +58,7 @@ def diferential_intensity_distribution(ω, θ, ωc, γ):
 
     Examples
     --------
-    >>> d2I = diferential_intensity_distribution(ω=9e4 / u.fs, θ=1 * u.miliradian, ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
+    >>> d2I = differential_intensity_distribution(ω=9e4 / u.fs, θ=1 * u.miliradian, ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
     >>> print("{:.1f}".format(d2I))
     0.0 dimensionless
     """  # noqa E501
@@ -365,7 +365,7 @@ class SynchrotronAngularSpectrum(SynchrotronSpectrum):
     >>> _, ax = pyplot.subplots()
     >>> s = SynchrotronAngularSpectrum(radiator, ax=ax, color="darkred")
     >>> s.size = (800, 800 / 1.618)  # golden ratio
-    >>> s.poof("out.png")
+    >>> s.poof("angle.png")
     """
 
     def __init__(self, radiator, ax=None, **kwargs):
@@ -429,7 +429,7 @@ class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
     >>> _, ax = pyplot.subplots()
     >>> s = SynchrotronFrequencySpectrum(radiator, ax=ax, color="darkred")
     >>> s.size = (800, 800 / 1.618)  # golden ratio
-    >>> s.poof("out.png")
+    >>> s.poof("frequency.png")
     """
 
     def __init__(self, radiator, ax=None, **kwargs):
@@ -465,6 +465,73 @@ class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
             xlabel=r"$y = \omega / \omega_c$",
             ax_title="Synchrotron Frequency Spectrum",
         )
+
+        return self.ax
+
+
+class DifferentialSpectrum(Visualizer):
+    def __init__(self, radiator, ax=None, **kwargs):
+        super().__init__(ax=ax, **kwargs)
+        self.rad = radiator
+
+        self.ω = np.linspace(1e-5 * self.rad.ωc, 2 * self.rad.ωc, 50)
+        self.θ = np.linspace(0, 0.4, 50) * u.miliradian
+        self.dist_func = partial(
+            differential_intensity_distribution, ωc=self.rad.ωc, γ=self.rad.γ
+        )  # = f(ω, θ)
+
+        self.xdata = np.array([])
+        self.ydata = np.array([])
+
+    def transform(self, *args, **kwargs):
+        self.generate_spectrum().draw()
+        return self
+
+    def generate_spectrum(self):
+        # call once to get unit
+        unit_of_spectrum = self.dist_func(self.ω[0], self.θ[0]).units
+
+        # pre-allocate
+        spectrum = np.empty(self.ω.size, self.θ.size) * unit_of_spectrum
+
+        # compute spectrum at each point
+        ωω, θθ = np.meshgrid(self.ω, self.θ)
+
+        spectrum = self.dist_func(ωω, θθ)
+
+        self.ydata = spectrum.to_value(u.dimensionless)
+
+    def draw(self):
+        self.ax.plot(self.xdata, self.ydata, color=self.color)
+
+        self.ax.fill_between(
+            self.xdata,
+            self.ydata,
+            where=self.xdata <= 1,
+            facecolor=self.color,
+            alpha=0.5,
+        )
+
+        self.ax.set_xlim(0, 2)
+        self.ax.set_ylim(bottom=0)
+
+        return self.ax
+
+    def finalize(self, *, xlabel, ylabel, ax_title, annotations):
+        self.ax.ticklabel_format(
+            axis="y",
+            style="scientific",
+            scilimits=(0, 0),
+            useOffset=False,
+            useMathText=True,
+        )
+
+        for ann in annotations:
+            self.ax.annotate(s=ann.text, xy=ann.xy, xycoords=ann.xycoords)
+
+        self.ax.set_ylabel(ylabel)
+        self.ax.set_xlabel(xlabel)
+        self.set_title(ax_title)
 
         return self.ax
 
