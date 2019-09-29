@@ -7,7 +7,7 @@ import unyt as u
 
 from prepic.laser import GaussianBeam, Laser
 from prepic.plasma import Plasma
-from prepic._constants import r_e
+from prepic.constants import r_e
 
 
 def matched_laser_plasma(a0, beam=GaussianBeam()):
