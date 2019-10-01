@@ -14,6 +14,8 @@ import unyt as u
 from prepic.base import BaseClass, Visualizer
 from prepic.constants import r_e, α
 
+from sliceplots import Plot2D
+
 dim = u.dimensions
 
 
@@ -21,27 +23,27 @@ dim = u.dimensions
 
 
 @u.returns(dim.dimensionless)
-@u.accepts(ω=1 / dim.time, θ=dim.angle, ωc=1 / dim.time, γ=dim.dimensionless)
-def differential_intensity_distribution(ω, θ, ωc, γ):
+@u.accepts(ħω=dim.energy, θ=dim.angle, ħωc=dim.energy, γ=dim.dimensionless)
+def differential_intensity_distribution(ħω, θ, ħωc, γ):
     r"""Computes the synchrotron energy distribution in frequency and solid angle.
 
     Doubly differential intensity distribution :math:`\frac{d^2I}{d \hbar \omega d \Omega}`, representing the radiated
     energy per unit energy interval :math:`d \hbar \omega` per unit solid angle :math:`d \Omega`.
 
-    .. math:: \frac{d^2I}{d \hbar \omega d \Omega} = \frac{3 \alpha}{4 \pi^2} \left(\frac{\omega}{\omega_c}\right)^2 \gamma^6 \left(\frac{1}{\gamma^2} + \theta^2\right)^2 \left[K^2_{2/3}(\xi) + \frac{\theta^2}{1/\gamma^2 + \theta^2} K^2_{1/3}(\xi)\right]
+    .. math:: \frac{d^2I}{d \hbar \omega d \Omega} = \frac{3 \alpha}{4 \pi^2} \left(\frac{\hbar \omega}{\hbar \omega_c}\right)^2 \gamma^6 \left(\frac{1}{\gamma^2} + \theta^2\right)^2 \left[K^2_{2/3}(\xi) + \frac{\theta^2}{1/\gamma^2 + \theta^2} K^2_{1/3}(\xi)\right]
 
     where
 
-    .. math:: \xi \simeq \frac{\omega}{2 \omega_c} \left(1 + \gamma^2 \theta^2 \right)^{3/2}
+    .. math:: \xi \simeq \frac{\hbar \omega}{2 \hbar \omega_c} \left(1 + \gamma^2 \theta^2 \right)^{3/2}
 
     Parameters
     ----------
-    ω : float, 1/time
-        Observation frequency.
+    ħω : float, energy
+        Observation energy.
     θ : float, angle
         Observation angle relative to the particle's orbital plane (latitude).
-    ωc : float, 1/time
-        Critical synchrotron frequency.
+    ħωc : float, energy
+        Critical synchrotron energy.
     γ : float, dimensionless
         Electron Lorentz factor.
 
@@ -58,17 +60,17 @@ def differential_intensity_distribution(ω, θ, ωc, γ):
 
     Examples
     --------
-    >>> d2I = differential_intensity_distribution(ω=9e4 / u.fs, θ=1 * u.miliradian, ωc=3e5 / u.fs, γ=5e3 * u.dimensionless)
+    >>> d2I = differential_intensity_distribution(ħω=59.24 * u.kiloelectronvolt, θ=1 * u.miliradian, ħωc=197.5 * u.kiloelectronvolt, γ=5e3 * u.dimensionless)
     >>> print("{:.1f}".format(d2I))
     0.0 dimensionless
     """  # noqa E501
     γ = γ.to_value(u.dimensionless)
     θ = θ.to_value(u.radian)
-    ξ = (ω / (2 * ωc) * (1 + γ ** 2 * θ ** 2) ** (3 / 2)).to_value(u.dimensionless)
+    ξ = (ħω / (2 * ħωc) * (1 + γ ** 2 * θ ** 2) ** (3 / 2)).to_value(u.dimensionless)
     d2I = (
         (3 * α)
         / (4 * np.pi ** 2)
-        * (ω / ωc) ** 2
+        * (ħω / ħωc) ** 2
         * γ ** 6
         * (1 / γ ** 2 + θ ** 2) ** 2
         * (kv(2 / 3, ξ) ** 2 + θ ** 2 / (1 / γ ** 2 + θ ** 2) * kv(1 / 3, ξ) ** 2)
@@ -272,6 +274,7 @@ class AnnotationText:
         self.xycoords = xycoords
 
 
+# todo deprecate
 class SynchrotronSpectrum(Visualizer):
     def __init__(self, radiator, ax=None, **kwargs):
         super().__init__(ax=ax, **kwargs)
@@ -335,6 +338,7 @@ class SynchrotronSpectrum(Visualizer):
         return self.ax
 
 
+# todo deprecate
 class SynchrotronAngularSpectrum(SynchrotronSpectrum):
     """
     Examples
@@ -399,6 +403,7 @@ class SynchrotronAngularSpectrum(SynchrotronSpectrum):
         return self.ax
 
 
+# todo deprecate
 class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
     """
     Examples
@@ -469,56 +474,94 @@ class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
         return self.ax
 
 
-class DifferentialSpectrum(Visualizer):
-    def __init__(self, radiator, ax=None, **kwargs):
-        super().__init__(ax=ax, **kwargs)
+class DifferentialSpectrum:
+    def __init__(self, radiator, npoints=50, ħω=None, θ=None):
         self.rad = radiator
 
-        self.ω = np.linspace(1e-5 * self.rad.ωc, 2 * self.rad.ωc, 50)
-        self.θ = np.linspace(0, 0.4, 50) * u.miliradian
         self.dist_func = partial(
-            differential_intensity_distribution, ωc=self.rad.ωc, γ=self.rad.γ
-        )  # = f(ω, θ)
+            differential_intensity_distribution, ħωc=self.rad.ħωc, γ=self.rad.γ
+        )  # = f(ħω, θ)
 
-        self.xdata = np.array([])
-        self.ydata = np.array([])
+        if ħω is None:
+            self.ħω = np.linspace(1e-5 * self.rad.ħωc, 2 * self.rad.ħωc, npoints)
+        else:
+            self.ħω = ħω
 
-    def transform(self, *args, **kwargs):
-        self.generate_spectrum().draw()
-        return self
-
-    def generate_spectrum(self):
-        # call once to get unit
-        unit_of_spectrum = self.dist_func(self.ω[0], self.θ[0]).units
+        if θ is None:
+            self.θc = 1e3 / self.rad.γ.to_value(u.dimensionless)
+            self.θ = np.linspace(0, 2 * self.θc, npoints) * u.miliradian
+        else:
+            self.θ = θ
 
         # pre-allocate
-        spectrum = np.empty(self.ω.size, self.θ.size) * unit_of_spectrum
+        self._doubly_differential_data = np.array([])
+        self._angle_integrated_data = np.array([])
+        self._energy_integrated_data = np.array([])
 
-        # compute spectrum at each point
-        ωω, θθ = np.meshgrid(self.ω, self.θ)
+    @property
+    def doubly_differential_data(self):
+        if self._doubly_differential_data.size == 0:  # empty array?
+            # vectorized computation
+            ħωħω, θθ = np.meshgrid(self.ħω, self.θ)
+            self._doubly_differential_data = self.dist_func(ħωħω, θθ).to_value(
+                u.dimensionless
+            )
+        return self._doubly_differential_data
 
-        spectrum = self.dist_func(ωω, θθ)
+    @property
+    def angle_integrated_data(self):
+        if self._angle_integrated_data.size == 0:
+            self._angle_integrated_data = np.trapz(
+                self.doubly_differential_data, axis=0
+            )  # f(ħω) // integrate over θ
+        return self._angle_integrated_data
 
-        self.ydata = spectrum.to_value(u.dimensionless)
+    @property
+    def energy_integrated_data(self):
+        if self._energy_integrated_data.size == 0:
+            self._energy_integrated_data = np.trapz(
+                self.doubly_differential_data, axis=1
+            )  # f(θ) // integrate over ħω
+        return self._energy_integrated_data
 
-    def draw(self):
-        self.ax.plot(self.xdata, self.ydata, color=self.color)
+    def doubly_differential(self, fig):
+        p2d = Plot2D(
+            fig=fig,
+            arr2d=self.doubly_differential_data,
+            h_axis=self.ħω,
+            v_axis=self.θ,
+            xlabel=r"$\hbar \omega$ [%s]" % self.ħω.units,
+            ylabel=r"$\theta$ [%s]" % self.θ.units,
+            zlabel=r"$\frac{d^2I}{d \hbar \omega d \Omega}$",
+            hslice_val=self.θc * u.miliradian,
+            vslice_val=self.rad.ħωc,
+            hslice_opts={"color": "#1f77b4", "lw": 1.5, "ls": "-"},
+            vslice_opts={"color": "#d62728", "ls": "-"},
+            cbar=False,
+        )
+        return p2d.fig
 
-        self.ax.fill_between(
-            self.xdata,
-            self.ydata,
-            where=self.xdata <= 1,
-            facecolor=self.color,
+    def angle_integrated(self, ax, **kwargs):
+        color = kwargs.pop("color", "#d62728")
+
+        ax.plot(self.ħω, self.angle_integrated_data, color=color)
+
+        ax.fill_between(
+            self.ħω,
+            self.angle_integrated_data,
+            where=self.ħω <= self.rad.ħωc,
+            facecolor=color,
             alpha=0.5,
         )
 
-        self.ax.set_xlim(0, 2)
-        self.ax.set_ylim(bottom=0)
+        ax.set(
+            xlim=(self.ħω[0], self.ħω[-1]),
+            ylabel=r"$\frac{dI}{d \hbar \omega}$",
+            xlabel=r"$\hbar \omega$ [%s]" % self.ħω.units,
+        )
 
-        return self.ax
-
-    def finalize(self, *, xlabel, ylabel, ax_title, annotations):
-        self.ax.ticklabel_format(
+        ax.set_ylim(bottom=0)
+        ax.ticklabel_format(
             axis="y",
             style="scientific",
             scilimits=(0, 0),
@@ -526,14 +569,49 @@ class DifferentialSpectrum(Visualizer):
             useMathText=True,
         )
 
-        for ann in annotations:
-            self.ax.annotate(s=ann.text, xy=ann.xy, xycoords=ann.xycoords)
+        x_pos = self.rad.ħω_avg.to_value(u.kiloelectronvolt)
+        ax.axvline(x=x_pos, linestyle="--", color=color)
 
-        self.ax.set_ylabel(ylabel)
-        self.ax.set_xlabel(xlabel)
-        self.set_title(ax_title)
+        omega_average = AnnotationText(text=r"$\langle \omega \rangle$", xy=(x_pos, 0))
+        ax.annotate(
+            s=omega_average.text, xy=omega_average.xy, xycoords=omega_average.xycoords
+        )
 
-        return self.ax
+        ax.set_title("Integrated Frequency Spectrum")
+
+        return ax
+
+    def energy_integrated(self, ax, **kwargs):
+        color = kwargs.pop("color", "#d62728")
+
+        ax.plot(self.θ, self.energy_integrated_data, color=color)
+
+        ax.fill_between(
+            self.θ,
+            self.energy_integrated_data,
+            where=self.θ <= self.θc,
+            facecolor=color,
+            alpha=0.5,
+        )
+
+        ax.set(
+            xlim=(self.θ[0], self.θ[-1]),
+            ylabel=r"$\frac{dI}{d \Omega}$",
+            xlabel=r"$\theta$ [%s]" % self.θ.units,
+        )
+
+        ax.set_ylim(bottom=0)
+        ax.ticklabel_format(
+            axis="y",
+            style="scientific",
+            scilimits=(0, 0),
+            useOffset=False,
+            useMathText=True,
+        )
+
+        ax.set_title("Integrated Angular Spectrum")
+
+        return ax
 
 
 class Radiator(BaseClass):
@@ -650,6 +728,7 @@ class Radiator(BaseClass):
             # todo implement undulator case
             raise NotImplementedError("The undulator case is not yet implemented.")
 
+    # todo remove
     def frequency_spectrum(self, ω=None):
         r"""Computes photon frequency distribution over a range of frequencies.
 
