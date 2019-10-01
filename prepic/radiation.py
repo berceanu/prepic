@@ -11,7 +11,7 @@ from scipy.special import kv
 
 import unyt as u
 
-from prepic.base import BaseClass, Visualizer
+from prepic.base import BaseClass
 from prepic.constants import r_e, α
 
 from sliceplots import Plot2D
@@ -60,9 +60,9 @@ def differential_intensity_distribution(ħω, θ, ħωc, γ):
 
     Examples
     --------
-    >>> d2I = differential_intensity_distribution(ħω=59.24 * u.kiloelectronvolt, θ=1 * u.miliradian, ħωc=197.5 * u.kiloelectronvolt, γ=5e3 * u.dimensionless)
+    >>> d2I = differential_intensity_distribution(ħω=59.24 * u.kiloelectronvolt, θ=0.1 * u.miliradian, ħωc=197.0 * u.kiloelectronvolt, γ=4956.5 * u.dimensionless)
     >>> print("{:.1f}".format(d2I))
-    0.0 dimensionless
+    15364.7 dimensionless
     """  # noqa E501
     γ = γ.to_value(u.dimensionless)
     θ = θ.to_value(u.radian)
@@ -75,8 +75,6 @@ def differential_intensity_distribution(ħω, θ, ħωc, γ):
         * (1 / γ ** 2 + θ ** 2) ** 2
         * (kv(2 / 3, ξ) ** 2 + θ ** 2 / (1 / γ ** 2 + θ ** 2) * kv(1 / 3, ξ) ** 2)
     )
-    # todo update example
-    # todo why is the result 0
     return d2I.to(u.dimensionless)
 
 
@@ -272,206 +270,6 @@ class AnnotationText:
         self.text = text
         self.xy = xy
         self.xycoords = xycoords
-
-
-# todo deprecate
-class SynchrotronSpectrum(Visualizer):
-    def __init__(self, radiator, ax=None, **kwargs):
-        super().__init__(ax=ax, **kwargs)
-        self.rad = radiator
-
-        self.var = np.array([])
-        self.dist_func = lambda v: v
-
-        self.xdata = np.array([])
-        self.ydata = np.array([])
-
-    def transform(self, *args, **kwargs):
-        self.generate_spectrum().draw()
-        return self
-
-    def generate_spectrum(self):
-        # call once to get unit
-        unit_of_spectrum = self.dist_func(self.var[0]).units
-
-        # pre-allocate
-        spectrum = np.empty(self.var.size) * unit_of_spectrum
-
-        # compute spectrum at each point
-        for i, v in enumerate(self.var):
-            spectrum[i] = self.dist_func(v)
-
-        self.ydata = spectrum.to_value(u.dimensionless)
-
-    def draw(self):
-        self.ax.plot(self.xdata, self.ydata, color=self.color)
-
-        self.ax.fill_between(
-            self.xdata,
-            self.ydata,
-            where=self.xdata <= 1,
-            facecolor=self.color,
-            alpha=0.5,
-        )
-
-        self.ax.set_xlim(0, 2)
-        self.ax.set_ylim(bottom=0)
-
-        return self.ax
-
-    def finalize(self, *, xlabel, ylabel, ax_title, annotations):
-        self.ax.ticklabel_format(
-            axis="y",
-            style="scientific",
-            scilimits=(0, 0),
-            useOffset=False,
-            useMathText=True,
-        )
-
-        for ann in annotations:
-            self.ax.annotate(s=ann.text, xy=ann.xy, xycoords=ann.xycoords)
-
-        self.ax.set_ylabel(ylabel)
-        self.ax.set_xlabel(xlabel)
-        self.set_title(ax_title)
-
-        return self.ax
-
-
-# todo deprecate
-class SynchrotronAngularSpectrum(SynchrotronSpectrum):
-    """
-    Examples
-    --------
-    >>> import unyt as u
-    >>> from prepic import Plasma, Laser, GaussianBeam, Radiator
-    >>> from matplotlib import pyplot
-    >>> from collections import namedtuple
-
-    >>> Param = namedtuple("Param", ["npe", "w0", "ɛL", "τL", "prop_dist"])
-
-    >>> p = Param(  # external guiding / injection example from from http://doi.org/f4j98s
-    ...     npe=5.1e17 / u.cm ** 3,
-    ...     w0=21.0 * u.micrometer,
-    ...     ɛL=3.0 * u.joule,
-    ...     τL=47.0 * u.femtosecond,
-    ...     prop_dist=52.0 * u.mm,
-    ... )
-
-    >>> laser = Laser(ɛL=p.ɛL, τL=p.τL, beam=GaussianBeam(w0=p.w0))
-
-    >>> plasma = Plasma(
-    ...     n_pe=p.npe, laser=laser, bubble_radius=p.w0, propagation_distance=p.prop_dist
-    ... )
-
-    >>> radiator = Radiator(plasma=plasma)
-
-    >>> _, ax = pyplot.subplots()
-    >>> s = SynchrotronAngularSpectrum(radiator, ax=ax, color="darkred")
-    >>> s.size = (800, 800 / 1.618)  # golden ratio
-    >>> s.poof("angle.png")
-    """
-
-    def __init__(self, radiator, ax=None, **kwargs):
-        super().__init__(radiator=radiator, ax=ax, **kwargs)
-        self.var = np.linspace(0, 0.4, 50) * u.miliradian  # var = θ
-        self.dist_func = partial(photon_angle_distribution, γ=self.rad.γ)
-
-        self.transform()  # generate the spectrum and draw it
-
-    def generate_spectrum(self):
-        super().generate_spectrum()
-
-        self.xdata = (self.rad.γ * self.var).to(u.radian)
-
-        return self
-
-    def finalize(self, **kwargs):
-        gamma = AnnotationText(
-            text=r"$\gamma = {:.1f}$".format(self.rad.γ.to_value(u.dimensionless)),
-            xy=(0.6, 0.9),
-            xycoords="axes fraction",
-        )
-
-        super().finalize(
-            annotations=(gamma,),
-            ylabel=r"$\frac{dN}{d\Omega}$",
-            xlabel=r"$\gamma \theta$ [%s]" % self.xdata.units,
-            ax_title="Synchrotron Angular Spectrum",
-        )
-
-        return self.ax
-
-
-# todo deprecate
-class SynchrotronFrequencySpectrum(SynchrotronSpectrum):
-    """
-    Examples
-    --------
-    >>> import unyt as u
-    >>> from prepic import Plasma, Laser, GaussianBeam, Radiator
-    >>> from matplotlib import pyplot
-    >>> from collections import namedtuple
-
-    >>> Param = namedtuple("Param", ["npe", "w0", "ɛL", "τL", "prop_dist"])
-
-    >>> p = Param(  # external guiding / injection example from from http://doi.org/f4j98s
-    ...     npe=5.1e17 / u.cm ** 3,
-    ...     w0=21.0 * u.micrometer,
-    ...     ɛL=3.0 * u.joule,
-    ...     τL=47.0 * u.femtosecond,
-    ...     prop_dist=52.0 * u.mm,
-    ... )
-
-    >>> laser = Laser(ɛL=p.ɛL, τL=p.τL, beam=GaussianBeam(w0=p.w0))
-
-    >>> plasma = Plasma(
-    ...     n_pe=p.npe, laser=laser, bubble_radius=p.w0, propagation_distance=p.prop_dist
-    ... )
-
-    >>> radiator = Radiator(plasma=plasma)
-
-    >>> _, ax = pyplot.subplots()
-    >>> s = SynchrotronFrequencySpectrum(radiator, ax=ax, color="darkred")
-    >>> s.size = (800, 800 / 1.618)  # golden ratio
-    >>> s.poof("frequency.png")
-    """
-
-    def __init__(self, radiator, ax=None, **kwargs):
-        super().__init__(radiator=radiator, ax=ax, **kwargs)
-        self.var = np.linspace(1e-5 * self.rad.ωc, 2 * self.rad.ωc, 50)  # var = ω
-        self.dist_func = partial(
-            photon_frequency_distribution, ωc=self.rad.ωc, γ=self.rad.γ
-        )
-
-        self.transform()  # generate the spectrum and draw it
-
-    def generate_spectrum(self):
-        super().generate_spectrum()
-
-        self.xdata = (self.var / self.rad.ωc).to_value(u.dimensionless)
-
-        return self
-
-    def finalize(self, **kwargs):
-        x_pos = (self.rad.ω_avg / self.rad.ωc).to_value(u.dimensionless)
-        self.ax.axvline(x=x_pos, linestyle="--", color=self.color)
-
-        omega_average = AnnotationText(text=r"$\langle \omega \rangle$", xy=(x_pos, 0))
-        hbar_omega_c = AnnotationText(
-            text=r"$\hbar \omega_c = {:.1f}$".format(self.rad.ħωc),
-            xy=(0.6, 0.9),
-            xycoords="axes fraction",
-        )
-
-        super().finalize(
-            annotations=(hbar_omega_c, omega_average),
-            ylabel=r"$\frac{dN}{dy}$",
-            xlabel=r"$y = \omega / \omega_c$",
-            ax_title="Synchrotron Frequency Spectrum",
-        )
-
-        return self.ax
 
 
 class DifferentialSpectrum:
@@ -727,48 +525,6 @@ class Radiator(BaseClass):
         else:
             # todo implement undulator case
             raise NotImplementedError("The undulator case is not yet implemented.")
-
-    # todo remove
-    def frequency_spectrum(self, ω=None):
-        r"""Computes photon frequency distribution over a range of frequencies.
-
-        Computes the number of synchrotron photons emitted at each of the frequencies in `ω`.
-
-        Parameters
-        ----------
-        ω : (N,) unyt_array of floats
-            Frequency container, with dimensions of 1/time.
-            Defaults to ``np.linspace(1e-5 * self.ωc, 2 * self.ωc, 100)``
-
-        Returns
-        -------
-
-        Examples
-        --------
-
-        """
-        freq_dist = partial(photon_frequency_distribution, ωc=self.ωc, γ=self.γ)
-
-        if ω is None:
-            ω = np.linspace(1e-5 * self.ωc, 2 * self.ωc, 50)
-
-        # call once to get unit
-        unit_of_spectrum = freq_dist(ω[0]).units
-
-        # pre-allocate
-        spectrum = np.empty(ω.size) * unit_of_spectrum
-
-        # compute spectrum at each point
-        for i, freq in enumerate(ω):
-            spectrum[i] = freq_dist(freq)
-
-        # return SynchrotronFrequencySpectrum(
-        #     horiz_axis_data=ω,
-        #     spectrum=spectrum,
-        #     horiz_norm=self.ωc,
-        #     vline=self.ω_avg / self.ωc,
-        #     text=r"$\hbar \omega_c = {:.1f}$".format(self.ħωc),
-        # )
 
     def __eq__(self, other):
         return super().__eq__(other)

@@ -4,11 +4,7 @@ import unyt as u
 from matplotlib import pyplot
 
 from prepic import Plasma, Laser, GaussianBeam, Radiator
-from prepic.radiation import (
-    SynchrotronFrequencySpectrum,
-    SynchrotronAngularSpectrum,
-    DifferentialSpectrum,
-)
+from prepic.radiation import DifferentialSpectrum
 
 Param = namedtuple("Param", ["npe", "w0", "ɛL", "τL", "prop_dist"])
 
@@ -27,18 +23,6 @@ plasma = Plasma(
 )
 
 radiator = Radiator(plasma=plasma)
-
-# Frequency Spectrum
-_, ax = pyplot.subplots()
-s = SynchrotronFrequencySpectrum(radiator, ax=ax, color="darkred")
-s.size = (800, 800 / 1.618)  # golden ratio
-s.poof("my_frequency.png")
-
-# Angular Spectrum
-_, ax = pyplot.subplots()
-s = SynchrotronAngularSpectrum(radiator, ax=ax, color="darkred")
-s.size = (800, 800 / 1.618)  # golden ratio
-s.poof("my_angle.png")
 
 ############################
 
