@@ -27,17 +27,12 @@ radiator = Radiator(plasma=plasma)
 ############################
 
 ds = DifferentialSpectrum(radiator)
-# print(ds.ħω)
-# print(ds.θ)
-# print(ds.doubly_differential_data)
-# print(ds.angle_integrated_data)
-# print(ds.energy_integrated_data)
 
 fig_dd = pyplot.figure(figsize=(8, 8))
 
 ds.doubly_differential(fig_dd)
 
-fig_dd.savefig("delete_me.png")
+fig_dd.savefig("doubly_differential.png")
 
 
 fig, axarr = pyplot.subplots(
@@ -48,7 +43,7 @@ axes = {"angle": axarr.flat[0], "energy": axarr.flat[1]}
 ds.angle_integrated(axes["angle"])
 ds.energy_integrated(axes["energy"])
 
-fig.savefig("delete_me_too.png")
+fig.savefig("integrated.png")
 
 #############################
 
