@@ -22,9 +22,24 @@ plasma = Plasma(
     n_pe=p.npe, laser=laser, bubble_radius=p.w0, propagation_distance=p.prop_dist
 )
 
+print(
+    (
+        f"For a plasma with a density of {plasma.npe:.1e} we get an "
+        f"electron energy gain of {plasma.ΔE:.1f} and a total accelerated charge "
+        f"of {plasma.Q:.1f} over an acceleration distance of {plasma.Lacc:.1f}."
+    )
+)
+
+print("\nFurther details: ")
+print(f"{plasma}")
+
 radiator = Radiator(plasma=plasma)
 
-############################
+print("ħω_avg = {:.1f}".format(radiator.ħω_avg))
+print("ħωc = {:.1f}".format(radiator.ħωc))
+
+print("\nFurther details: ")
+print(f"{radiator}")
 
 ds = DifferentialSpectrum(radiator)
 
@@ -44,8 +59,3 @@ ds.angle_integrated(axes["angle"])
 ds.energy_integrated(axes["energy"])
 
 fig.savefig("integrated.png")
-
-#############################
-
-print("ħω_avg = {:.1f}".format(radiator.ħω_avg))
-print("ħωc = {:.1f}".format(radiator.ħωc))
