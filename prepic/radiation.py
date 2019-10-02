@@ -19,9 +19,6 @@ from sliceplots import Plot2D
 dim = u.dimensions
 
 
-# todo add docstrings
-
-
 @u.returns(dim.dimensionless)
 @u.accepts(ħω=dim.energy, θ=dim.angle, ħωc=dim.energy, γ=dim.dimensionless)
 def differential_intensity_distribution(ħω, θ, ħωc, γ):
@@ -272,6 +269,7 @@ class AnnotationText:
         self.xycoords = xycoords
 
 
+# todo add docstrings
 class DifferentialSpectrum:
     def __init__(self, radiator, npoints=50, ħω=None, θ=None):
         self.rad = radiator
