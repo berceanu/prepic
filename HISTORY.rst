@@ -2,6 +2,12 @@
 History
 =======
 
+0.2.1 (2019-10-02)
+------------------
+
+* Added new dependencies
+* Pinned dependency versions
+
 0.2.0 (2019-10-02)
 ------------------
 
