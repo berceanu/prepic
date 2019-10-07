@@ -510,19 +510,23 @@ class Radiator(BaseClass):
             self.λu / (2 * np.pi ** 2 * u.clight * self.τ0 * self.γ * self.K ** 2)
         ).to("dimensionless")
 
-        if self.K > 5:  # wiggler regime
-            self.ħωc = (3 / 2 * self.K * self.γ ** 2 * u.h * u.clight / self.λu).to(
-                "kiloelectronvolt"
+        self.ħωc = (3 / 2 * self.K * self.γ ** 2 * u.h * u.clight / self.λu).to(
+            "kiloelectronvolt"
+        )
+        self.ωc = (self.ħωc / u.hbar).to(1 / u.fs)
+        self.ħω_avg = (8 / (15 * np.sqrt(3)) * self.ħωc).to("kiloelectronvolt")
+        self.ω_avg = (self.ħω_avg / u.hbar).to(1 / u.fs)
+        self.Nγ = 5 * np.sqrt(3) * np.pi * α * self.K / 6
+        self.θ_par = (self.K / self.γ * u.radian).to("miliradian")
+        self.N_shot = (self.Nγ * self.Nβ * self.plasma.N).to("dimensionless")
+
+        if self.K < 5:
+            warnings.warn(
+                "K = %.1f < 5. The radiation may be emitted in the undulator regime (K < 1)."
+                % self.K.to_value(u.dimensionless)
             )
-            self.ωc = (self.ħωc / u.hbar).to(1 / u.fs)
-            self.ħω_avg = (8 / (15 * np.sqrt(3)) * self.ħωc).to("kiloelectronvolt")
-            self.ω_avg = (self.ħω_avg / u.hbar).to(1 / u.fs)
-            self.Nγ = 5 * np.sqrt(3) * np.pi * α * self.K / 6
-            self.θ_par = (self.K / self.γ * u.radian).to("miliradian")
-            self.N_shot = (self.Nγ * self.Nβ * self.plasma.N).to("dimensionless")
-        else:
             # todo implement undulator case
-            raise NotImplementedError("The undulator case is not yet implemented.")
+            # raise NotImplementedError("The undulator case is not yet implemented.")
 
     def __eq__(self, other):
         return super().__eq__(other)
