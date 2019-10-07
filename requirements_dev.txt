@@ -9,7 +9,7 @@ coverage==4.5.4
 Sphinx==2.2.0
 twine==2.0.0
 
-pytest==5.2.0
+pytest==5.2.1
 pytest-runner==5.1
 pytest-mpl==0.10
 pytest-cov==2.8.1
