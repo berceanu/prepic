@@ -13,9 +13,9 @@ with open("HISTORY.rst") as history_file:
 
 requirements = [
     "unyt==2.3.1",
-    "numpy==1.17.2",
+    "numpy>=1.16.1",
     "scipy==1.3.1",
-    "matplotlib==3.1.1",
+    "matplotlib>=3.1.0",
     "matplotlib-label-lines==0.3.6",
     "sliceplots==0.3.1",
 ]
