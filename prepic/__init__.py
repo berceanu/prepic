@@ -21,4 +21,4 @@ from prepic.lwfa import matched_laser_plasma  # NOQA: F401
 
 __author__ = """Andrei Berceanu"""
 __email__ = "andreicberceanu@gmail.com"
-__version__ = "0.2.1"
+__version__ = "0.2.2"
