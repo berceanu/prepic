@@ -15,4 +15,4 @@ pytest-mpl==0.10
 pytest-cov==2.8.1
 pytest-doctestplus==0.4.0
 codecov==2.0.15
-pre-commit==1.18.3
+pre-commit==1.19.0
