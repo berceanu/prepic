@@ -12,12 +12,12 @@ with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
 requirements = [
-    "unyt==2.3.1",
+    "unyt>=2.3.1",
     "numpy>=1.16.1",
-    "scipy==1.3.1",
+    "scipy>=1.3.1",
     "matplotlib>=3.1.0",
-    "matplotlib-label-lines==0.3.6",
-    "sliceplots==0.3.1",
+    "matplotlib-label-lines>=0.3.6",
+    "sliceplots>=0.3.1",
 ]
 
 setup_requirements = ["pytest-runner"]
