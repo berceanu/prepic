@@ -1,5 +1,5 @@
 numpy==1.17.4
-scipy==1.3.3
+scipy==1.5.1
 matplotlib==3.1.2
 sliceplots==0.3.2
 unyt==2.4.0
