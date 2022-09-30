@@ -2,6 +2,11 @@
 History
 =======
 
+0.2.5 (2022-09-30)
+------------------
+
+* Fix compatibility issues with Python 3.10 and latest version of unyt
+
 0.2.4 (2019-11-07)
 ------------------
 
