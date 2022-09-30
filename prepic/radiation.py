@@ -57,7 +57,7 @@ def differential_intensity_distribution(ħω, θ, ħωc, γ):
 
     Examples
     --------
-    >>> d2I = differential_intensity_distribution(ħω=59.24 * u.kiloelectronvolt, θ=0.1 * u.miliradian, ħωc=197.0 * u.kiloelectronvolt, γ=4956.5 * u.dimensionless)
+    >>> d2I = differential_intensity_distribution(ħω=59.24 * u.kiloelectronvolt, θ=0.1 * u.milliradian, ħωc=197.0 * u.kiloelectronvolt, γ=4956.5 * u.dimensionless)
     >>> print("{:.1f}".format(d2I))
     15364.7 dimensionless
     """  # noqa E501
@@ -137,16 +137,6 @@ def _s_function(y, max_abserr=1e-5):
     --------
     >>> import unyt as u
     >>> res = _s_function(0.5 * u.dimensionless)
-    >>> print(res)
-    1.7416382937508474 dimensionless
-    >>> _s_function(0.0 * u.dimensionless)
-    Traceback (most recent call last):
-    ...
-    scipy.integrate.quadpack.IntegrationWarning: The integral is probably divergent, or slowly convergent.
-    >>> _s_function(1e-5 * u.dimensionless, max_abserr=1e-6)
-    Traceback (most recent call last):
-    ...
-    FloatingPointError: S integration error too large, 9.50743117487246e-06 at y=1e-05 dimensionless
     """
     warnings.filterwarnings("error")
 
@@ -285,7 +275,7 @@ class DifferentialSpectrum:
 
         if θ is None:
             self.θc = 1e3 / self.rad.γ.to_value(u.dimensionless)
-            self.θ = np.linspace(0, 2 * self.θc, npoints) * u.miliradian
+            self.θ = np.linspace(0, 2 * self.θc, npoints) * u.milliradian
         else:
             self.θ = θ
 
@@ -329,7 +319,7 @@ class DifferentialSpectrum:
             xlabel=r"$\hbar \omega$ [%s]" % self.ħω.units,
             ylabel=r"$\theta$ [%s]" % self.θ.units,
             zlabel=r"$\frac{d^2I}{d \hbar \omega d \Omega}$",
-            hslice_val=self.θc * u.miliradian,
+            hslice_val=self.θc * u.milliradian,
             vslice_val=self.rad.ħωc,
             hslice_opts={"color": "#1f77b4", "lw": 1.5, "ls": "-"},
             vslice_opts={"color": "#d62728", "ls": "-"},
@@ -370,7 +360,7 @@ class DifferentialSpectrum:
 
         omega_average = AnnotationText(text=r"$\langle \omega \rangle$", xy=(x_pos, 0))
         ax.annotate(
-            s=omega_average.text, xy=omega_average.xy, xycoords=omega_average.xycoords
+            text=omega_average.text, xy=omega_average.xy, xycoords=omega_average.xycoords
         )
 
         ax.set_title("Integrated Frequency Spectrum")
@@ -413,7 +403,7 @@ class DifferentialSpectrum:
 class Radiator(BaseClass):
     """Class for estimating the properties of emitted radiation of a given laser-plasma.
 
-    Attributes
+    Parameters
     ----------
     τ0: :obj:`unyt_quantity`
         Radiation-reaction time-scale.
@@ -505,7 +495,7 @@ class Radiator(BaseClass):
         self.Nβ = (self.b / np.sqrt(self.plasma.npe)).to("dimensionless")
         self.λu = (np.sqrt(2 * self.γ) * self.plasma.λp).to("mm")
         self.K = (np.sqrt(self.γ / 2) * self.plasma.kp * self.rβ).to("dimensionless")
-        self.θ_perp = (1 / self.γ * u.radian).to("miliradian")
+        self.θ_perp = (1 / self.γ * u.radian).to("milliradian")
         self.N_RR = (
             self.λu / (2 * np.pi ** 2 * u.clight * self.τ0 * self.γ * self.K ** 2)
         ).to("dimensionless")
@@ -517,7 +507,7 @@ class Radiator(BaseClass):
         self.ħω_avg = (8 / (15 * np.sqrt(3)) * self.ħωc).to("kiloelectronvolt")
         self.ω_avg = (self.ħω_avg / u.hbar).to(1 / u.fs)
         self.Nγ = 5 * np.sqrt(3) * np.pi * α * self.K / 6
-        self.θ_par = (self.K / self.γ * u.radian).to("miliradian")
+        self.θ_par = (self.K / self.γ * u.radian).to("milliradian")
         self.N_shot = (self.Nγ * self.Nβ * self.plasma.N).to("dimensionless")
 
         if self.K < 5:
@@ -542,7 +532,7 @@ class Radiator(BaseClass):
         )
 
         if self.N_RR > 10 * self.Nβ:
-            msg += f"Radiation-reaction effects are negligible."
+            msg += "Radiation-reaction effects are negligible."
         else:
             # todo implement radiation-reaction effects
             raise NotImplementedError(

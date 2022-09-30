@@ -3,7 +3,7 @@
 Utility functions
 
 """
-from collections import Iterable
+from collections.abc import Iterable
 
 from unyt.array import unyt_quantity
 
