@@ -72,7 +72,7 @@ release = prepic.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -179,7 +179,7 @@ def run_apidoc(_):
     api_doc_dir = os.path.join(cur_dir, "modules")
     module = os.path.join(cur_dir, "..", "prepic")
     ignore = os.path.join(cur_dir, "..", "tests")
-    os.environ["SPHINX_APIDOC_OPTIONS"] = "members,undoc-members,show-inheritance"
+    os.environ["SPHINX_APIDOC_OPTIONS"] = "members,show-inheritance"
     main(["-M", "-f", "-e", "-T", "-d 0", "-o", api_doc_dir, module, ignore])
 
 

@@ -107,7 +107,7 @@ class GaussianBeam(BaseClass):
             self.fwhm = None
 
         if self.w0:
-            self.zR = (np.pi * self.w0 ** 2 / self.λL).to("milimeter")
+            self.zR = (np.pi * self.w0 ** 2 / self.λL).to("millimetre")
         else:
             self.zR = None
 
