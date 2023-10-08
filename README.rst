@@ -1,3 +1,5 @@
+<img src="./prepic_logo.png" alt="pre-PIC Logo" width="400"/>
+
 =======
 pre-PIC
 =======
