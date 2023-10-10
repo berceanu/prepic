@@ -1,6 +1,0 @@
-numpy
-scipy
-matplotlib
-matplotlib-label-lines
-sliceplots
-unyt

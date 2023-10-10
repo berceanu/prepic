@@ -1,0 +1,17 @@
+[project]
+name = "prepic"
+version = "0.2.5"
+description = "Analytically estimate various laser-plasma parameters for experiments and PIC simulations"
+authors = ["Andrei Berceanu <andreicberceanu@gmail.com>"]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64", "linux-ppc64le"]
+
+[tasks]
+start = "python flame_study.py"
+
+[dependencies]
+python = "3.11.6.*"
+unyt = "2.9.5.*"
+numpy = "1.26.0.*"
+matplotlib = "3.8.0.*"
+scipy = "1.11.3.*"
