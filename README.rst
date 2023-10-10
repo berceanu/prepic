@@ -19,7 +19,7 @@ Features
 Quick start
 -----------
 
-We make use of the excellent `pixi <pixi.sh>`_ package manager, which can be installed on Linux/macOS via::
+We make use of the excellent `pixi <https://pixi.sh>`_ package manager, which can be installed on Linux/macOS via::
 
     $ curl -fsSL https://pixi.sh/install.sh | bash
 
@@ -30,4 +30,3 @@ One can then clone this repo via::
 Estimate ideal laser-plasma matching parameters based on scaling laws from [LTJT]_
 
 .. [LTJT] Lu, Wei, et al. Physical Review Special Topics-Accelerators and Beams 10.6 (2007): 061301.
-.. _pixi: http://www.pixi.sh
