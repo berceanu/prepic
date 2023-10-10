@@ -15,7 +15,7 @@ top-level ``prepic`` namespace:
 """
 from prepic.laser import GaussianBeam, Laser  # NOQA: F401
 from prepic.plasma import Plasma  # NOQA: F401
-from prepic.radiation import Radiator, DifferentialSpectrum  # NOQA: F401
+#from prepic.radiation import Radiator, DifferentialSpectrum  # NOQA: F401
 from prepic.simulation import Simulation  # NOQA: F401
 from prepic.lwfa import matched_laser_plasma  # NOQA: F401
 
