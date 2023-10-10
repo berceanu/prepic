@@ -14,7 +14,7 @@ import unyt as u
 from prepic.base import BaseClass
 from prepic.constants import r_e, α
 
-from sliceplots import Plot2D
+from prepic.sliceplots import Plot2D
 
 dim = u.dimensions
 
