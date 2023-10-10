@@ -8,6 +8,7 @@ platforms = ["osx-arm64", "linux-64", "linux-ppc64le"]
 
 [tasks]
 start = "python flame_study.py"
+test = "pytest"
 
 [dependencies]
 python = "3.11.6.*"
@@ -15,3 +16,5 @@ unyt = "2.9.5.*"
 numpy = "1.26.0.*"
 matplotlib = "3.8.0.*"
 scipy = "1.11.3.*"
+pytest = "7.4.2.*"
+matplotlib-label-lines = "0.7.0.*"
